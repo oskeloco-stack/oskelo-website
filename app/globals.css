@@ -223,6 +223,33 @@ header{
 .section{ padding: 110px 0; }
 .section-alt{ background: var(--bg-panel); }
 
+/* ---------- Legal pages ---------- */
+
+.legal h3{
+  font-family:'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+  margin: 40px 0 12px;
+}
+.legal h3:first-of-type{ margin-top: 0; }
+.legal p{
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--grey);
+  max-width: 68ch;
+  margin: 0;
+}
+.legal p a{ color: var(--amber); }
+.legal-updated{
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
 /* ---------- Founding offer promo ---------- */
 
 .promo{ padding: 90px 0; }
@@ -391,6 +418,14 @@ header{
 }
 .service-detail ul li::before{ content:'— '; color: var(--grey-dim); }
 
+.travel-note{
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--grey-dim);
+  margin: -6px 0 0;
+}
+.service-detail .travel-note{ margin: -10px 0 22px; }
+
 /* ---------- Team ---------- */
 
 .team-grid{
@@ -480,6 +515,9 @@ footer{ padding: 30px 0; border-top: 1px solid var(--line); }
   font-size: 13px;
   color: var(--grey-dim);
 }
+.footer-links{ display:flex; align-items:center; gap: 24px; }
+.footer-links a{ color: var(--grey-dim); }
+.footer-links a:hover{ color: var(--white); }
 
 /* ---------- Responsive ---------- */
 

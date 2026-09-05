@@ -3,7 +3,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Contact from '../../components/Contact';
 import FoundingOffer from '../../components/FoundingOffer';
-import { SERVICES, getService } from '../../../lib/services';
+import { SERVICES, getService, TRAVEL_NOTE } from '../../../lib/services';
 
 export function generateStaticParams() {
   return SERVICES.map((service) => ({ slug: service.slug }));
@@ -48,6 +48,7 @@ export default async function ServicePage({ params }) {
                     <ul>
                       {pkg.features.map((f) => <li key={f}>{f}</li>)}
                     </ul>
+                    {pkg.travel && <p className="travel-note">{TRAVEL_NOTE}</p>}
                   </div>
                 ))}
               </div>
@@ -57,6 +58,7 @@ export default async function ServicePage({ params }) {
                 <ul>
                   {service.features.map((f) => <li key={f}>{f}</li>)}
                 </ul>
+                {service.travel && <p className="travel-note">{TRAVEL_NOTE}</p>}
                 <a className="btn btn-solid" href="#contact">
                   {service.cta ? 'Get a quote' : 'Get started'}
                 </a>

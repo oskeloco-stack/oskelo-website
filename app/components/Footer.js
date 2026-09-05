@@ -3,7 +3,10 @@ export default function Footer() {
     <footer>
       <div className="wrap footer-inner">
         <span>© 2026 Oskelo</span>
-        <span>Pennsylvania</span>
+        <div className="footer-links">
+          <span>Pennsylvania</span>
+          <a href="/terms">Terms</a>
+        </div>
       </div>
     </footer>
   );
