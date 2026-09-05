@@ -14,7 +14,7 @@ const WORK_ITEMS = [
 const PACKAGES = [
   {
     name: 'Edit only',
-    price: '$450',
+    price: '$500',
     features: [
       'You send the raw footage',
       'Up to 3 minutes, final cut',
@@ -24,7 +24,7 @@ const PACKAGES = [
   },
   {
     name: 'Full production',
-    price: '$1,800',
+    price: '$2,200',
     featured: true,
     features: [
       'On-site filming, half day',
@@ -81,8 +81,7 @@ export default function Home() {
       <header>
         <div className="nav">
           <a className="logo" href="#top">
-            <span className="logo-mark"></span>
-            <span className="logo-word">OSKELO</span>
+            <img className="logo-img" src="/4.png" alt="Oskelo" />
           </a>
           <nav className="nav-links">
             <a href="#work">Work</a>
