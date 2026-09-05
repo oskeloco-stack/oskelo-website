@@ -3,14 +3,14 @@ import Footer from './components/Footer';
 import Contact from './components/Contact';
 import FoundingOffer from './components/FoundingOffer';
 import { SERVICES } from '../lib/services';
+import { WORK_CATEGORIES } from '../lib/work';
 
-const WORK_ITEMS = [
-  { name: 'Foundry Coffee', tag: 'Brand film' },
-  { name: 'Harlow & Co.', tag: 'Product launch' },
-  { name: 'Northside Realty', tag: 'Listing series' },
-  { name: 'Vantage Fitness', tag: 'Social campaign' },
-  { name: 'Fielding Law', tag: 'Testimonial' },
-  { name: 'Marrow Studio', tag: 'Event recap' },
+const REELS = [
+  { label: 'Brand Story' },
+  { label: 'Product Launch' },
+  { label: 'Social Cutdown' },
+  { label: 'Event Recap' },
+  { label: 'Behind the Scenes' },
 ];
 
 export default function Home() {
@@ -36,11 +36,13 @@ export default function Home() {
               one simple process.
             </p>
             <div className="hero-ctas">
-              <a className="btn btn-solid" href="#services">See the packages</a>
-              <a className="btn btn-outline" href="#work">View our work</a>
+              <a className="btn btn-solid" href="/services">See the packages</a>
+              <a className="btn btn-outline" href="/work">View our work</a>
             </div>
           </div>
         </section>
+
+        <FoundingOffer />
 
         <div className="wrap">
           <section className="section" id="work">
@@ -49,15 +51,35 @@ export default function Home() {
                 <div className="eyebrow">Selected work</div>
                 <h2>Recent projects</h2>
               </div>
-              <p>A short survey of business and brand videos delivered in the last year.</p>
+              <p>A short survey of business and brand work delivered in the last year.</p>
             </div>
-            <div className="work-grid">
-              {WORK_ITEMS.map((item) => (
-                <div className="work-card" key={item.name}>
-                  <div className="tag">
-                    <b>{item.name}</b>
-                    <span>{item.tag}</span>
-                  </div>
+            <div className="link-cards cols-2">
+              {WORK_CATEGORIES.map((category) => (
+                <a className="link-card" href={`/work/${category.slug}`} key={category.slug}>
+                  <div className="link-card-media"></div>
+                  <h3>{category.title}</h3>
+                  <p>{category.subtitle}</p>
+                  <span className="link-card-cta">View work →</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <div className="wrap">
+          <section className="section reels-section" id="reels">
+            <div className="section-head">
+              <div>
+                <div className="eyebrow">In motion</div>
+                <h2>Short-form, built for scroll</h2>
+              </div>
+              <p>A preview of the vertical video content we create for social feeds.</p>
+            </div>
+            <div className="reels-row">
+              {REELS.map((reel) => (
+                <div className="reel-card" key={reel.label}>
+                  <span className="reel-play">▶</span>
+                  <span className="reel-label">{reel.label}</span>
                 </div>
               ))}
             </div>
@@ -74,23 +96,21 @@ export default function Home() {
                 </div>
                 <p>Monthly video plans, a one-time shoot, or a single edited video — pick an option for full details.</p>
               </div>
-              <div className="service-links">
+              <div className="link-cards">
                 {SERVICES.map((service) => (
-                  <a className="service-link-card" href={`/services/${service.slug}`} key={service.slug}>
+                  <a className="link-card" href={`/services/${service.slug}`} key={service.slug}>
                     <h3>{service.title}</h3>
                     <p>{service.subtitle}</p>
-                    <span className="service-link-price">
+                    <span className="link-card-price">
                       {service.type === 'plans' ? `From ${service.plans[0].price}` : service.price}
                     </span>
-                    <span className="service-link-cta">View details →</span>
+                    <span className="link-card-cta">View details →</span>
                   </a>
                 ))}
               </div>
             </section>
           </div>
         </div>
-
-        <FoundingOffer />
 
         <Contact />
       </main>

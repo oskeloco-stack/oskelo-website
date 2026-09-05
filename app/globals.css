@@ -103,6 +103,28 @@ header{
 }
 .nav-links a:hover{ color: var(--white); }
 
+.nav-toggle{
+  display:none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 32px; height: 32px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.nav-toggle span{
+  display:block;
+  width: 100%;
+  height: 2px;
+  background: var(--white);
+}
+
+.mobile-menu{
+  display:none;
+}
+
 .nav-dropdown{ position: relative; }
 .nav-dropdown-trigger{ cursor: pointer; }
 .nav-dropdown-menu{
@@ -368,14 +390,15 @@ header{
 }
 .package ul li::before{ content:'— '; color: var(--grey-dim); }
 
-/* ---------- Services links ---------- */
+/* ---------- Link cards (services & work) ---------- */
 
-.service-links{
+.link-cards{
   display:grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
 }
-.service-link-card{
+.link-cards.cols-2{ grid-template-columns: repeat(2, 1fr); }
+.link-card{
   display:flex;
   flex-direction: column;
   border: 1px solid var(--line);
@@ -384,22 +407,79 @@ header{
   gap: 6px;
   transition: border-color .2s ease, transform .2s ease;
 }
-.service-link-card:hover{ border-color: var(--amber); transform: translateY(-4px); }
-.service-link-card h3{
+.link-card:hover{ border-color: var(--amber); transform: translateY(-4px); }
+.link-card h3{
   font-family:'Archivo', sans-serif;
   font-weight: 700;
   font-size: 18px;
   text-transform: uppercase;
   margin: 0;
 }
-.service-link-card p{ font-size: 14px; color: var(--grey); margin: 4px 0 18px; }
-.service-link-price{
+.link-card p{ font-size: 14px; color: var(--grey); margin: 4px 0 18px; }
+.link-card-price{
   font-family:'Archivo', sans-serif;
   font-weight: 800;
   font-size: 22px;
   margin-bottom: 14px;
 }
-.service-link-cta{ font-size: 13px; color: var(--amber); letter-spacing: 0.04em; }
+.link-card-cta{ font-size: 13px; color: var(--amber); letter-spacing: 0.04em; }
+.link-card-media{
+  aspect-ratio: 16 / 10;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(217,154,78,0.18), transparent 55%),
+    linear-gradient(150deg, #23201b, #14110d);
+  border: 1px solid var(--line);
+}
+
+/* ---------- Reels ---------- */
+
+.reels-row{
+  display:flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+}
+.reel-card{
+  position: relative;
+  flex: 0 0 190px;
+  aspect-ratio: 9 / 16;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 30% 15%, rgba(217,154,78,0.18), transparent 55%),
+    linear-gradient(160deg, #23201b, #14110d);
+  display:flex;
+  align-items: flex-end;
+  scroll-snap-align: start;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.reel-card:hover{ border-color: var(--amber); transform: translateY(-4px); }
+.reel-play{
+  position:absolute;
+  top:50%; left:50%;
+  transform: translate(-50%, -50%);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(245,243,239,0.4);
+  display:flex; align-items:center; justify-content:center;
+  font-size: 13px;
+  color: var(--white);
+  background: rgba(11,10,9,0.4);
+}
+.reel-label{
+  position: relative;
+  z-index: 2;
+  padding: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
 
 /* ---------- Service detail page ---------- */
 
@@ -525,11 +605,39 @@ footer{ padding: 30px 0; border-top: 1px solid var(--line); }
   .wrap{ padding: 0 24px; }
   .nav{ padding: 18px 24px; }
   .nav-links{ display:none; }
+  .nav-cta{ display:none; }
+  .nav-toggle{ display:flex; }
+  .mobile-menu{
+    display:flex;
+    flex-direction: column;
+    gap: 26px;
+    padding: 10px 24px 30px;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .mobile-menu-group{
+    display:flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .mobile-menu-heading{
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--grey-dim);
+  }
+  .mobile-menu-group a{
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .mobile-menu .btn{ align-self: flex-start; }
   .hero{ min-height: 720px; }
   .hero-content{ padding: 0 24px; }
   .work-grid{ grid-template-columns: 1fr 1fr; }
   .packages{ grid-template-columns: 1fr; }
-  .service-links{ grid-template-columns: 1fr; }
+  .link-cards{ grid-template-columns: 1fr; }
   .team-grid{ grid-template-columns: 1fr; }
   .contact-inner{ grid-template-columns: 1fr; }
 }
