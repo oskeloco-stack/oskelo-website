@@ -42,9 +42,9 @@ export default function Header() {
             </div>
           </div>
           <a href="/about">Team</a>
-          <a href="/#contact">Contact</a>
+          <a href="/contact">Contact</a>
         </nav>
-        <a className="btn btn-solid btn-sm nav-cta" href="/#contact">Get a quote</a>
+        <a className="btn btn-solid btn-sm nav-cta" href="/contact">Get a quote</a>
         <button
           type="button"
           className="nav-toggle"
@@ -81,9 +81,9 @@ export default function Header() {
           </div>
           <div className="mobile-menu-group">
             <a href="/about" className="mobile-menu-heading" onClick={closeMobile}>Team</a>
-            <a href="/#contact" className="mobile-menu-heading" onClick={closeMobile}>Contact</a>
+            <a href="/contact" className="mobile-menu-heading" onClick={closeMobile}>Contact</a>
           </div>
-          <a className="btn btn-solid btn-sm" href="/#contact" onClick={closeMobile}>Get a quote</a>
+          <a className="btn btn-solid btn-sm" href="/contact" onClick={closeMobile}>Get a quote</a>
         </div>
       )}
     </header>
