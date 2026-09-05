@@ -49,6 +49,21 @@ copy .env.local.example .env.local
 Open `.env.local` and paste in your real Supabase URL and anon key.
 This file is already in `.gitignore` — it will never be committed.
 
+### Email notifications (optional but recommended)
+
+Contact form submissions always save to Supabase. To also get an email
+at **oskelo.co@gmail.com** every time someone submits the form:
+
+1. Sign up at [resend.com](https://resend.com) (free tier is plenty).
+2. Go to **API Keys** and create a new key.
+3. Paste it into `.env.local` as `RESEND_API_KEY=...`.
+4. When you deploy (step 6 below), add the same `RESEND_API_KEY`
+   variable in Vercel's **Environment Variables** settings.
+
+Without this key, the form still works and still saves messages —
+you just won't get an email, and would need to check the Supabase
+**Table Editor → messages** table manually.
+
 ## 4. Run it locally
 
 ```powershell
@@ -72,8 +87,9 @@ git push -u origin main
 ## 6. Deploy to Vercel
 
 1. Go to vercel.com/new and import this GitHub repo.
-2. Before deploying, add the same two environment variables from
-   step 3 under **Environment Variables**.
+2. Before deploying, add the same environment variables from step 3
+   (Supabase URL, Supabase anon key, and `RESEND_API_KEY` if you set
+   up email notifications) under **Environment Variables**.
 3. Click **Deploy**.
 
 ## 7. Point your domain at it

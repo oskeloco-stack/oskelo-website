@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
 import { supabase } from '../../../lib/supabaseClient';
+
+const NOTIFY_EMAIL = 'oskelo.co@gmail.com';
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(request) {
   try {
@@ -22,6 +26,22 @@ export async function POST(request) {
         { error: 'Could not save your message. Please try again.' },
         { status: 500 }
       );
+    }
+
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: 'Oskelo Website <onboarding@resend.dev>',
+          to: NOTIFY_EMAIL,
+          replyTo: email,
+          subject: `New inquiry from ${name}`,
+          text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+        });
+      } catch (emailErr) {
+        console.error('Resend email error:', emailErr);
+      }
+    } else {
+      console.warn('RESEND_API_KEY not set — skipping email notification.');
     }
 
     return NextResponse.json({ success: true });
