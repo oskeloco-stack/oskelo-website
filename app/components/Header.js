@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { SERVICES } from '../../lib/services';
 import { WORK_CATEGORIES } from '../../lib/work';
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMobile = () => setMobileOpen(false);
+  const pathname = usePathname();
+  const isHome = pathname === '/';
 
   return (
     <header>
@@ -15,6 +18,7 @@ export default function Header() {
           <img className="logo-img" src="/4.png" alt="Oskelo" />
         </a>
         <nav className="nav-links">
+          {!isHome && <a href="/">Home</a>}
           <div className="nav-dropdown">
             <a href="/work" className="nav-dropdown-trigger">Work</a>
             <div className="nav-dropdown-menu">
@@ -56,6 +60,9 @@ export default function Header() {
 
       {mobileOpen && (
         <div className="mobile-menu">
+          <div className="mobile-menu-group">
+            <a href="/" className="mobile-menu-heading" onClick={closeMobile}>Home</a>
+          </div>
           <div className="mobile-menu-group">
             <a href="/work" className="mobile-menu-heading" onClick={closeMobile}>Work</a>
             {WORK_CATEGORIES.map((category) => (
