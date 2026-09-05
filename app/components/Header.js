@@ -59,7 +59,7 @@ export default function Header() {
           <div className="mobile-menu-group">
             <a href="/work" className="mobile-menu-heading" onClick={closeMobile}>Work</a>
             {WORK_CATEGORIES.map((category) => (
-              <a href={`/work/${category.slug}`} key={category.slug} onClick={closeMobile}>
+              <a href={`/work/${category.slug}`} key={category.slug} className="mobile-submenu-link" onClick={closeMobile}>
                 {category.title}
               </a>
             ))}
@@ -67,14 +67,14 @@ export default function Header() {
           <div className="mobile-menu-group">
             <a href="/services" className="mobile-menu-heading" onClick={closeMobile}>Services</a>
             {SERVICES.map((service) => (
-              <a href={`/services/${service.slug}`} key={service.slug} onClick={closeMobile}>
+              <a href={`/services/${service.slug}`} key={service.slug} className="mobile-submenu-link" onClick={closeMobile}>
                 {service.title}
               </a>
             ))}
           </div>
           <div className="mobile-menu-group">
-            <a href="/about" onClick={closeMobile}>Team</a>
-            <a href="/#contact" onClick={closeMobile}>Contact</a>
+            <a href="/about" className="mobile-menu-heading" onClick={closeMobile}>Team</a>
+            <a href="/#contact" className="mobile-menu-heading" onClick={closeMobile}>Contact</a>
           </div>
           <a className="btn btn-solid btn-sm" href="/#contact" onClick={closeMobile}>Get a quote</a>
         </div>
