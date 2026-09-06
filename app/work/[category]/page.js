@@ -38,14 +38,30 @@ export default async function WorkCategoryPage({ params }) {
               <p>{category.subtitle}</p>
             </div>
             <div className="work-grid">
-              {category.items.map((item) => (
-                <div className="work-card" key={item.name}>
-                  <div className="tag">
-                    <b>{item.name}</b>
-                    <span>{item.tag}</span>
+              {category.items.map((item) => {
+                const className = `work-card${item.image ? ' work-card--photo' : ''}`;
+                const inner = (
+                  <>
+                    {item.image && (
+                      <img src={item.image} alt={`${item.name} — ${item.tag}`} loading="lazy" />
+                    )}
+                    <div className="tag">
+                      <b>{item.name}</b>
+                      <span>{item.tag}</span>
+                    </div>
+                  </>
+                );
+
+                return item.slug ? (
+                  <a className={className} href={`/work/${category.slug}/${item.slug}`} key={item.name}>
+                    {inner}
+                  </a>
+                ) : (
+                  <div className={className} key={item.name}>
+                    {inner}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         </div>

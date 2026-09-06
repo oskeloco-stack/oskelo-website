@@ -26,7 +26,11 @@ export default function WorkPage() {
             <div className="link-cards cols-2">
               {WORK_CATEGORIES.map((category) => (
                 <a className="link-card" href={`/work/${category.slug}`} key={category.slug}>
-                  <div className="link-card-media"></div>
+                  <div className="link-card-media">
+                    {category.cover && (
+                      <img src={category.cover} alt={`${category.title} work`} loading="lazy" />
+                    )}
+                  </div>
                   <h3>{category.title}</h3>
                   <p>{category.subtitle}</p>
                   <span className="link-card-cta">View work →</span>
