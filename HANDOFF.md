@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (collage shipped to production)_
+_Last updated: 2026-09-07 (collage live on oskelo.com, verified)_
 
 ---
 
@@ -17,21 +17,29 @@ _Last updated: 2026-09-07 (collage shipped to production)_
 
 ## Current state
 
-- **Local HEAD:** `1354669`. Two commits sit on `main` ahead of `origin` — the handoff doc and the Photography collage — **committed but not yet pushed** (this session's shell can't authenticate to GitHub; the user runs `git push` from their own terminal). oskelo.com deploys once the push lands.
+- **Local HEAD:** `06a6c34` (+ a small pending HANDOFF.md update). The handoff doc and the Photography collage are **pushed to `origin/main` and live on oskelo.com** — verified: `/work` shows the 3-up colour collage, `tree-branch.jpg` serves 200.
+- **Note on pushing:** this session's shell can't authenticate to GitHub (credential manager needs a terminal). The user runs `git push` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies). Untracked, unreferenced, left in place for now.
 - `HANDOFF.md` is committed and pushed to `main`, so it syncs across machines via `git pull`.
 
 ## Outstanding / next steps
 
+- [ ] Push the pending HANDOFF.md update (`git push origin main` from the user's terminal).
 - [ ] Remove the redundant loose images from `public/` root (b49aceb + this task added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
-- [ ] Confirm the collage looks right on the deployed site once Vercel finishes building.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
 - [x] Commit the Photography collage + push so it reaches oskelo.com.
+- [x] Confirm the collage looks right on the deployed site — verified 2026-09-07.
 - Note: the middle-image color correction is a CSS filter in `app/globals.css`, not baked into the file — kept as CSS so it stays adjustable.
 
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Push landed, collage verified live
+
+- **Asked:** get the work onto the live site.
+- **What happened:** the user ran `git push origin main` from their own terminal (this session's shell can't auth to GitHub). `origin/main` now at `06a6c34`. Vercel deployed; checked oskelo.com/work — the 3-up colour collage renders and `tree-branch.jpg` serves 200.
+- **State left in:** live and correct. One trivial HANDOFF.md update still to be pushed. Loose `public/` images still to clean up.
 
 ### 2026-09-07 — Ship the Photography collage to production
 
