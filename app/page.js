@@ -31,9 +31,10 @@ export default function Home() {
             <div className="eyebrow">Video &amp; photo for businesses, individuals &amp; events</div>
             <h1>Content built<br />to stand out</h1>
             <p>
-              Oskelo turns your raw footage into polished business videos — or
-              comes on-site to film and create them for you. Three packages,
-              one simple process.
+              Video and photography for businesses, individuals, and events —
+              brand films, portraits, product shoots, and event coverage. Hand
+              us your footage to edit, or have us on-site to shoot and produce
+              the whole piece.
             </p>
             <div className="hero-ctas">
               <a className="btn btn-solid" href="/services">See the packages</a>

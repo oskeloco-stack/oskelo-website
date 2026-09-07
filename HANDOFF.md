@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (broadened the hero tagline to video + photo for businesses, individuals & events)_
+_Last updated: 2026-09-07 (rewrote the hero tagline + blurb to "we do it all" — video + photo, businesses / individuals / events)_
 
 ---
 
@@ -24,8 +24,8 @@ _Last updated: 2026-09-07 (broadened the hero tagline to video + photo for busin
 
 ## Outstanding / next steps
 
-- [ ] Push the unpushed commits (`git push origin main` from the user's terminal), then check oskelo.com shows the new hero tagline.
-- [ ] Optional: broaden the hero body paragraph too — it still says "polished business videos" / "on-site to film". Left as-is for now (only the eyebrow line was in scope).
+- [ ] Push the unpushed commits (`git push origin main` from the user's terminal), then check oskelo.com shows the new hero copy.
+- [x] Rewrote the hero body paragraph to match the "we do it all" positioning.
 - [ ] Remove the redundant loose images from `public/` root (b49aceb + this task added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
 - [x] Commit the Photography collage + push so it reaches oskelo.com.
@@ -35,6 +35,15 @@ _Last updated: 2026-09-07 (broadened the hero tagline to video + photo for busin
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Rewrite the hero blurb to "we do it all"
+
+- **Asked:** change the paragraph under the big title so it matches the idea that Oskelo does everything.
+- **Changed (committed locally, not pushed):** `app/page.js` hero `<p>` is now:
+  "Video and photography for businesses, individuals, and events — brand films, portraits, product shoots, and event coverage. Hand us your footage to edit, or have us on-site to shoot and produce the whole piece."
+  (was: "Oskelo turns your raw footage into polished business videos — or comes on-site to film and create them for you. Three packages, one simple process.")
+- **Verified:** localhost — four lines, sits cleanly above the CTAs.
+- **State left in:** committed locally, not pushed.
 
 ### 2026-09-07 — Broaden the hero tagline
 
