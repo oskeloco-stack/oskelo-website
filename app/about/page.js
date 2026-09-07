@@ -21,7 +21,7 @@ const TEAM = [
 
 export const metadata = {
   title: 'About the Team — Oskelo',
-  description: 'Meet the people behind Oskelo, video creation for businesses.',
+  description: 'Meet the people behind Oskelo — video and photo for businesses, individuals, and events.',
 };
 
 export default function About() {

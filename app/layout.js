@@ -1,9 +1,9 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Oskelo — Video Creation for Businesses',
+  title: 'Oskelo — Video & Photo for Businesses, Individuals & Events',
   description:
-    'Oskelo turns your raw footage into polished business videos, or comes on-site to film and create them for you.',
+    'Oskelo creates video and photography for businesses, individuals, and events — editing your footage or coming on-site to shoot it.',
 };
 
 export default function RootLayout({ children }) {

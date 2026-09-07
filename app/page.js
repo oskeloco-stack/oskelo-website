@@ -28,7 +28,7 @@ export default function Home() {
           </div>
           <div className="hero-scrim"></div>
           <div className="hero-content">
-            <div className="eyebrow">Video creation for businesses</div>
+            <div className="eyebrow">Video &amp; photo for businesses, individuals &amp; events</div>
             <h1>Content built<br />to stand out</h1>
             <p>
               Oskelo turns your raw footage into polished business videos — or

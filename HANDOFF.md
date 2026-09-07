@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (hero collage built then reverted at user's request — hero is back to the bridge)_
+_Last updated: 2026-09-07 (broadened the hero tagline to video + photo for businesses, individuals & events)_
 
 ---
 
@@ -17,14 +17,15 @@ _Last updated: 2026-09-07 (hero collage built then reverted at user's request �
 
 ## Current state
 
-- **Local HEAD:** `06a6c34` (+ a small pending HANDOFF.md update). The handoff doc and the Photography collage are **pushed to `origin/main` and live on oskelo.com** — verified: `/work` shows the 3-up colour collage, `tree-branch.jpg` serves 200.
-- **Note on pushing:** this session's shell can't authenticate to GitHub (credential manager needs a terminal). The user runs `git push` from their own terminal.
+- **Local HEAD:** `main` is ahead of `origin/main` (`06a6c34`) by a few unpushed commits: two handoff-doc updates plus the hero-tagline copy change. All safe; nothing about the live site has changed yet.
+- **Note on pushing:** this session's shell can't authenticate to GitHub (credential manager needs a terminal). The user runs `git push origin main` from their own terminal; Vercel then deploys.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies). Untracked, unreferenced, left in place for now.
 - `HANDOFF.md` is committed and pushed to `main`, so it syncs across machines via `git pull`.
 
 ## Outstanding / next steps
 
-- [ ] Push the pending HANDOFF.md update (`git push origin main` from the user's terminal).
+- [ ] Push the unpushed commits (`git push origin main` from the user's terminal), then check oskelo.com shows the new hero tagline.
+- [ ] Optional: broaden the hero body paragraph too — it still says "polished business videos" / "on-site to film". Left as-is for now (only the eyebrow line was in scope).
 - [ ] Remove the redundant loose images from `public/` root (b49aceb + this task added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
 - [x] Commit the Photography collage + push so it reaches oskelo.com.
@@ -34,6 +35,17 @@ _Last updated: 2026-09-07 (hero collage built then reverted at user's request �
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Broaden the hero tagline
+
+- **Asked:** change the "Video creation for businesses" line so it covers both video and photo, and audiences of businesses, individuals, and events.
+- **Changed (committed locally, not pushed):**
+  - `app/page.js` — hero eyebrow is now "Video & photo for businesses, individuals & events".
+  - `app/layout.js` — `<title>` → "Oskelo — Video & Photo for Businesses, Individuals & Events"; meta description reworded to mention video + photography and all three audiences.
+  - `app/about/page.js` — meta description reworded to match.
+  - Left alone: `app/terms/page.js` legal copy; the hero body paragraph (still video/business only — see Outstanding).
+- **Verified:** localhost desktop (one line) and mobile (wraps to two lines) both read cleanly.
+- **State left in:** committed locally, not pushed.
 
 ### 2026-09-07 — Hero photo-wall collage: built, then reverted
 
