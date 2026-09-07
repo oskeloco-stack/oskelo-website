@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (collage live on oskelo.com, verified)_
+_Last updated: 2026-09-07 (hero collage built then reverted at user's request — hero is back to the bridge)_
 
 ---
 
@@ -34,6 +34,13 @@ _Last updated: 2026-09-07 (collage live on oskelo.com, verified)_
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Hero photo-wall collage: built, then reverted
+
+- **Asked:** replace the homepage hero background (`/1.png`, the bridge) with a big collage of many photos. After seeing it and a follow-up tweak request, the user changed their mind: "make it back to the bridge like it was before".
+- **What was built (commit `ad9b0bc`, never pushed):** `public/hero/` with 29 ~520px webp tiles cropped via `sharp` from the loose `public/` images and `public/work/`; `lib/hero.js` tile list; `.hero-collage` masonry in `app/page.js` + `app/globals.css` (7-col CSS `columns`, rotate/scale, drift animation, stronger scrim); `.claude/launch.json`.
+- **Revert:** `git reset --hard 40f291a` — dropped `ad9b0bc` entirely. Hero is back to `.hero-bg { url('/1.png') }`, verified on localhost (bridge renders as before). `public/hero/`, `lib/hero.js`, and `.claude/launch.json` are gone. `public/1.png` untouched.
+- **State left in:** working tree matches the pre-task state plus this handoff entry. Nothing to push except the handoff commit.
 
 ### 2026-09-07 — Push landed, collage verified live
 
