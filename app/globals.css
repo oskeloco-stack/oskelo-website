@@ -363,7 +363,6 @@ header{
   height: 100%;
   object-fit: cover;
   z-index: 1;
-  filter: grayscale(100%);
 }
 .work-card--photo::before{
   z-index: 1;
@@ -498,6 +497,19 @@ header{
   transition: filter .3s ease, transform .3s ease;
 }
 .link-card:hover .link-card-media img{ filter: grayscale(0); transform: scale(1.03); }
+.link-card-media.is-collage{ display: flex; gap: 3px; }
+.link-card-media.is-collage img{
+  position: static;
+  flex: 1;
+  width: 0;
+  object-position: 50% 30%;
+  filter: none;
+}
+/* middle portrait: nudge tone toward the others */
+.link-card-media.is-collage img:nth-child(2),
+.link-card:hover .link-card-media.is-collage img:nth-child(2){
+  filter: brightness(0.96) contrast(1.04) saturate(1.16) sepia(0.16) hue-rotate(-6deg);
+}
 
 /* ---------- Reels ---------- */
 

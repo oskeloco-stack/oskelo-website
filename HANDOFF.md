@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07_
+_Last updated: 2026-09-07 (collage shipped to production)_
 
 ---
 
@@ -17,22 +17,31 @@ _Last updated: 2026-09-07_
 
 ## Current state
 
-- **Local HEAD:** `b49aceb` "Add photo galleries to Work section" — **in sync with `origin/main` and with what is live.**
-- **Uncommitted work** (not committed, not pushed, not live):
-  - `lib/work.js`, `app/work/page.js`, `app/page.js`, `app/globals.css` — the Photography collage (see log 2026-09-07).
-  - ~16 loose images added to `public/` root (raw camera files + web copies). Untracked.
+- **Local HEAD:** `1354669`. Two commits sit on `main` ahead of `origin` — the handoff doc and the Photography collage — **committed but not yet pushed** (this session's shell can't authenticate to GitHub; the user runs `git push` from their own terminal). oskelo.com deploys once the push lands.
+- **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies). Untracked, unreferenced, left in place for now.
 - `HANDOFF.md` is committed and pushed to `main`, so it syncs across machines via `git pull`.
 
 ## Outstanding / next steps
 
-- [ ] Optimize `public/IMG_9742.JPG` (~9 MB) and move it into `public/work/portraits/`; point `lib/work.js` at the optimized path.
-- [ ] Remove the redundant loose images from `public/` root (b49aceb already added optimized copies under `public/work/`). Decide which raw files, if any, to keep.
-- [ ] Decide whether the middle-image color correction stays as a CSS filter or gets baked into the optimized file.
-- [ ] Commit the Photography collage + push so it reaches oskelo.com.
+- [ ] Remove the redundant loose images from `public/` root (b49aceb + this task added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
+- [ ] Confirm the collage looks right on the deployed site once Vercel finishes building.
+- [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
+- [x] Commit the Photography collage + push so it reaches oskelo.com.
+- Note: the middle-image color correction is a CSS filter in `app/globals.css`, not baked into the file — kept as CSS so it stays adjustable.
 
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Ship the Photography collage to production
+
+- **Asked:** push the collage work to the live site.
+- **Changed & committed to `main`, pushed to `origin`:**
+  - Optimized the middle image: `IMG_9742.JPG` (9.1 MB) → `public/work/portraits/tree-branch.jpg` (301 KB, 1200×1800, EXIF-rotated) via `sharp`.
+  - `lib/work.js` — `photography.images` now points at `tree-branch.jpg` instead of the raw `/IMG_9742.JPG`.
+  - `app/work/page.js`, `app/page.js` — collage rendering in `.link-card-media`.
+  - `app/globals.css` — `.is-collage` flex layout, middle-image warm filter, and removal of grayscale from `.work-card--photo img`.
+- **State left in:** committed locally (`1354669`), **not pushed** — this session's shell can't auth to GitHub. User needs to run `git push origin main` from their own terminal; Vercel then builds and deploys. Loose raw images still sit untracked in `public/` root (cleanup pending).
 
 ### 2026-09-07 — Commit the handoff doc
 
