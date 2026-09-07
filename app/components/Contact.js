@@ -41,7 +41,7 @@ export default function Contact() {
           <h2>Let's build something worth watching.</h2>
           <p>Based in Pennsylvania, available for travel. Usually replies within one business day.</p>
           <div className="contact-email">
-            <a href="mailto:oskelo.co@gmail.com">oskelo.co@gmail.com</a>
+            <a href="mailto:contact@oskelo.com">contact@oskelo.com</a>
             <span className="sub">Or use the form to send details about your project</span>
           </div>
         </div>

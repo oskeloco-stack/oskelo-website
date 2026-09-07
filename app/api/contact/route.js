@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { supabase } from '../../../lib/supabaseClient';
 
+// Where new contact-form submissions are emailed. Kept as the Gmail address
+// because Resend's zero-setup sender (onboarding@resend.dev) only delivers to
+// the Resend account's own email. Switch to contact@oskelo.com once the
+// oskelo.com domain is verified in Resend.
 const NOTIFY_EMAIL = 'oskelo.co@gmail.com';
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 

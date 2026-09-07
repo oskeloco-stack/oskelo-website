@@ -197,7 +197,7 @@ export default function Terms() {
             <h3>Contact</h3>
             <p>
               Questions about these terms can be sent to{' '}
-              <a href="mailto:oskelo.co@gmail.com">oskelo.co@gmail.com</a>.
+              <a href="mailto:contact@oskelo.com">contact@oskelo.com</a>.
             </p>
           </section>
         </div>

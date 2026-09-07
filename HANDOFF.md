@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (hero tagline + blurb rewritten and pushed to origin/main)_
+_Last updated: 2026-09-07 (contact@oskelo.com forwarding live; site email refs updated)_
 
 ---
 
@@ -27,6 +27,11 @@ _Last updated: 2026-09-07 (hero tagline + blurb rewritten and pushed to origin/m
 - [x] Push the hero copy change to `origin/main` — done 2026-09-07.
 - [x] Confirmed live: www.oskelo.com serves the new eyebrow, blurb, and `<title>` (checked via curl 2026-09-07). Note oskelo.com 308-redirects to www.oskelo.com.
 - [x] Rewrote the hero body paragraph to match the "we do it all" positioning.
+- [x] **Branded contact email — forwarding is live.** `contact@oskelo.com` forwards to `oskelo.co@gmail.com` via **ImprovMX** (not Cloudflare — Cloudflare's dashboard hid the Email Routing nav on this account). DNS records added in Cloudflare and verified resolving publicly: MX `mx1.improvmx.com` (10), MX `mx2.improvmx.com` (20), TXT SPF `v=spf1 include:spf.improvmx.com ~all`. Alias `contact` set up at improvmx.com. ImprovMX free plan: unlimited aliases, 25 total recipients — can route e.g. `weddings@` to a photographer's email. Replies from Gmail still come from the personal address unless "Send mail as" (SMTP) is configured per person.
+- [x] Site public-facing email updated to `contact@oskelo.com` in [Contact.js:44](app/components/Contact.js) and [terms/page.js:200](app/terms/page.js).
+- [ ] **Make the contact form actually email on submit.** The form already POSTs to `/api/contact`, saves to Supabase, and *tries* to send a Resend notification — but only if `RESEND_API_KEY` is set. Need to: sign up at resend.com **with `oskelo.co@gmail.com`**, create an API key, add `RESEND_API_KEY` to Vercel → Settings → Environment Variables (and local `.env.local`), redeploy. `NOTIFY_EMAIL` in [api/contact/route.js:5](app/api/contact/route.js) is deliberately kept as `oskelo.co@gmail.com` because Resend's zero-setup sender `onboarding@resend.dev` only delivers to the Resend account's own email.
+- [ ] **Later:** verify the `oskelo.com` domain in Resend (adds DKIM/SPF/return-path records to Cloudflare) → then flip both the Resend `from:` and `NOTIFY_EMAIL` to `@oskelo.com` addresses. Also the point to consider Google Workspace / Zoho mailboxes if the team grows.
+- [ ] Remove the redundant loose images from `public/` root
 - [ ] Remove the redundant loose images from `public/` root (b49aceb + this task added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
 - [x] Commit the Photography collage + push so it reaches oskelo.com.
@@ -36,6 +41,25 @@ _Last updated: 2026-09-07 (hero tagline + blurb rewritten and pushed to origin/m
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Stand up contact@oskelo.com + point the site at it
+
+- **Asked:** set up a branded contact email as a forward for now; then update the website to use it; then "make the send message button send it to my gmail".
+- **Done (outside the repo):** Cloudflare's Email Routing nav was missing, so used **ImprovMX**. Added MX + SPF records in Cloudflare's DNS page; confirmed all three resolve via `8.8.8.8`. Alias `contact@oskelo.com` → `oskelo.co@gmail.com` created at improvmx.com.
+- **Changed in the repo (uncommitted):**
+  - [app/components/Contact.js](app/components/Contact.js) + [app/terms/page.js](app/terms/page.js) — visible email + `mailto:` now `contact@oskelo.com`.
+  - [app/api/contact/route.js](app/api/contact/route.js) — `NOTIFY_EMAIL` left as `oskelo.co@gmail.com` with a comment explaining why (Resend sandbox sender limitation).
+  - `.env.local.example`, `README.md` — comments unchanged in net (briefly flipped, then reverted).
+- **Contact form status:** it already emails on submit *if* `RESEND_API_KEY` is configured. It is not yet (no `.env.local` here; unknown whether Vercel has it). User still needs to connect Resend — see Outstanding.
+- **Build:** `npm run build` fails locally with `supabaseUrl is required` — pre-existing, this checkout has no `.env.local`; Vercel has the vars. Not caused by these edits (text-only).
+- **State left in:** edits uncommitted, not pushed. Site still shows `oskelo.co@gmail.com` live until pushed.
+
+### 2026-09-07 — Plan a branded contact email
+
+- **Asked:** whether the user can have a business email for people to contact them; then to "just connect it to forward it for now", with a real mailbox purchase deferred until the business grows.
+- **Findings:** `oskelo.com` DNS is already on Cloudflare (`harley/dana.ns.cloudflare.com`); no MX records exist. Site currently exposes `oskelo.co@gmail.com` in `app/components/Contact.js`, `app/terms/page.js`, and as `NOTIFY_EMAIL` in `app/api/contact/route.js`.
+- **Plan handed to the user (no code changed, nothing done in Cloudflare — Claude can't touch their DNS/accounts):** enable Cloudflare Email Routing on the oskelo.com zone, create `contact@oskelo.com` forwarding to `oskelo.co@gmail.com`, verify via the Gmail link. Later: swap the forward for Google Workspace / Zoho if volume grows.
+- **State left in:** nothing committed. Added as an Outstanding item with full steps. Site email refs unchanged until forwarding is confirmed live.
 
 ### 2026-09-07 — Rewrite the hero blurb to "we do it all" (+ push)
 
