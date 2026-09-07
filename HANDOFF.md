@@ -17,7 +17,7 @@ _Last updated: 2026-09-07 (contact@oskelo.com forwarding live; site email refs u
 
 ## Current state
 
-- **Local HEAD:** `b170fb9`, **pushed to `origin/main`**. Vercel deployed; the hero copy change is **live on www.oskelo.com** (verified via curl). (Handoff-only commits on top, also pushed.)
+- **Local HEAD:** `99aca01`, **pushed to `origin/main`**. Vercel auto-deploying. Change: homepage + Terms page now show `contact@oskelo.com`. (Hero copy change from earlier also live.)
 - **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies). Untracked, unreferenced, left in place for now.
 - `HANDOFF.md` is committed and pushed to `main`, so it syncs across machines via `git pull`.
@@ -52,7 +52,7 @@ Newest first. Each entry: what was asked, what changed, state left in.
   - `.env.local.example`, `README.md` — comments unchanged in net (briefly flipped, then reverted).
 - **Contact form status:** it already emails on submit *if* `RESEND_API_KEY` is configured. It is not yet (no `.env.local` here; unknown whether Vercel has it). User still needs to connect Resend — see Outstanding.
 - **Build:** `npm run build` fails locally with `supabaseUrl is required` — pre-existing, this checkout has no `.env.local`; Vercel has the vars. Not caused by these edits (text-only).
-- **State left in:** edits uncommitted, not pushed. Site still shows `oskelo.co@gmail.com` live until pushed.
+- **State left in:** committed as `99aca01` and pushed to `origin/main`. Vercel deploying. Once live, homepage + Terms show `contact@oskelo.com`. Contact form still needs Resend connected (Outstanding) before submissions email anywhere.
 
 ### 2026-09-07 — Plan a branded contact email
 
