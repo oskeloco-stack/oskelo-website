@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (rewrote the hero tagline + blurb to "we do it all" — video + photo, businesses / individuals / events)_
+_Last updated: 2026-09-07 (hero tagline + blurb rewritten and pushed to origin/main)_
 
 ---
 
@@ -17,14 +17,15 @@ _Last updated: 2026-09-07 (rewrote the hero tagline + blurb to "we do it all" �
 
 ## Current state
 
-- **Local HEAD:** `main` is ahead of `origin/main` (`06a6c34`) by a few unpushed commits: two handoff-doc updates plus the hero-tagline copy change. All safe; nothing about the live site has changed yet.
-- **Note on pushing:** this session's shell can't authenticate to GitHub (credential manager needs a terminal). The user runs `git push origin main` from their own terminal; Vercel then deploys.
+- **Local HEAD:** `7c82a9a`, **pushed to `origin/main`**. Vercel is building/has deployed the hero copy change. (One further handoff-only commit on top, pushed too.)
+- **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies). Untracked, unreferenced, left in place for now.
 - `HANDOFF.md` is committed and pushed to `main`, so it syncs across machines via `git pull`.
 
 ## Outstanding / next steps
 
-- [ ] Push the unpushed commits (`git push origin main` from the user's terminal), then check oskelo.com shows the new hero copy.
+- [x] Push the hero copy change to `origin/main` — done 2026-09-07.
+- [ ] Confirm oskelo.com shows the new hero tagline + blurb once Vercel finishes deploying.
 - [x] Rewrote the hero body paragraph to match the "we do it all" positioning.
 - [ ] Remove the redundant loose images from `public/` root (b49aceb + this task added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
@@ -36,14 +37,14 @@ _Last updated: 2026-09-07 (rewrote the hero tagline + blurb to "we do it all" �
 
 Newest first. Each entry: what was asked, what changed, state left in.
 
-### 2026-09-07 — Rewrite the hero blurb to "we do it all"
+### 2026-09-07 — Rewrite the hero blurb to "we do it all" (+ push)
 
-- **Asked:** change the paragraph under the big title so it matches the idea that Oskelo does everything.
+- **Asked:** change the paragraph under the big title so it matches the idea that Oskelo does everything, then "push it".
 - **Changed (committed locally, not pushed):** `app/page.js` hero `<p>` is now:
   "Video and photography for businesses, individuals, and events — brand films, portraits, product shoots, and event coverage. Hand us your footage to edit, or have us on-site to shoot and produce the whole piece."
   (was: "Oskelo turns your raw footage into polished business videos — or comes on-site to film and create them for you. Three packages, one simple process.")
 - **Verified:** localhost — four lines, sits cleanly above the CTAs.
-- **State left in:** committed locally, not pushed.
+- **State left in:** committed as `7c82a9a` and **pushed to `origin/main`** (push worked from this session this time). Vercel deploying. Live-site check still pending.
 
 ### 2026-09-07 — Broaden the hero tagline
 
