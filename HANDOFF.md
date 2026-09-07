@@ -17,7 +17,7 @@ _Last updated: 2026-09-07 (hero tagline + blurb rewritten and pushed to origin/m
 
 ## Current state
 
-- **Local HEAD:** `7c82a9a`, **pushed to `origin/main`**. Vercel is building/has deployed the hero copy change. (One further handoff-only commit on top, pushed too.)
+- **Local HEAD:** `b170fb9`, **pushed to `origin/main`**. Vercel deployed; the hero copy change is **live on www.oskelo.com** (verified via curl). (Handoff-only commits on top, also pushed.)
 - **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies). Untracked, unreferenced, left in place for now.
 - `HANDOFF.md` is committed and pushed to `main`, so it syncs across machines via `git pull`.
@@ -25,7 +25,7 @@ _Last updated: 2026-09-07 (hero tagline + blurb rewritten and pushed to origin/m
 ## Outstanding / next steps
 
 - [x] Push the hero copy change to `origin/main` — done 2026-09-07.
-- [ ] Confirm oskelo.com shows the new hero tagline + blurb once Vercel finishes deploying.
+- [x] Confirmed live: www.oskelo.com serves the new eyebrow, blurb, and `<title>` (checked via curl 2026-09-07). Note oskelo.com 308-redirects to www.oskelo.com.
 - [x] Rewrote the hero body paragraph to match the "we do it all" positioning.
 - [ ] Remove the redundant loose images from `public/` root (b49aceb + this task added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
@@ -44,7 +44,7 @@ Newest first. Each entry: what was asked, what changed, state left in.
   "Video and photography for businesses, individuals, and events — brand films, portraits, product shoots, and event coverage. Hand us your footage to edit, or have us on-site to shoot and produce the whole piece."
   (was: "Oskelo turns your raw footage into polished business videos — or comes on-site to film and create them for you. Three packages, one simple process.")
 - **Verified:** localhost — four lines, sits cleanly above the CTAs.
-- **State left in:** committed as `7c82a9a` and **pushed to `origin/main`** (push worked from this session this time). Vercel deploying. Live-site check still pending.
+- **State left in:** committed as `7c82a9a`, **pushed to `origin/main`** (push worked from this session this time), **deployed and verified live** on www.oskelo.com.
 
 ### 2026-09-07 — Broaden the hero tagline
 
