@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (contact@oskelo.com forwarding live; site email refs updated)_
+_Last updated: 2026-09-07 (contact@oskelo.com fully live — forwarding in, form notifications, and Gmail send-as out)_
 
 ---
 
@@ -29,10 +29,12 @@ _Last updated: 2026-09-07 (contact@oskelo.com forwarding live; site email refs u
 - [x] Rewrote the hero body paragraph to match the "we do it all" positioning.
 - [x] **Branded contact email — forwarding is live.** `contact@oskelo.com` forwards to `oskelo.co@gmail.com` via **ImprovMX** (not Cloudflare — Cloudflare's dashboard hid the Email Routing nav on this account). DNS records added in Cloudflare and verified resolving publicly: MX `mx1.improvmx.com` (10), MX `mx2.improvmx.com` (20), TXT SPF `v=spf1 include:spf.improvmx.com ~all`. Alias `contact` set up at improvmx.com. ImprovMX free plan: unlimited aliases, 25 total recipients — can route e.g. `weddings@` to a photographer's email. Replies from Gmail still come from the personal address unless "Send mail as" (SMTP) is configured per person.
 - [x] Site public-facing email updated to `contact@oskelo.com` in [Contact.js:44](app/components/Contact.js) and [terms/page.js:200](app/terms/page.js).
-- [ ] **Make the contact form actually email on submit.** The form already POSTs to `/api/contact`, saves to Supabase, and *tries* to send a Resend notification — but only if `RESEND_API_KEY` is set. Need to: sign up at resend.com **with `oskelo.co@gmail.com`**, create an API key, add `RESEND_API_KEY` to Vercel → Settings → Environment Variables (and local `.env.local`), redeploy. `NOTIFY_EMAIL` in [api/contact/route.js:5](app/api/contact/route.js) is deliberately kept as `oskelo.co@gmail.com` because Resend's zero-setup sender `onboarding@resend.dev` only delivers to the Resend account's own email.
-- [ ] **Later:** verify the `oskelo.com` domain in Resend (adds DKIM/SPF/return-path records to Cloudflare) → then flip both the Resend `from:` and `NOTIFY_EMAIL` to `@oskelo.com` addresses. Also the point to consider Google Workspace / Zoho mailboxes if the team grows.
-- [ ] Remove the redundant loose images from `public/` root
-- [ ] Remove the redundant loose images from `public/` root (b49aceb + this task added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
+- [x] **Contact form emails on submit.** `RESEND_API_KEY` is set in Vercel; a test submission arrived at `oskelo.co@gmail.com`. `NOTIFY_EMAIL` in [api/contact/route.js:9](app/api/contact/route.js) stays `oskelo.co@gmail.com` (Resend `from:` is still `onboarding@resend.dev`; the visitor's address is set as `replyTo`).
+- [x] **`oskelo.com` verified in Resend for sending.** DKIM (`resend._domainkey`) + SPF on the `send.oskelo.com` subdomain (MX `feedback-smtp…amazonses.com`, TXT `v=spf1 include:amazonses.com ~all`) added in Cloudflare DNS — all show **Verified**. No conflict with the root ImprovMX SPF because Resend uses a subdomain. "Enable Receiving" left OFF (ImprovMX handles inbound).
+- [x] **Gmail "Send mail as" `contact@oskelo.com`.** Configured via Resend SMTP (`smtp.resend.com:465`, user `resend`, password = a Resend API key named `gmail-smtp`). Confirmed working — replies now go out from `contact@oskelo.com`.
+- [ ] **Optional polish:** flip the Resend `from:` in [api/contact/route.js:38](app/api/contact/route.js) from `onboarding@resend.dev` to something like `Oskelo Website <noreply@oskelo.com>` now that the domain is verified — makes the notification email itself come from the domain. Low priority; current setup works.
+- [ ] **Later:** Google Workspace / Zoho mailboxes if the team grows (real per-person inboxes instead of forwards + send-as).
+- [ ] Remove the redundant loose images from `public/` root (b49aceb + earlier work added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
 - [x] Commit the Photography collage + push so it reaches oskelo.com.
 - [x] Confirm the collage looks right on the deployed site — verified 2026-09-07.
@@ -41,6 +43,15 @@ _Last updated: 2026-09-07 (contact@oskelo.com forwarding live; site email refs u
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Finish the email setup: Resend notifications + Gmail send-as
+
+- **Asked:** connect the contact form's "Send message" to Gmail; then set up replies so they come *from* `contact@oskelo.com` without paying.
+- **Done (all external config, no repo changes):**
+  - Created Resend account (signed up as `oskelo.co@gmail.com`), made an API key, added `RESEND_API_KEY` in Vercel env vars, redeployed. Test form submission arrived in Gmail — **working**.
+  - Added `oskelo.com` in Resend, chose **Manual setup**, added DKIM + `send`-subdomain SPF (MX + TXT) records in Cloudflare DNS. All **Verified**. No SPF conflict — Resend uses `send.oskelo.com`, ImprovMX uses the root.
+  - Made a second Resend API key `gmail-smtp`; used it as the password for Gmail → Settings → Accounts and Import → "Send mail as" → `contact@oskelo.com` via `smtp.resend.com:465` (user `resend`). Gmail's confirmation code came through the ImprovMX forward. **Replies now send from `contact@oskelo.com`.**
+- **State left in:** email is fully functional end to end — inbound forward (ImprovMX), form notifications (Resend → Gmail), outbound replies (Gmail send-as via Resend SMTP). No code committed this phase; only HANDOFF.md updated.
 
 ### 2026-09-07 — Stand up contact@oskelo.com + point the site at it
 
