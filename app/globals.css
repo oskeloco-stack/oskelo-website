@@ -70,6 +70,52 @@ img{ max-width:100%; display:block; }
 .btn-outline:hover{ border-color: var(--ink); }
 .btn-sm{ padding: 10px 20px; font-size: 12px; }
 
+/* ---------- Promo bar (scrolling announcement) ---------- */
+
+.promo-bar{
+  display: block;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.promo-bar-track{
+  display: inline-flex;
+  min-width: 100%;
+  width: max-content;
+  animation: promo-marquee 38s linear infinite;
+  will-change: transform;
+}
+.promo-bar:hover .promo-bar-track,
+.promo-bar:focus-visible .promo-bar-track{ animation-play-state: paused; }
+.promo-bar-group{ display: inline-flex; flex: none; }
+.promo-bar-group > span{ display: inline-block; padding: 9px 44px; }
+.promo-bar-group > span::after{
+  content: '·';
+  margin-left: 44px;
+  margin-right: -44px;
+  color: rgba(250,247,241,0.4);
+}
+
+@keyframes promo-marquee{
+  from{ transform: translateX(0); }
+  to{ transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .promo-bar{ white-space: normal; }
+  .promo-bar-track{ animation: none; min-width: 0; width: auto; }
+  .promo-bar-group{ display: block; }
+  .promo-bar-group ~ .promo-bar-group{ display: none; }
+  .promo-bar-group > span{ display: none; text-align: center; padding: 9px 24px; }
+  .promo-bar-group > span:first-child{ display: block; }
+  .promo-bar-group > span::after{ content: none; }
+}
+
 /* ---------- Header ---------- */
 
 header{
@@ -184,7 +230,7 @@ header{
 
 .hero{
   position: relative;
-  min-height: 860px;
+  min-height: 660px;
   display:flex;
   align-items:center;
   overflow: hidden;
@@ -316,6 +362,48 @@ header{
   max-width: 50ch;
   margin: 0 auto 28px;
 }
+
+/* ---------- Offers page ---------- */
+
+.offer-card-list{
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.offer-card{
+  max-width: 720px;
+  border: 1px solid var(--amber);
+  border-radius: 4px;
+  padding: 40px;
+  background: rgba(154,95,51,0.07);
+}
+.offer-card .eyebrow{ color: var(--amber); }
+.offer-card h3{
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin: 12px 0 16px;
+}
+.offer-card > p{
+  color: var(--grey);
+  font-size: 15px;
+  max-width: 56ch;
+  margin: 0 0 22px;
+}
+.offer-card ul{
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--grey);
+}
+.offer-card ul li::before{ content: '— '; color: var(--grey-dim); }
 
 .section-head{
   display:flex;
@@ -525,6 +613,104 @@ header{
 }
 .link-card:hover .link-card-media.is-collage img{ filter: brightness(1.12) contrast(1.04) saturate(1.05); }
 
+/* ---------- Offers list (homepage, under hero) ---------- */
+
+.offers{ padding-top: 36px; }
+.offer-list{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+}
+.offer-list li{
+  flex: 1;
+  display: flex;
+  border-bottom: 1px solid var(--line);
+}
+.offer-list a{
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 22px;
+  padding: 18px 6px;
+  color: var(--ink);
+  transition: color .2s ease, padding-left .2s ease;
+}
+.offer-list a:hover{ color: var(--amber); padding-left: 12px; }
+.offer-num{
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: clamp(22px, 2.8vw, 34px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--grey-dim);
+  transition: color .2s ease;
+}
+.offer-list a:hover .offer-num{ color: var(--amber); }
+.offer-text{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.offer-name{
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: clamp(18px, 2vw, 23px);
+  line-height: 1.12;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.offer-blurb{
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--grey);
+}
+.offer-list a:hover .offer-blurb{ color: var(--grey); }
+.offer-arrow{
+  color: var(--amber);
+  font-weight: 500;
+  font-size: 18px;
+  transition: transform .2s ease;
+}
+.offer-list a:hover .offer-arrow{ transform: translateX(4px); }
+
+/* ---------- Mission ---------- */
+
+.mission-body{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 44px;
+  max-width: 940px;
+}
+.mission-body p{
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--grey);
+}
+
+/* collage beside the "What we offer" list */
+.offers-inner{
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 48px;
+  align-items: stretch;
+}
+.offers-collage{ display: block; }
+.offers-collage img{
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 35%;
+  border-radius: 3px;
+  filter: grayscale(1) contrast(1.05) brightness(1.02);
+}
+
 /* ---------- Reels ---------- */
 
 .reels-row{
@@ -727,11 +913,17 @@ footer{ padding: 30px 0; border-top: 1px solid var(--line); }
     padding-left: 4px;
   }
   .mobile-menu .btn{ align-self: flex-start; }
-  .hero{ min-height: 600px; }
+  .hero{ min-height: 520px; }
   .hero-content{ padding: 0 24px; }
   .hero-content p{ margin: 0 0 26px; }
   .section{ padding: 56px 0; }
-  .section-head{ margin-bottom: 30px; padding-bottom: 18px; }
+  .section-head{
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding-bottom: 18px;
+  }
+  .section-head p{ max-width: none; }
   .work-grid{ grid-template-columns: 1fr 1fr; gap: 16px; }
   .photo-grid{ grid-template-columns: 1fr 1fr; gap: 10px; }
   .packages{ grid-template-columns: 1fr; gap: 16px; }
@@ -740,8 +932,14 @@ footer{ padding: 30px 0; border-top: 1px solid var(--line); }
   .reels-row{ gap: 12px; }
   .team-grid{ grid-template-columns: 1fr; gap: 16px; }
   .contact-inner{ grid-template-columns: 1fr; gap: 36px; }
+  .mission-body{ grid-template-columns: 1fr; gap: 18px; }
+  .offers-inner{ grid-template-columns: 1fr; gap: 28px; }
+  .offers-collage{ max-width: 420px; }
+  .offers{ padding-top: 44px; }
+  .offer-list a{ padding: 20px 4px; gap: 18px; }
   .promo{ padding: 44px 0; }
   .promo-inner{ padding: 36px 24px; }
+  .offer-card{ padding: 28px 22px; }
   .promo-inner h2{ margin: 12px 0 14px; }
   .legal h3{ margin: 28px 0 10px; }
 }

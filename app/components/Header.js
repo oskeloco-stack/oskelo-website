@@ -20,17 +20,6 @@ export default function Header() {
         <nav className="nav-links">
           {!isHome && <a href="/">Home</a>}
           <div className="nav-dropdown">
-            <a href="/work" className="nav-dropdown-trigger">Work</a>
-            <div className="nav-dropdown-menu">
-              {WORK_CATEGORIES.map((category) => (
-                <a href={`/work/${category.slug}`} key={category.slug}>
-                  <b>{category.title}</b>
-                  <span>{category.subtitle}</span>
-                </a>
-              ))}
-            </div>
-          </div>
-          <div className="nav-dropdown">
             <a href="/services" className="nav-dropdown-trigger">Services</a>
             <div className="nav-dropdown-menu">
               {SERVICES.map((service) => (
@@ -41,6 +30,18 @@ export default function Header() {
               ))}
             </div>
           </div>
+          <div className="nav-dropdown">
+            <a href="/work" className="nav-dropdown-trigger">Work</a>
+            <div className="nav-dropdown-menu">
+              {WORK_CATEGORIES.map((category) => (
+                <a href={`/work/${category.slug}`} key={category.slug}>
+                  <b>{category.title}</b>
+                  <span>{category.subtitle}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+          <a href="/offers">Offers</a>
           <a href="/about">Team</a>
           <a href="/contact">Contact</a>
         </nav>
@@ -64,14 +65,6 @@ export default function Header() {
             <a href="/" className="mobile-menu-heading" onClick={closeMobile}>Home</a>
           </div>
           <div className="mobile-menu-group">
-            <a href="/work" className="mobile-menu-heading" onClick={closeMobile}>Work</a>
-            {WORK_CATEGORIES.map((category) => (
-              <a href={`/work/${category.slug}`} key={category.slug} className="mobile-submenu-link" onClick={closeMobile}>
-                {category.title}
-              </a>
-            ))}
-          </div>
-          <div className="mobile-menu-group">
             <a href="/services" className="mobile-menu-heading" onClick={closeMobile}>Services</a>
             {SERVICES.map((service) => (
               <a href={`/services/${service.slug}`} key={service.slug} className="mobile-submenu-link" onClick={closeMobile}>
@@ -80,6 +73,15 @@ export default function Header() {
             ))}
           </div>
           <div className="mobile-menu-group">
+            <a href="/work" className="mobile-menu-heading" onClick={closeMobile}>Work</a>
+            {WORK_CATEGORIES.map((category) => (
+              <a href={`/work/${category.slug}`} key={category.slug} className="mobile-submenu-link" onClick={closeMobile}>
+                {category.title}
+              </a>
+            ))}
+          </div>
+          <div className="mobile-menu-group">
+            <a href="/offers" className="mobile-menu-heading" onClick={closeMobile}>Offers</a>
             <a href="/about" className="mobile-menu-heading" onClick={closeMobile}>Team</a>
             <a href="/contact" className="mobile-menu-heading" onClick={closeMobile}>Contact</a>
           </div>

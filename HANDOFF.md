@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (Photography card now the crouch-and-smile portrait, brightened; hero photo revealed; founding offer reframed; stale dev server restarted)_
+_Last updated: 2026-09-07 (Homepage restructure: scrolling promo bar, hero blurb removed, "What we offer" moved under the hero as a numbered list + B&W photo, "Our mission" section added, new /offers page, nav reordered)_
 
 ---
 
@@ -59,6 +59,19 @@ _Last updated: 2026-09-07 (Photography card now the crouch-and-smile portrait, b
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Homepage restructure + scrolling promo bar + /offers page
+
+- **Asked (one long session of iteration):** move the hero description out into its own "mission / what we do" section; move "What we offer" up directly under the hero and reduce it to just the clickable service names; add a moving banner across the very top with the promo + action step; then many follow-up tweaks to the banner copy, the "What we offer" layout, and a mission-section background image that was ultimately scrapped.
+- **`app/components/PromoBar.js` (new)** — pure-CSS marquee, rendered site-wide in `app/layout.js` above `<Header>` (dark `--ink` bar, cream text, `promo-marquee` keyframes, pauses on hover, one static line under `prefers-reduced-motion`). Links to `/offers`. Final copy: "Start any monthly plan this month and keep today's rate for good — limited to 5 spots" (iterated: dropped "Monthly Rate Lock", dropped "Claim your spot", swapped "be one of the first 5" → "limited to 5 spots").
+- **`app/page.js` — homepage reordered:** hero (no `<p>` blurb) → **What we offer** (`.offers` / `#services`) → **Our mission** (`.section-alt` / `#mission`) → FoundingOffer → work → reels → contact.
+  - **What we offer** is now `.offers-inner` (grid `1.8fr 1fr`): left = `.offer-list`, a `<ul>` of the 3 `SERVICES` as big Archivo links — `01 / 02 / 03` index number, name, one-line blurb (the service `subtitle`), arrow. `li{flex:1}` so the three rows stretch to exactly match the photo's height. Right = `.offers-collage`, a **single** portrait image (`/work/wedding-engagement/garden-path.jpg`), `aspect-ratio: 4/5`, `filter: grayscale(1) contrast(1.05) brightness(1.02)` (B&W — the user tried a warm colour wash and a 2–3 image collage first, then settled on one B&W portrait).
+  - **Our mission** — `.section-head` ("What we do" / "Our mission") + `.mission-body` (2-col text grid). A sunset-silhouette-kiss background image (`IMG_1858` → `public/mission-sunset.jpg`, 147 KB) was built with a radial `mask-image` feather, then **scrapped at the user's request** — the section is back to plain text on the tan panel. `public/mission-sunset.jpg` and `public/IMG_1858.JPG` are left untracked/unused in `public/`.
+- **`app/offers/page.js` + `lib/offers.js` (new)** — "Limited Offers" page at `/offers`. `OFFERS` array (currently one: Monthly Rate Lock) → `.offer-card-list` of amber-bordered `.offer-card`s (eyebrow, title, body, detail `<ul>`, CTA button to `/services/monthly-plans`). Empty-state message if the array is emptied. Added **Offers** to the header nav (desktop + mobile).
+- **`app/components/Header.js`** — nav order is now **Services · Work · Offers · Team · Contact** (Services and Work dropdowns swapped; Offers inserted).
+- **`app/globals.css`** — `.promo-bar*` marquee; `.offers-inner` / `.offer-list` / `.offer-num` / `.offer-text` / `.offer-name` / `.offer-blurb` / `.offer-arrow` / `.offers-collage`; `.offer-card*` for the offers page; `.hero{min-height}` `860 → 660` (`520` mobile) now that the hero has no paragraph; mobile `.section-head` now stacks (`flex-direction: column`) so headings don't overlap their side note.
+- **Verified:** localhost screenshots of the promo bar, reordered homepage, `/offers`, and the reverted mission section; `npm run build` passes (all routes prerender, `/` still static). The preview pane went blank after scrolling several times this session — fixed each time by restarting the `oskelo-dev` server; production unaffected.
+- **State left in:** committed and pushed to `origin/main`; Vercel deploying. Untracked and **not** committed: `.claude/`, the ~10 loose `public/*.JPG` originals, `public/IMG_1858.JPG`, `public/mission-sunset.jpg`.
 
 ### 2026-09-07 — Photography card: crouch-and-smile portrait, brightened + dev server fix
 

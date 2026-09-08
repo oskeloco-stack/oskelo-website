@@ -30,18 +30,70 @@ export default function Home() {
           <div className="hero-content">
             <div className="eyebrow">Video &amp; photo for businesses, individuals &amp; events</div>
             <h1>Content built<br />to stand out</h1>
-            <p>
-              Video and photography for businesses, individuals, and events —
-              brand films, portraits, product shoots, and event coverage. Hand
-              us your footage to edit, or have us on-site to shoot and produce
-              the whole piece.
-            </p>
             <div className="hero-ctas">
               <a className="btn btn-solid" href="/services">See the packages</a>
               <a className="btn btn-outline" href="/work">View our work</a>
             </div>
           </div>
         </section>
+
+        <div className="wrap">
+          <section className="section offers" id="services">
+            <div className="section-head">
+              <div>
+                <div className="eyebrow">Services</div>
+                <h2>What we offer</h2>
+              </div>
+              <p>Three ways to work with us. Tap through for full details and pricing.</p>
+            </div>
+            <div className="offers-inner">
+              <ul className="offer-list">
+                {SERVICES.map((service, i) => (
+                  <li key={service.slug}>
+                    <a href={`/services/${service.slug}`}>
+                      <span className="offer-num" aria-hidden="true">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="offer-text">
+                        <span className="offer-name">{service.title}</span>
+                        <span className="offer-blurb">{service.subtitle}</span>
+                      </span>
+                      <span className="offer-arrow" aria-hidden="true">→</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <div className="offers-collage" aria-hidden="true">
+                <img src="/work/wedding-engagement/garden-path.jpg" alt="" loading="lazy" />
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div className="section-alt">
+          <div className="wrap">
+            <section className="section mission" id="mission">
+              <div className="section-head">
+                <div>
+                  <div className="eyebrow">What we do</div>
+                  <h2>Our mission</h2>
+                </div>
+              </div>
+              <div className="mission-body">
+                <p>
+                  Oskelo makes video and photography for businesses, individuals,
+                  and events — brand films, portraits, product shoots, and event
+                  coverage.
+                </p>
+                <p>
+                  Hand us your footage to edit, or have us on-site to shoot and
+                  produce the whole piece. Either way the goal is the same:
+                  content built to stand out, made simple to get.
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
 
         <FoundingOffer />
 
@@ -89,32 +141,6 @@ export default function Home() {
               ))}
             </div>
           </section>
-        </div>
-
-        <div className="section-alt">
-          <div className="wrap">
-            <section className="section" id="services">
-              <div className="section-head">
-                <div>
-                  <div className="eyebrow">Services</div>
-                  <h2>What we offer</h2>
-                </div>
-                <p>Monthly video plans, a one-time shoot, or a single edited video — pick an option for full details.</p>
-              </div>
-              <div className="link-cards">
-                {SERVICES.map((service) => (
-                  <a className="link-card" href={`/services/${service.slug}`} key={service.slug}>
-                    <h3>{service.title}</h3>
-                    <p>{service.subtitle}</p>
-                    <span className="link-card-price">
-                      {service.type === 'plans' ? `From ${service.plans[0].price}` : service.price}
-                    </span>
-                    <span className="link-card-cta">View details →</span>
-                  </a>
-                ))}
-              </div>
-            </section>
-          </div>
         </div>
 
         <Contact />
