@@ -75,7 +75,7 @@ img{ max-width:100%; display:block; }
 .promo-bar{
   display: block;
   overflow: hidden;
-  background: var(--ink);
+  background: rgba(52,42,31,0.86);
   color: var(--bg);
   font-size: 12px;
   font-weight: 600;
