@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (contact@oskelo.com fully live — forwarding in, form notifications, and Gmail send-as out)_
+_Last updated: 2026-09-07 (site recoloured to a light warm palette; Photography collage now features the middle portrait)_
 
 ---
 
@@ -17,9 +17,10 @@ _Last updated: 2026-09-07 (contact@oskelo.com fully live — forwarding in, form
 
 ## Current state
 
-- **Local HEAD:** `99aca01`, **pushed to `origin/main`**. Vercel auto-deploying. Change: homepage + Terms page now show `contact@oskelo.com`. (Hero copy change from earlier also live.)
+- **Local HEAD:** `0d8064f`, **pushed to `origin/main`**. Vercel auto-deploying. Latest change: whole-site colour scheme flipped from near-black to light warm (paper white + natural brown), and the Photography collage's middle portrait is now the dominant panel.
 - **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
-- **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies). Untracked, unreferenced, left in place for now.
+- **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies), plus an untracked `.claude/launch.json` (added this session so `preview` can start `next dev` on port 3000 — harmless, not committed).
+- **Dev-server note:** during this session `/work/photography` threw `Jest worker encountered 2 child process exceptions` on the already-running `next dev` (PID 13444). This is a Turbopack/Next 16 dev worker crash, unrelated to the CSS change (homepage + `/work` render fine, only `globals.css` was touched). Fix is to stop that dev server and restart it (`taskkill /PID <pid> /F` then `npm run dev`).
 - `HANDOFF.md` is committed and pushed to `main`, so it syncs across machines via `git pull`.
 
 ## Outstanding / next steps
@@ -43,6 +44,17 @@ _Last updated: 2026-09-07 (contact@oskelo.com fully live — forwarding in, form
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Recolour the site to a light warm palette + feature the middle portrait
+
+- **Asked:** "make the whole color scheme white and like a natural brown color. Not black anymore." Then, mid-task: "make the black guy officially the main guy in the image for photography recent projects."
+- **Changed (`app/globals.css` only, committed `0d8064f`, pushed):**
+  - Rewrote the `:root` tokens: `--bg #faf7f1` (warm paper white), `--bg-panel #efe7da` (light tan), renamed `--white` → `--ink #342a1f` (deep natural brown, primary text — no more near-black), `--grey #6f6353`, `--grey-dim #9a8d7a`, `--amber #9a5f33` (natural brown accent) + new `--amber-deep #7d4a26` for hovers, `--line` now a dark alpha on light.
+  - Every hard-coded dark value updated to match: header gradient, hero `.hero-bg`/`.hero-scrim` (dark scrim → warm cream wash over `/1.png`), work/photo/reel card gradient fills (`#23201b→#14110d` → `#e9e0d2→#d8ccb9`), photo-card tags (dark pill → cream pill w/ ink text), form inputs, dropdown, team avatar, form status colours, focus ring.
+  - `/4.png` is a white wordmark → added `filter: brightness(0.38) sepia(0.9) saturate(2.6) hue-rotate(-8deg)` on `.logo-img` so it renders natural brown on the light header.
+  - `.link-card-media.is-collage img:nth-child(2)` (the middle portrait, `tree-branch.jpg`) now `flex: 2.2` vs `1` for the siblings, and `object-position: 50% 22%` — it's the dominant panel in the Photography collage on both the homepage and `/work`.
+- **Verified:** localhost hero + `/work` screenshots show the new palette; computed styles confirm body bg `rgb(250,247,241)` / text `rgb(52,42,31)`, solid button brown, middle collage image 260px vs 118px siblings. Below-fold screenshots were unreliable (browser pane hidden) but content and computed styles check out.
+- **State left in:** committed and pushed as `0d8064f`; Vercel deploying. `.claude/launch.json` left untracked.
 
 ### 2026-09-07 — Finish the email setup: Resend notifications + Gmail send-as
 
