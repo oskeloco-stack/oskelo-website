@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (Homepage restructure: scrolling promo bar, hero blurb removed, "What we offer" moved under the hero as a numbered list + B&W photo, "Our mission" section added, new /offers page, nav reordered)_
+_Last updated: 2026-09-07 (Mobile polish pass: promo-bar smaller + muted-brown on mobile, B&W photo behind the founding offer, hero title readable over the bridge on mobile, hero pulled closer to "What we offer")_
 
 ---
 
@@ -59,6 +59,16 @@ _Last updated: 2026-09-07 (Homepage restructure: scrolling promo bar, hero blurb
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Mobile polish: promo bar, founding-offer photo, hero legibility
+
+Follow-up tweaks after the homepage restructure. All in `app/globals.css` unless noted; each was committed and pushed on its own (`2058728` → `2dd320a`).
+
+- **Promo bar, mobile** — user wanted the moving-banner text "way smaller" and the background less harsh. Mobile now: `font-size: 8px`, `letter-spacing: 0.04em`, `padding: 6px 22px` on the span, `background: #8c6a52` (a muted Oskelo brown — path was `rgba(52,42,31,0.55)` → `var(--amber)` → muted `#8c6a52` for "less vivid"). Desktop is unchanged (solid `var(--ink)`, 12px). One brief experiment softened the **desktop** bar to `rgba(52,42,31,0.86)` (`e534228`) and was reverted the next commit.
+- **B&W photo behind the founding offer** (`98cdd1b`) — `app/components/FoundingOffer.js` now takes an optional `image` prop; `app/page.js` passes `/work/wedding-engagement/veil-barn.jpg`. When set it renders `.promo-bg` (grayscale `filter`, `object-position: 50% 26%`, a single radial `mask-image` so all four edges dissolve — the approach that finally beat the "choppy line" problem on the earlier mission-bg attempt) plus an `rgba(250,247,241,0.55)` scrim, and `.promo--image .promo-inner` becomes near-opaque cream with a soft shadow so the card lifts off the photo. `FoundingOffer` on `/services` and `/services/monthly-plans` stays plain (no prop).
+- **Hero title legibility on mobile** — the headline was hard to read over the bridge. Mobile-only override of `.hero-scrim` (an even, light cream wash — `0.66 → 0.44 → 0.24` across the width, plus a soft vertical fade) and a tight-plus-wide cream `text-shadow` glow on `.hero-content h1` and `.eyebrow`. First pass over-washed it (`e3c7624`); dialled the wash back so the bridge shows through and the glow carries the legibility (`8ecb21d`).
+- **Hero closer to "What we offer" on mobile** (`2dd320a`) — mobile `.hero{min-height}` `520px → 430px` and `.offers{padding-top}` `44px → 14px`, so the section sits right under the hero.
+- **State left in:** local `main` == `origin/main` at `2dd320a`; all deployed. Dev server restarted so localhost matches. `HANDOFF.md` updated (this entry). Still untracked/uncommitted: `.claude/`, the loose `public/*.JPG` originals, `public/IMG_1858.JPG`, `public/mission-sunset.jpg`.
 
 ### 2026-09-07 — Homepage restructure + scrolling promo bar + /offers page
 
