@@ -971,7 +971,7 @@ footer{ padding: 30px 0; border-top: 1px solid var(--line); }
   .offers-collage{ max-width: 420px; }
   .offers{ padding-top: 44px; }
   .offer-list a{ padding: 20px 4px; gap: 18px; }
-  .promo-bar{ font-size: 8px; letter-spacing: 0.04em; background: rgba(52,42,31,0.55); }
+  .promo-bar{ font-size: 8px; letter-spacing: 0.04em; background: var(--amber); }
   .promo-bar-group > span{ padding: 6px 22px; }
   .promo{ padding: 44px 0; }
   .promo-inner{ padding: 36px 24px; }
