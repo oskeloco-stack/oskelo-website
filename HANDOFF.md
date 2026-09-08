@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (light warm palette live; Photography card is now a single portrait)_
+_Last updated: 2026-09-07 (light warm palette + single Photography portrait — both verified live on www.oskelo.com)_
 
 ---
 
@@ -17,7 +17,7 @@ _Last updated: 2026-09-07 (light warm palette live; Photography card is now a si
 
 ## Current state
 
-- **Local HEAD:** `7658c03`, **pushed to `origin/main`**. Vercel auto-deploying. Recent changes: whole-site colour scheme flipped from near-black to light warm (paper white + natural brown); the Photography "Recent projects" card is now a single full-bleed portrait (`tree-branch.jpg`) rather than a 3-up collage.
+- **Local HEAD:** `c11c267`, **pushed to `origin/main`**. **Live and verified on www.oskelo.com:** new light warm palette (`#faf7f1` / `#9a5f33` present in deployed CSS) and the Photography "Recent projects" card now shows the single `tree-branch.jpg` portrait (the only `/work` collage image reference). Recent changes: whole-site colour scheme flipped from near-black to light warm (paper white + natural brown); Photography card went from a 3-up collage to one full-bleed portrait.
 - **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies), plus an untracked `.claude/launch.json` (added this session so `preview` can start `next dev` on port 3000 — harmless, not committed).
 - **Dev-server note:** during this session `/work/photography` threw `Jest worker encountered 2 child process exceptions` on the already-running `next dev` (PID 13444). This is a Turbopack/Next 16 dev worker crash, unrelated to the CSS change (homepage + `/work` render fine, only `globals.css` was touched). Fix is to stop that dev server and restart it (`taskkill /PID <pid> /F` then `npm run dev`).
