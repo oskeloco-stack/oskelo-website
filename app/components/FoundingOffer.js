@@ -4,7 +4,7 @@ export default function FoundingOffer({ ctaHref = '/services/monthly-plans' }) {
       <div className="wrap">
         <div className="promo-inner">
           <div className="eyebrow">Monthly Rate Lock</div>
-          <h2>The first 5 to sign up this month lock in their rate for good</h2>
+          <h2>First 5 in — rate locked for good</h2>
           <p>
             Start any monthly plan this month and, if you're one of the first
             5 to sign up, today's rate is grandfathered in for as long as you
