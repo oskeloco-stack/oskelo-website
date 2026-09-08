@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (Hero bridge photo made more visible with an even bottom fade; founding offer reframed; Photography card at object-position 50% 31%)_
+_Last updated: 2026-09-07 (Photography card now the crouch-and-smile portrait, brightened; hero photo revealed; founding offer reframed; stale dev server restarted)_
 
 ---
 
@@ -17,7 +17,7 @@ _Last updated: 2026-09-07 (Hero bridge photo made more visible with an even bott
 
 ## Current state
 
-- **Local HEAD:** `24f8799`, **pushed to `origin/main`** (push worked from this session). Three workstreams this session:
+- **Local HEAD:** `83f0d51`, **pushed to `origin/main`** (push worked from this session). Workstreams this session:
 - **0. Hero photo visibility** (`24f8799`) — `app/globals.css`, `.hero-bg` + `.hero-scrim`. The bridge photo (`/1.png`) was ~80–93% hidden under a cream wash; the user wanted it more visible, then dialed back once ("words hard to see"), then asked to fix a hard line at the hero's bottom edge. Now: `.hero-bg` 115deg wash `0.82 → 0.60 → 0.30 → 0.48`; `.hero-scrim` has a 90deg left-column wash (`0.78 → 0.38 → 0` across 0–68%) for headline legibility plus a multi-stop 180deg vertical fade that ramps to full `--bg` by 99% so the hero clips into the section below with no seam. User said "perfect".
 - **1. Founding offer copy** (`f17a1fe` → `ad53951` → `baf75d0`) — `app/components/FoundingOffer.js` reframed so it doesn't read as a launch deal, then the heading iterated down to something plain:
   - eyebrow `Founding Member Offer` → `Monthly Rate Lock`
@@ -25,15 +25,16 @@ _Last updated: 2026-09-07 (Hero bridge photo made more visible with an even bott
   - body: "Start any monthly plan this month and, if you're one of the first 5 to sign up, today's rate is grandfathered in for as long as you stay subscribed — even after our prices go up. What you pay now is what you pay for good."
   - Dropped "our first 5 clients" / "Join early" (implied a brand-new business); user also said don't say "each month", so the cadence is implied by "this month" only. CTA "Claim your spot" unchanged.
   - Component renders on the homepage, `/services`, and the monthly-plans service page. **Verified live on www.oskelo.com:** homepage `<h2>` reads "Lock in your rate for good".
-- **2. Photography "Recent projects" card** — commits `3b4d1b9` (image swap + first uncrop), `ab30caa` (center), `63a5b99` (tighten), `f023dda` (bring up + hover-origin), `a3153fc` (raise to hair-near-top):
-  - `public/work/portraits/woodland-path.jpg` — `IMG_9787` optimised to 1200×1800 / ~285 KB, EXIF-rotated (`sharp` `.rotate().resize(1200).jpeg({quality:80,mozjpeg:true})`). He's crouched on a woodland path facing camera.
-  - `lib/work.js` — `photography.images` now `['/work/portraits/woodland-path.jpg']` (was `tree-branch.jpg`).
-  - `app/globals.css` — `.link-card-media.is-collage img` now has `object-position: 50% 31%` (history through the session: `28%` original, clipped the head → `6%` too low → `15%` centered → `25%` → `28%` → `31%` per the user, "hair almost hitting the top") **plus `transform-origin: 50% 100%`** so the `.link-card:hover` `transform: scale(1.03)` grows from the bottom and can't clip his hair. One rule; feeds both the homepage `#work` card and `/work`. ~32%+ starts shaving the topmost hair.
-  - `public/work/portraits/tree-branch.jpg` (the old `IMG_9742` log shot) is now **orphaned** — still committed, referenced nowhere. Left in place in case of a revert; a candidate for the image cleanup below.
-  - **Verified live on www.oskelo.com:** deployed CSS now reads `.is-collage img{object-position:50% 31%;filter:none;transform-origin:50% 100%;…}` and the homepage references `woodland-path`.
+- **2. Photography "Recent projects" card** — long iteration; final commit `83f0d51`. Earlier commits `3b4d1b9` → `ab30caa` → `63a5b99` → `f023dda` → `a3153fc` swapped in `IMG_9787` (`woodland-path.jpg`) and tuned the crop `28% → 6% → 15% → 25% → 28% → 31%`. Then the user asked for a *different* image of Isaac — "the crouch and smile one" = `IMG_9793` — and pointed at it by number.
+  - `public/work/portraits/woodland-path-smile.jpg` — **current image**; `IMG_9793` (Isaac crouched on the path, big smile, same shoot/outfit as `IMG_9787`) optimised to 1200×1800 / ~293 KB, EXIF-rotated (`sharp` `.rotate().resize(1200).jpeg({quality:80,mozjpeg:true})`).
+  - `lib/work.js` — `photography.images` now `['/work/portraits/woodland-path-smile.jpg']`.
+  - `app/globals.css` `.link-card-media.is-collage img` — `object-position: 50% 26%` (dropped from 31% on "move him down a little"), `filter: brightness(1.12) contrast(1.04) saturate(1.05)` (from "brighten the photo up" + "bring out his face a little better" — his face was a touch dark against the backlit green), and `transform-origin: 50% 100%` (keeps the `:hover` `scale(1.03)` zoom from clipping the top). A matching `.link-card:hover .link-card-media.is-collage img` rule carries the same filter through hover (the generic hover rule would otherwise reset it to `grayscale(0)`). One block; feeds the homepage `#work` card and `/work`.
+  - **Orphaned, still committed, referenced nowhere:** `public/work/portraits/tree-branch.jpg` (`IMG_9742` log shot) and now `public/work/portraits/woodland-path.jpg` (`IMG_9787`). Candidates for the image cleanup below.
+  - **Verified live on www.oskelo.com:** homepage references `woodland-path-smile.jpg` (serves 200, 293 KB); deployed CSS reads `.is-collage img{object-position:50% 26%;filter:brightness(1.12)contrast(1.04)saturate(1.05);transform-origin:50% 100%;…}` plus the hover rule.
+- **3. Local dev server was stale** — `/work/photography` on localhost returned HTTP 500 `Jest worker encountered 2 child process exceptions` (Turbopack/Next 16 dev-worker crash). The `next dev` process (PID 13444) had been running since **9/6**. Killed it (`Stop-Process -Id 13444 -Force`) and started a fresh one via the `oskelo-dev` launch config; `/work/photography` now returns 200. Production was never affected. If this recurs: kill whatever PID holds port 3000 and restart `npm run dev`.
 - **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies), plus an untracked `.claude/launch.json` (added this session so `preview` can start `next dev` on port 3000 — harmless, not committed).
-- **Dev-server note:** during this session `/work/photography` threw `Jest worker encountered 2 child process exceptions` on the already-running `next dev` (PID 13444). This is a Turbopack/Next 16 dev worker crash, unrelated to the CSS change (homepage + `/work` render fine, only `globals.css` was touched). Fix is to stop that dev server and restart it (`taskkill /PID <pid> /F` then `npm run dev`).
+- **Dev-server note:** the Turbopack/Next 16 dev worker crashes (`Jest worker encountered 2 child process exceptions`) if the `next dev` process is left running for days. Seen again this session on a process from 9/6; fixed by killing it and restarting. If localhost pages 500 with that message, kill whatever PID holds port 3000 and run `npm run dev` fresh.
 - `HANDOFF.md` is committed and pushed to `main`, so it syncs across machines via `git pull`.
 
 ## Outstanding / next steps
@@ -48,7 +49,8 @@ _Last updated: 2026-09-07 (Hero bridge photo made more visible with an even bott
 - [x] **Gmail "Send mail as" `contact@oskelo.com`.** Configured via Resend SMTP (`smtp.resend.com:465`, user `resend`, password = a Resend API key named `gmail-smtp`). Set as the **default** send address; "when replying, use the same address the message was sent to". Confirmed working — replies now go out from `contact@oskelo.com`.
 - [ ] **Optional polish:** flip the Resend `from:` in [api/contact/route.js:38](app/api/contact/route.js) from `onboarding@resend.dev` to something like `Oskelo Website <noreply@oskelo.com>` now that the domain is verified — makes the notification email itself come from the domain. Low priority; current setup works.
 - [ ] **Later:** Google Workspace / Zoho mailboxes if the team grows (real per-person inboxes instead of forwards + send-as).
-- [ ] Remove the redundant loose images from `public/` root (b49aceb + earlier work added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete.
+- [ ] Remove the redundant loose images from `public/` root (b49aceb + earlier work added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete. Includes the ~20 untracked `IMG_*.JPG` / UUID `.jpg` files still sitting in `public/` root.
+- [ ] Delete the two now-orphaned optimized portraits `public/work/portraits/tree-branch.jpg` and `public/work/portraits/woodland-path.jpg` once the crouch-and-smile card (`woodland-path-smile.jpg`) is settled.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
 - [x] Commit the Photography collage + push so it reaches oskelo.com.
 - [x] Confirm the collage looks right on the deployed site — verified 2026-09-07.
@@ -57,6 +59,17 @@ _Last updated: 2026-09-07 (Hero bridge photo made more visible with an even bott
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Photography card: crouch-and-smile portrait, brightened + dev server fix
+
+- **Asked (rapid iteration):** "make the image of the black guy (isaac) a different image" → tried to identify a rock/creek shot the user pasted (not in the repo) → "use the crouch and smile one" → "image 9793" → "move him down a little" → "brighten the photo up a bit" → "bring out his face a little better" → separately "why can't I access the photography page on localhost please fix" → "launch that to the live website".
+- **Image swap (`83f0d51`, pushed, verified live):**
+  - `public/work/portraits/woodland-path-smile.jpg` — `IMG_9793` (Isaac crouched on the woodland path, big smile, same shoot as `IMG_9787`) → `sharp .rotate().resize(1200).jpeg({quality:80,mozjpeg:true})`, 1200×1800 / ~293 KB.
+  - `lib/work.js` — `photography.images` → `['/work/portraits/woodland-path-smile.jpg']`.
+  - `app/globals.css` `.is-collage img` — `object-position` `50% 31%` → `50% 26%` ("move him down a little"); added `filter: brightness(1.12) contrast(1.04) saturate(1.05)` (brighten + open his face against the backlit green); added matching `.link-card:hover .link-card-media.is-collage img` so hover doesn't reset the filter to `grayscale(0)`.
+  - Filter values were tuned against `sharp` previews approximating the CSS filter at the real card box (501×312). Kept as CSS (not baked into the JPG) so it stays adjustable, per the project convention.
+- **Localhost photography page 500:** stale `next dev` (PID 13444, running since 9/6) — killed and restarted via the `oskelo-dev` launch config; `/work/photography` now 200. Production was never affected.
+- **State left in:** committed `83f0d51`, pushed; **verified live on www.oskelo.com** (homepage → `woodland-path-smile.jpg` 200; CSS shows `object-position:50% 26%` + the brightness filter). `woodland-path.jpg` and `tree-branch.jpg` now both orphaned.
 
 ### 2026-09-07 — Hero: make the bridge photo more visible + even out the fade
 
