@@ -947,7 +947,7 @@ footer{ padding: 30px 0; border-top: 1px solid var(--line); }
     padding-left: 4px;
   }
   .mobile-menu .btn{ align-self: flex-start; }
-  .hero{ min-height: 520px; }
+  .hero{ min-height: 430px; }
   .hero-content{ padding: 0 24px; }
   .hero-content p{ margin: 0 0 26px; }
   /* mobile: a light cream wash keeps the bridge visible; a tight + wide cream
@@ -983,7 +983,7 @@ footer{ padding: 30px 0; border-top: 1px solid var(--line); }
   .mission-body{ grid-template-columns: 1fr; gap: 18px; }
   .offers-inner{ grid-template-columns: 1fr; gap: 28px; }
   .offers-collage{ max-width: 420px; }
-  .offers{ padding-top: 44px; }
+  .offers{ padding-top: 14px; }
   .offer-list a{ padding: 20px 4px; gap: 18px; }
   .promo-bar{ font-size: 8px; letter-spacing: 0.04em; background: #8c6a52; }
   .promo-bar-group > span{ padding: 6px 22px; }
