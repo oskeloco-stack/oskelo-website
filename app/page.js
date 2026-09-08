@@ -95,7 +95,7 @@ export default function Home() {
           </div>
         </div>
 
-        <FoundingOffer />
+        <FoundingOffer image="/work/wedding-engagement/veil-barn.jpg" />
 
         <div className="wrap">
           <section className="section" id="work">

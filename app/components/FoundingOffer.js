@@ -1,6 +1,11 @@
-export default function FoundingOffer({ ctaHref = '/services/monthly-plans' }) {
+export default function FoundingOffer({ ctaHref = '/services/monthly-plans', image }) {
   return (
-    <section className="section promo" id="founding-offer">
+    <section className={`section promo${image ? ' promo--image' : ''}`} id="founding-offer">
+      {image && (
+        <div className="promo-bg" aria-hidden="true">
+          <img src={image} alt="" loading="lazy" />
+        </div>
+      )}
       <div className="wrap">
         <div className="promo-inner">
           <div className="eyebrow">Monthly Rate Lock</div>
