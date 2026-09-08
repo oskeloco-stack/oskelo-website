@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (site recoloured to a light warm palette; Photography collage now features the middle portrait)_
+_Last updated: 2026-09-07 (light warm palette live; Photography card is now a single portrait)_
 
 ---
 
@@ -17,7 +17,7 @@ _Last updated: 2026-09-07 (site recoloured to a light warm palette; Photography 
 
 ## Current state
 
-- **Local HEAD:** `0d8064f`, **pushed to `origin/main`**. Vercel auto-deploying. Latest change: whole-site colour scheme flipped from near-black to light warm (paper white + natural brown), and the Photography collage's middle portrait is now the dominant panel.
+- **Local HEAD:** `7658c03`, **pushed to `origin/main`**. Vercel auto-deploying. Recent changes: whole-site colour scheme flipped from near-black to light warm (paper white + natural brown); the Photography "Recent projects" card is now a single full-bleed portrait (`tree-branch.jpg`) rather than a 3-up collage.
 - **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies), plus an untracked `.claude/launch.json` (added this session so `preview` can start `next dev` on port 3000 — harmless, not committed).
 - **Dev-server note:** during this session `/work/photography` threw `Jest worker encountered 2 child process exceptions` on the already-running `next dev` (PID 13444). This is a Turbopack/Next 16 dev worker crash, unrelated to the CSS change (homepage + `/work` render fine, only `globals.css` was touched). Fix is to stop that dev server and restart it (`taskkill /PID <pid> /F` then `npm run dev`).
@@ -44,6 +44,13 @@ _Last updated: 2026-09-07 (site recoloured to a light warm palette; Photography 
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Photography card down to a single portrait
+
+- **Asked:** "make the black guy the only guy in the image" (Photography "Recent projects" card).
+- **Changed (`7658c03`, pushed):** `lib/work.js` — `photography.images` is now just `['/work/portraits/tree-branch.jpg']`, so both the homepage `#work` card and `/work` show that one portrait full-bleed. Removed the `.is-collage img:nth-child(2)` featured-panel + tone-blend rules from `app/globals.css` (only relevant with multiple images). Single image keeps `flex:1` and stays in colour (`.is-collage img { filter:none }`), `object-position: 50% 28%`.
+- **Verified:** DOM check on localhost — collage wrapper now has 1 `<img>` (`tree-branch.jpg`) filling the full 503px media width.
+- **State left in:** committed + pushed; Vercel deploying.
 
 ### 2026-09-07 — Recolour the site to a light warm palette + feature the middle portrait
 
