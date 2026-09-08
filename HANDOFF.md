@@ -23,13 +23,13 @@ _Last updated: 2026-09-07 (Founding offer heading now "Lock in your rate for goo
   - heading, final: **"Lock in your rate for good"** (path: "The first 5 to sign up this month lock in their rate for good" → "First 5 in — rate locked for good" → simpler)
   - body: "Start any monthly plan this month and, if you're one of the first 5 to sign up, today's rate is grandfathered in for as long as you stay subscribed — even after our prices go up. What you pay now is what you pay for good."
   - Dropped "our first 5 clients" / "Join early" (implied a brand-new business); user also said don't say "each month", so the cadence is implied by "this month" only. CTA "Claim your spot" unchanged.
-  - Component renders on the homepage, `/services`, and the monthly-plans service page. Verified on localhost; **not yet reconfirmed on www.oskelo.com** (last push `baf75d0` still deploying).
+  - Component renders on the homepage, `/services`, and the monthly-plans service page. **Verified live on www.oskelo.com:** homepage `<h2>` reads "Lock in your rate for good".
 - **2. Photography "Recent projects" card** — commits `3b4d1b9` (image swap + first uncrop), `ab30caa` (center), `63a5b99` (tighten), `f023dda` (bring up + hover-origin), `a3153fc` (raise to hair-near-top):
   - `public/work/portraits/woodland-path.jpg` — `IMG_9787` optimised to 1200×1800 / ~285 KB, EXIF-rotated (`sharp` `.rotate().resize(1200).jpeg({quality:80,mozjpeg:true})`). He's crouched on a woodland path facing camera.
   - `lib/work.js` — `photography.images` now `['/work/portraits/woodland-path.jpg']` (was `tree-branch.jpg`).
   - `app/globals.css` — `.link-card-media.is-collage img` now has `object-position: 50% 31%` (history through the session: `28%` original, clipped the head → `6%` too low → `15%` centered → `25%` → `28%` → `31%` per the user, "hair almost hitting the top") **plus `transform-origin: 50% 100%`** so the `.link-card:hover` `transform: scale(1.03)` grows from the bottom and can't clip his hair. One rule; feeds both the homepage `#work` card and `/work`. ~32%+ starts shaving the topmost hair.
   - `public/work/portraits/tree-branch.jpg` (the old `IMG_9742` log shot) is now **orphaned** — still committed, referenced nowhere. Left in place in case of a revert; a candidate for the image cleanup below.
-  - **Verified live on www.oskelo.com:** as of commit `f023dda`, deployed CSS read `object-position:50% 28%` + `transform-origin:50% 100%` and the homepage referenced `woodland-path`. The `31%` bump (`a3153fc`) was pushed after that check — reconfirm `object-position:50% 31%` once Vercel finishes.
+  - **Verified live on www.oskelo.com:** deployed CSS now reads `.is-collage img{object-position:50% 31%;filter:none;transform-origin:50% 100%;…}` and the homepage references `woodland-path`.
 - **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies), plus an untracked `.claude/launch.json` (added this session so `preview` can start `next dev` on port 3000 — harmless, not committed).
 - **Dev-server note:** during this session `/work/photography` threw `Jest worker encountered 2 child process exceptions` on the already-running `next dev` (PID 13444). This is a Turbopack/Next 16 dev worker crash, unrelated to the CSS change (homepage + `/work` render fine, only `globals.css` was touched). Fix is to stop that dev server and restart it (`taskkill /PID <pid> /F` then `npm run dev`).
@@ -66,14 +66,14 @@ Newest first. Each entry: what was asked, what changed, state left in.
   - body → "Start any monthly plan this month and, if you're one of the first 5 to sign up, today's rate is grandfathered in for as long as you stay subscribed — even after our prices go up. What you pay now is what you pay for good." (was "…as one of our first 5 clients… Join early…")
   - CTA "Claim your spot" unchanged.
 - **Verified:** localhost DOM shows the final eyebrow/heading/body on `#founding-offer`.
-- **State left in:** committed `f17a1fe` → `ad53951` → `baf75d0`, all pushed; Vercel deploying `baf75d0`. Not yet reconfirmed live.
+- **State left in:** committed `f17a1fe` → `ad53951` → `baf75d0`, all pushed; **verified live** — homepage `<h2>` is "Lock in your rate for good".
 
 ### 2026-09-07 — Photography card: center the portrait, then bring the subject up
 
 - **Asked:** "center the image" → "center the image more so his body is center and head is near top but not cut off" → "bring him up a bit more" → "Bring him up to where his hair is almost hitting the top" (Photography "Recent projects" card, after the woodland-path swap).
 - **Changed (`app/globals.css`):** `.link-card-media.is-collage img` `object-position` `50% 6%` → `50% 15%` (`ab30caa`) → `50% 25%` (`63a5b99`) → `50% 28%` (`f023dda`) → `50% 31%` (`a3153fc`), and added `transform-origin: 50% 100%` in `f023dda`. The portrait (1200×1800) is `object-fit: cover` in a 16/10 card ≈ 501×312, so the visible source window is ~747px tall and `object-position` Y% places its top at `Y% × (1800−747)`. 6% sat him low with a band of canopy above; 15% centered with generous headroom; 25% put his body dead-center; 28% lifted his head to just below the edge; 31% (source window `y326..1073`) puts the hair tips ~2px off the top. ~32%+ shaves the topmost hair. The bottom `transform-origin` makes the `:hover` `scale(1.03)` grow downward so it can't eat the tiny headroom.
 - **Verified:** localhost computed `object-position: 50% 31%`, `transform-origin` = 50% 100% of the 501×312 box. Browser-pane screenshots blank (pane hidden — known); visual check via `sharp` extracts at the exact card box across 15–33% — 31% chosen as the tightest that doesn't clip.
-- **State left in:** committed `ab30caa` → `63a5b99` → `f023dda` → `a3153fc`, all pushed. Live CSS confirmed at `28%`/`transform-origin` before the `31%` push; reconfirm `31%` after Vercel.
+- **State left in:** committed `ab30caa` → `63a5b99` → `f023dda` → `a3153fc`, all pushed; **verified live** — deployed CSS reads `object-position:50% 31%` + `transform-origin:50% 100%`.
 
 ### 2026-09-07 — Photography card: new woodland-path portrait + head no longer cut off
 
