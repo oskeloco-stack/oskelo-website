@@ -518,11 +518,12 @@ header{
   position: static;
   flex: 1;
   width: 0;
-  object-position: 50% 31%;
-  filter: none;
+  object-position: 50% 26%;
+  filter: brightness(1.12) contrast(1.04) saturate(1.05);
   /* anchor the hover zoom at the bottom so it never eats into the headroom */
   transform-origin: 50% 100%;
 }
+.link-card:hover .link-card-media.is-collage img{ filter: brightness(1.12) contrast(1.04) saturate(1.05); }
 
 /* ---------- Reels ---------- */
 
