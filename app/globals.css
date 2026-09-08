@@ -950,6 +950,19 @@ footer{ padding: 30px 0; border-top: 1px solid var(--line); }
   .hero{ min-height: 520px; }
   .hero-content{ padding: 0 24px; }
   .hero-content p{ margin: 0 0 26px; }
+  /* full-width text on mobile needs an even, stronger cream wash + a glow */
+  .hero-scrim{
+    background:
+      linear-gradient(90deg, rgba(250,247,241,0.84) 0%, rgba(250,247,241,0.66) 55%, rgba(250,247,241,0.44) 100%),
+      linear-gradient(180deg,
+        rgba(250,247,241,0.32) 0%,
+        rgba(250,247,241,0.14) 42%,
+        rgba(250,247,241,0.34) 72%,
+        rgba(250,247,241,0.72) 90%,
+        var(--bg) 100%);
+  }
+  .hero-content h1{ text-shadow: 0 1px 14px rgba(250,247,241,0.92); }
+  .hero-content .eyebrow{ text-shadow: 0 1px 10px rgba(250,247,241,0.9); }
   .section{ padding: 56px 0; }
   .section-head{
     flex-direction: column;
