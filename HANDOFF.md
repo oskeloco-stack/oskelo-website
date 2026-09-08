@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (Founding offer heading now "Lock in your rate for good" + reframed body; Photography card at object-position 50% 31%)_
+_Last updated: 2026-09-07 (Hero bridge photo made more visible with an even bottom fade; founding offer reframed; Photography card at object-position 50% 31%)_
 
 ---
 
@@ -17,7 +17,8 @@ _Last updated: 2026-09-07 (Founding offer heading now "Lock in your rate for goo
 
 ## Current state
 
-- **Local HEAD:** `baf75d0`, **pushed to `origin/main`** (push worked from this session). Two workstreams this session:
+- **Local HEAD:** `24f8799`, **pushed to `origin/main`** (push worked from this session). Three workstreams this session:
+- **0. Hero photo visibility** (`24f8799`) — `app/globals.css`, `.hero-bg` + `.hero-scrim`. The bridge photo (`/1.png`) was ~80–93% hidden under a cream wash; the user wanted it more visible, then dialed back once ("words hard to see"), then asked to fix a hard line at the hero's bottom edge. Now: `.hero-bg` 115deg wash `0.82 → 0.60 → 0.30 → 0.48`; `.hero-scrim` has a 90deg left-column wash (`0.78 → 0.38 → 0` across 0–68%) for headline legibility plus a multi-stop 180deg vertical fade that ramps to full `--bg` by 99% so the hero clips into the section below with no seam. User said "perfect".
 - **1. Founding offer copy** (`f17a1fe` → `ad53951` → `baf75d0`) — `app/components/FoundingOffer.js` reframed so it doesn't read as a launch deal, then the heading iterated down to something plain:
   - eyebrow `Founding Member Offer` → `Monthly Rate Lock`
   - heading, final: **"Lock in your rate for good"** (path: "The first 5 to sign up this month lock in their rate for good" → "First 5 in — rate locked for good" → simpler)
@@ -56,6 +57,15 @@ _Last updated: 2026-09-07 (Founding offer heading now "Lock in your rate for goo
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Hero: make the bridge photo more visible + even out the fade
+
+- **Asked:** "make the main page more vivid" → clarified to "make the image on the hero more visible" → "a little less visible, the image is making the words hard to see" → "make the hero image fade more evenly out, right now there is a harsh line". Final reaction: "perfect".
+- **Changed (`app/globals.css`):**
+  - `.hero-bg` — 115deg cream wash over `/1.png` lightened from `0.93/0.78/0.55/0.82` to `0.82/0.60/0.30/0.48`; the two warm radial tints nudged `0.10/0.08` → `0.12/0.10`.
+  - `.hero-scrim` — now two layers: (a) a 90deg left-column wash `rgba(250,247,241,0.78) 0% → 0.38 40% → 0 68%` so the headline/eyebrow/paragraph stay legible over the lighter photo; (b) a 180deg vertical fade with 8 stops easing `0.22 → 0 → … → 1` and hitting **full `--bg` at 99%**, so the hero (`overflow:hidden`, `min-height:860px`) clips into the following `.section.promo` (which sits on plain `--bg`) with no visible line.
+- **Verified:** localhost screenshots (browser pane visible again this time) — bridge reads clearly on the right, headline readable on the left, no seam at the hero bottom.
+- **State left in:** committed `24f8799`, pushed; Vercel deploying. Not yet reconfirmed on www.oskelo.com.
 
 ### 2026-09-07 — Founding offer: reframe copy + simplify heading
 
