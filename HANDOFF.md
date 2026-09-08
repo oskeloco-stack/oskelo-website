@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (light warm palette + single Photography portrait — both verified live on www.oskelo.com)_
+_Last updated: 2026-09-07 (Photography card: swapped to the woodland-path portrait + re-cropped so his head isn't cut off)_
 
 ---
 
@@ -17,7 +17,11 @@ _Last updated: 2026-09-07 (light warm palette + single Photography portrait — 
 
 ## Current state
 
-- **Local HEAD:** `c11c267`, **pushed to `origin/main`**. **Live and verified on www.oskelo.com:** new light warm palette (`#faf7f1` / `#9a5f33` present in deployed CSS) and the Photography "Recent projects" card now shows the single `tree-branch.jpg` portrait (the only `/work` collage image reference). Recent changes: whole-site colour scheme flipped from near-black to light warm (paper white + natural brown); Photography card went from a 3-up collage to one full-bleed portrait.
+- **Local HEAD:** `c11c267` on `origin/main` (light warm palette + single portrait, live and verified on www.oskelo.com). **Uncommitted working changes this session** (Photography "Recent projects" card):
+  - `public/work/portraits/woodland-path.jpg` — new, `IMG_9787` optimised to 1200×1800 / ~285 KB, EXIF-rotated (`sharp` `.rotate().resize(1200).jpeg({quality:80,mozjpeg:true})`). He's crouched on a woodland path facing camera.
+  - `lib/work.js` — `photography.images` now `['/work/portraits/woodland-path.jpg']` (was `tree-branch.jpg`).
+  - `app/globals.css` — `.link-card-media.is-collage img` `object-position` `50% 28%` → `50% 6%` so the head isn't clipped by the 16/10 card. One rule; feeds both the homepage `#work` card and `/work`.
+  - `public/work/portraits/tree-branch.jpg` (the old `IMG_9742` log shot) is now **orphaned** — still committed, referenced nowhere. Left in place in case of a revert; a candidate for the image cleanup below.
 - **Note on pushing:** this session's shell *was* able to `git push` this time (credentials cached). It may still fail in future sessions — if so, the user runs `git push origin main` from their own terminal.
 - **Not committed:** ~16 loose images in `public/` root (raw camera files + web copies), plus an untracked `.claude/launch.json` (added this session so `preview` can start `next dev` on port 3000 — harmless, not committed).
 - **Dev-server note:** during this session `/work/photography` threw `Jest worker encountered 2 child process exceptions` on the already-running `next dev` (PID 13444). This is a Turbopack/Next 16 dev worker crash, unrelated to the CSS change (homepage + `/work` render fine, only `globals.css` was touched). Fix is to stop that dev server and restart it (`taskkill /PID <pid> /F` then `npm run dev`).
@@ -44,6 +48,17 @@ _Last updated: 2026-09-07 (light warm palette + single Photography portrait — 
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-07 — Photography card: new woodland-path portrait + head no longer cut off
+
+- **Asked:** "canter the black guy so his head isnt cut off", then "can we use a different image in the woods of him?" → "the one he is sitting in … like on a path". Picked `IMG_9787` from the previews.
+- **Changed (uncommitted):**
+  - `app/globals.css` — `.link-card-media.is-collage img` `object-position` `50% 28%` → `50% 6%`. The portrait (1200×1800) is `object-fit: cover` in a 16/10 card; at 28% the visible window started ~y126 in the source, clipping the top of the hair. At 6% it starts ~y63 (~80px headroom) and ends around his hands. Horizontal was already centred (`50%`).
+  - `public/work/portraits/woodland-path.jpg` — new; `IMG_9787` → 1200×1800, ~285 KB, EXIF-rotated via `sharp`.
+  - `lib/work.js` — `photography.images` → `['/work/portraits/woodland-path.jpg']`.
+- **Considered but not chosen:** `IMG_9818` (tighter, more bokeh) and `IMG_9690` (sitting on a log, but profile and no path). Other optimised portraits (`woodland-suit.jpg`, `field-dress.jpg`) are different people; the Aug-18 loose images are city shots.
+- **Verified on localhost:** single `<img src="/work/portraits/woodland-path.jpg">` in the collage wrapper, HEAD 200 / image-jpeg / 292 KB, natural 1200×1800, computed `object-fit: cover` + `object-position: 50% 6%`, card box ≈501×312. Browser-pane screenshots return blank (pane hidden — known), so the visual check was a `sharp` extract of the exact card window (`top:63, height:750`) done before the swap — full head with clearance, on the path, facing camera.
+- **State left in:** all three changes staged in the working tree, **not yet committed or pushed**. `tree-branch.jpg` left in the repo, now unreferenced.
 
 ### 2026-09-07 — Photography card down to a single portrait
 
