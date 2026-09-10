@@ -99,7 +99,7 @@ Newest first. Each entry: what was asked, what changed, state left in.
 - **Follow-ups same session:**
   - Owner did the Supabase dashboard steps for auth: created the `oskelo.co@gmail.com` user, disabled public sign-ups. Provided the project ref (`ropdifjuyekfnltpfdyy`) and the new-format `sb_publishable_` / `sb_secret_` keys, which replaced the placeholders in `.env.local`. Dev server restarted; a probe of `/auth/v1/token` returned `invalid_credentials` for a wrong password (i.e. URL + key + user all valid) — real login is ready on localhost.
   - Added a low-key **"Admin"** link to the site footer (`app/components/Footer.js`, styled in `app/globals.css` as `.footer-admin` — 12px, 50% opacity, full opacity on hover) pointing at `/admin` (which redirects to `/admin/login` when signed out). Verified in the DOM: footer now reads "© 2026 Oskelo | Pennsylvania | Terms | Admin".
-  - Not yet done: `media` bucket, `site_content` table, Vercel env vars, push.
+  - **Pushed** `638d17d..1beb7f0` to `origin/main` (admin area + footer link); Vercel deploying. Live login should work (Vercel already has the `NEXT_PUBLIC_SUPABASE_*` vars). **Still not done on the live side:** add `SUPABASE_SERVICE_ROLE_KEY` (the `sb_secret_` value) + `ADMIN_EMAIL` to Vercel env vars and redeploy; create the `media` bucket; run the `site_content` table SQL. Until the Vercel service-role key is set, `/admin/images` and `/admin/content` will 500 on the live site (public site + login unaffected).
 
 ### 2026-09-09 — Photography section: Concerts + Sports collections, more Portraits, uppercase headings
 
