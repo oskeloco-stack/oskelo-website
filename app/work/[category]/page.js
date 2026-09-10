@@ -3,6 +3,10 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Contact from '../../components/Contact';
 import { WORK_CATEGORIES, getWorkCategory } from '../../../lib/work';
+import { getContent } from '../../../lib/siteContent';
+
+// Re-read admin-edited content from Supabase at most once a minute.
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return WORK_CATEGORIES.map((category) => ({ category: category.slug }));
@@ -10,7 +14,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const { category: slug } = await params;
-  const category = getWorkCategory(slug);
+  const categories = await getContent('work', WORK_CATEGORIES);
+  const category = getWorkCategory(slug, categories);
   if (!category) return {};
   return {
     title: `${category.title} — Oskelo`,
@@ -20,7 +25,8 @@ export async function generateMetadata({ params }) {
 
 export default async function WorkCategoryPage({ params }) {
   const { category: slug } = await params;
-  const category = getWorkCategory(slug);
+  const categories = await getContent('work', WORK_CATEGORIES);
+  const category = getWorkCategory(slug, categories);
   if (!category) notFound();
 
   return (

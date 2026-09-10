@@ -3,6 +3,10 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import Contact from '../../../components/Contact';
 import { WORK_CATEGORIES, getWorkProject } from '../../../../lib/work';
+import { getContent } from '../../../../lib/siteContent';
+
+// Re-read admin-edited content from Supabase at most once a minute.
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return WORK_CATEGORIES.flatMap((category) =>
@@ -14,7 +18,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const { category: categorySlug, project: projectSlug } = await params;
-  const result = getWorkProject(categorySlug, projectSlug);
+  const categories = await getContent('work', WORK_CATEGORIES);
+  const result = getWorkProject(categorySlug, projectSlug, categories);
   if (!result) return {};
   return {
     title: `${result.project.name} — Oskelo`,
@@ -24,7 +29,8 @@ export async function generateMetadata({ params }) {
 
 export default async function WorkProjectPage({ params }) {
   const { category: categorySlug, project: projectSlug } = await params;
-  const result = getWorkProject(categorySlug, projectSlug);
+  const categories = await getContent('work', WORK_CATEGORIES);
+  const result = getWorkProject(categorySlug, projectSlug, categories);
   if (!result) notFound();
 
   const { category, project } = result;

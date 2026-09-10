@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-09 (Photography section: removed the homepage wedding-video loop; added Concerts + Sports collections with galleries, added five portraits to the Portraits gallery, uppercased the work-card headings — all pushed to `origin/main`)_
+_Last updated: 2026-09-10 (Built an admin area at `/admin`: Supabase-Auth login, image uploads to Supabase Storage, and a form + raw-JSON editor for Work / Services / Offers content. Code committed locally; NOT pushed. Needs Supabase dashboard setup + env vars before it works — see ADMIN.md.)_
 
 ---
 
@@ -17,6 +17,7 @@ _Last updated: 2026-09-09 (Photography section: removed the homepage wedding-vid
 
 ## Current state
 
+- **2026-09-10 session — admin area.** Local `main` is ahead of `origin/main` by the admin-area work (see task log); **not pushed**. `npm run build` passes. A local `.env.local` with **placeholder** Supabase values was added so the build/dev server run — replace it (or delete it) with real keys to actually use the admin area. Before the feature works anywhere, the owner must do the Supabase dashboard setup in `ADMIN.md` (create the auth user, `media` bucket, `site_content` table) and set `SUPABASE_SERVICE_ROLE_KEY` + `ADMIN_EMAIL` locally and in Vercel.
 - **2026-09-09 session:** local `main` == `origin/main` at **`1449259`** — one commit on top of `9543d96`: Concerts + Sports collections, five new Portraits photos, uppercase work-card headings. Pushed; Vercel building the deploy. (This HANDOFF update is a follow-up commit on top of `1449259`.)
   - **The wedding-video loop and its 16 MB blob never reached `origin`.** Earlier in the session the loop was reverted (`ea0d012` add → `8bb86bc` revert). A first push attempt of that chain failed mid-upload (`curl 55 Send failure: Connection was reset` — the 16 MB blob in `ea0d012` made the pack too big for the flaky uplink). That failure turned out to be useful: `git reset --soft 9543d96` then dropped both `ea0d012` and `8bb86bc`, keeping the photography changes staged, and only the lean photography commit was pushed. No `video-editing-loop.*` blob anywhere — not the tree, not history, not the live site. (`git reset --hard` is blocked in this environment; `--soft` is not.)
   - **Photography section changes** (`lib/work.js`, `app/globals.css`, new images under `public/work/`):
@@ -48,6 +49,9 @@ _Last updated: 2026-09-09 (Photography section: removed the homepage wedding-vid
 
 ## Outstanding / next steps
 
+- [ ] **Admin area — finish enabling it.** Do the `ADMIN.md` Supabase setup (auth user, disable public sign-ups, `media` public bucket, `site_content` table + public-read RLS). Add `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_EMAIL` to `.env.local` (real values) and to Vercel env vars. Then `git push` and redeploy. There is **no login yet** — the account is whatever you create in Supabase → Authentication → Users; the email must match `ADMIN_EMAIL` (defaults to `oskelo.co@gmail.com`).
+- [ ] **Admin area — verify against real Supabase** once keys are in: wrong password shows an error; right password reaches `/admin`; upload/copy-URL/delete on `/admin/images`; edit a gallery on `/admin/content`, save, confirm it shows on `/work/photography/...` within ~60s; "Reset to built-in default" works.
+- [ ] **Admin area — later polish (v1 gaps):** header/footer nav still lives in code; a brand-new category/service *slug* needs a deploy before its detail page pre-builds; no edit history/undo (only reset-to-default).
 - [x] Push the hero copy change to `origin/main` — done 2026-09-07.
 - [x] Confirmed live: www.oskelo.com serves the new eyebrow, blurb, and `<title>` (checked via curl 2026-09-07). Note oskelo.com 308-redirects to www.oskelo.com.
 - [x] Rewrote the hero body paragraph to match the "we do it all" positioning.
@@ -69,6 +73,26 @@ _Last updated: 2026-09-09 (Photography section: removed the homepage wedding-vid
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-10 — Admin area (`/admin`): image uploads + content editor
+
+- **Asked:** "make me a section that functions as an admin area" → clarified: "Add an admin section to the site only I can access that has an area I can upload images, and I can manually edit the website if I want to." Chose **Supabase Auth** for login and **structured forms + raw JSON** for the editor.
+- **New — auth & plumbing:**
+  - `npm install @supabase/ssr` (added to `package.json`). `@supabase/supabase-js` stays for the contact route.
+  - `proxy.js` (Next 16 renamed Middleware → **Proxy**; file is `proxy.js` at repo root) — refreshes the Supabase session cookie, optimistically redirects signed-out visitors off `/admin` pages, and bounces signed-in ones off `/admin/login`. Matcher: `/admin/:path*`, `/api/admin/:path*`. No-ops if Supabase env vars are absent.
+  - `lib/supabase/browser.js` / `server.js` / `admin.js` — browser client, cookie-bound server client, and a service-role client (privileged, route-handlers only).
+  - `lib/adminAuth.js` — `getAdminUser()`: valid Supabase session **and** `email === ADMIN_EMAIL` (default `oskelo.co@gmail.com`), else null. Returns null when env vars are missing.
+- **New — admin UI** (route group `app/admin/(dash)/` so `/admin/login` can sit outside the auth gate):
+  - `app/admin/layout.js` (noindex + styling), `app/admin/(dash)/layout.js` (`force-dynamic`, redirects to `/admin/login` unless `getAdminUser()`), `AdminNav.js` (sidebar, client-side `signOut`).
+  - `app/admin/login/page.js` — email/password form → `supabase.auth.signInWithPassword`.
+  - `app/admin/(dash)/page.js` — dashboard. `.../images/page.js` — drag/drop upload, grid with Copy URL / Delete. `.../content/page.js` + `StructuredEditor.js` + `JsonEditor.js` + `ImagePickerModal.js` — per-section (Work/Services/Offers) Form and Raw JSON tabs; Form auto-renders fields recursively, image-named fields get a "Pick" button that opens the uploaded-images picker; arrays get add/remove/move.
+  - `app/admin/admin.css` — self-contained `.admin-*` styles.
+  - `app/components/PromoBar.js` — now `'use client'`; returns null on `/admin` so the marquee doesn't show in the admin.
+- **New — APIs** (`getAdminUser()` guard, 401 if not admin): `app/api/admin/media/route.js` (GET list / POST multipart upload to the `media` bucket / DELETE) and `app/api/admin/content/route.js` (GET `?key=` with `isDefault`, PUT upsert into `site_content`, DELETE = reset to code default).
+- **Modified — public pages read overrides:** `lib/siteContent.js` `getContent(key, fallback)` (own guarded anon client; every failure path returns the fallback). `lib/work.js` / `lib/services.js` helper fns take the resolved content as an arg (default to the hardcoded export). `app/page.js`, `app/work/page.js`, `app/work/[category]/(+ /[project])/page.js`, `app/services/page.js`, `app/services/[slug]/page.js`, `app/offers/page.js` now `await getContent(...)` and set `export const revalidate = 60`. `generateStaticParams` still uses the hardcoded defaults.
+- **Docs:** new `ADMIN.md` (Supabase setup checklist, env vars, usage, known limits, file map); `.env.local.example` gains `SUPABASE_SERVICE_ROLE_KEY` + `ADMIN_EMAIL`.
+- **Verified (localhost, placeholder Supabase env):** `npm run build` passes — `/admin*` dynamic, public pages keep `1m` revalidate, Proxy detected. `/admin` → redirects to `/admin/login`; login page renders with no promo bar; a bad-credentials submit shows "That email and password did not match." All of `/api/admin/{media,content}` return **401** unauthenticated. Public pages (`/`, `/offers`, `/services`, `/work/photography/portraits`) render 200 with the hardcoded fallback content while Supabase is unreachable. No dev-server errors. **Not verified:** real login, uploads, and content saves — needs the owner's real Supabase keys + dashboard setup.
+- **State left in:** all committed locally on `main`; **not pushed**. `.env.local` created with **placeholder** values (gitignored). See the two new Outstanding items.
 
 ### 2026-09-09 — Photography section: Concerts + Sports collections, more Portraits, uppercase headings
 

@@ -2,6 +2,9 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Contact from '../components/Contact';
 import { OFFERS } from '../../lib/offers';
+import { getContent } from '../../lib/siteContent';
+
+export const revalidate = 60;
 
 export const metadata = {
   title: 'Limited Offers — Oskelo',
@@ -9,7 +12,9 @@ export const metadata = {
     'Current limited-time offers and promotions from Oskelo — including the Monthly Rate Lock.',
 };
 
-export default function OffersPage() {
+export default async function OffersPage() {
+  const offers = await getContent('offers', OFFERS);
+
   return (
     <>
       <Header />
@@ -25,9 +30,9 @@ export default function OffersPage() {
               <p>Time-limited promotions. When the spots are gone, they’re gone.</p>
             </div>
 
-            {OFFERS.length > 0 ? (
+            {offers.length > 0 ? (
               <div className="offer-card-list">
-                {OFFERS.map((offer) => (
+                {offers.map((offer) => (
                   <article className="offer-card" key={offer.slug}>
                     <div className="eyebrow">{offer.eyebrow}</div>
                     <h3>{offer.title}</h3>

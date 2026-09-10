@@ -5,6 +5,9 @@ import Contact from '../../components/Contact';
 import FoundingOffer from '../../components/FoundingOffer';
 import ServiceBlock from '../../components/ServiceBlock';
 import { SERVICES, getService } from '../../../lib/services';
+import { getContent } from '../../../lib/siteContent';
+
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return SERVICES.map((service) => ({ slug: service.slug }));
@@ -12,7 +15,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const service = getService(slug);
+  const services = await getContent('services', SERVICES);
+  const service = getService(slug, services);
   if (!service) return {};
   return {
     title: `${service.title} — Oskelo`,
@@ -22,7 +26,8 @@ export async function generateMetadata({ params }) {
 
 export default async function ServicePage({ params }) {
   const { slug } = await params;
-  const service = getService(slug);
+  const services = await getContent('services', SERVICES);
+  const service = getService(slug, services);
   if (!service) notFound();
 
   return (

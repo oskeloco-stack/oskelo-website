@@ -4,6 +4,9 @@ import Contact from './components/Contact';
 import FoundingOffer from './components/FoundingOffer';
 import { SERVICES } from '../lib/services';
 import { WORK_CATEGORIES } from '../lib/work';
+import { getContent } from '../lib/siteContent';
+
+export const revalidate = 60;
 
 const REELS = [
   { label: 'Brand Story' },
@@ -13,7 +16,10 @@ const REELS = [
   { label: 'Behind the Scenes' },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const services = await getContent('services', SERVICES);
+  const categories = await getContent('work', WORK_CATEGORIES);
+
   return (
     <>
       <Header />
@@ -48,7 +54,7 @@ export default function Home() {
             </div>
             <div className="offers-inner">
               <ul className="offer-list">
-                {SERVICES.map((service, i) => (
+                {services.map((service, i) => (
                   <li key={service.slug}>
                     <a href={`/services/${service.slug}`}>
                       <span className="offer-num" aria-hidden="true">
@@ -107,7 +113,7 @@ export default function Home() {
               <p>A short survey of business and brand work delivered in the last year.</p>
             </div>
             <div className="link-cards cols-2">
-              {WORK_CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <a className="link-card" href={`/work/${category.slug}`} key={category.slug}>
                   <div className={`link-card-media${category.images ? ' is-collage' : ''}`}>
                     {category.images?.map((src) => (
