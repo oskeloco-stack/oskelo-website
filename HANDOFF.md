@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-10 (Built an admin area at `/admin`: Supabase-Auth login, image uploads to Supabase Storage, and a form + raw-JSON editor for Work / Services / Offers content. Code committed locally; NOT pushed. Needs Supabase dashboard setup + env vars before it works — see ADMIN.md.)_
+_Last updated: 2026-09-10 (Built an admin area at `/admin`: Supabase-Auth login, image uploads to Supabase Storage, and a form + raw-JSON editor for Work / Services / Offers content. Added a discreet "Admin" link in the site footer. Real Supabase keys are now in the local `.env.local` and the connection is verified. Code committed locally; NOT pushed. Still need the `media` bucket + `site_content` table in Supabase, and the Vercel env vars, before it works live — see ADMIN.md.)_
 
 ---
 
@@ -17,7 +17,10 @@ _Last updated: 2026-09-10 (Built an admin area at `/admin`: Supabase-Auth login,
 
 ## Current state
 
-- **2026-09-10 session — admin area.** Local `main` is ahead of `origin/main` by the admin-area work (see task log); **not pushed**. `npm run build` passes. A local `.env.local` with **placeholder** Supabase values was added so the build/dev server run — replace it (or delete it) with real keys to actually use the admin area. Before the feature works anywhere, the owner must do the Supabase dashboard setup in `ADMIN.md` (create the auth user, `media` bucket, `site_content` table) and set `SUPABASE_SERVICE_ROLE_KEY` + `ADMIN_EMAIL` locally and in Vercel.
+- **2026-09-10 session — admin area.** Local `main` is ahead of `origin/main` by the admin-area work + a footer "Admin" link (see task log); **not pushed**. `npm run build` passes.
+  - **Local `.env.local` now holds the real Supabase values** (project `ropdifjuyekfnltpfdyy`, new-style `sb_publishable_` / `sb_secret_` keys, `ADMIN_EMAIL=oskelo.co@gmail.com`). Gitignored. Connection verified from the dev server — Supabase auth recognizes the `oskelo.co@gmail.com` user, so localhost login works once the owner enters the password they set in the Supabase dashboard.
+  - **Still pending before Images/Content work, and before anything works on the live site:** create the **`media`** public Storage bucket and run the **`site_content`** table SQL (both in the Supabase dashboard — see ADMIN.md); add `SUPABASE_SERVICE_ROLE_KEY` (= the `sb_secret_` key) and `ADMIN_EMAIL` to Vercel env vars; then `git push`.
+  - The Supabase admin **user** (`oskelo.co@gmail.com`) is already created and public sign-ups are disabled.
 - **2026-09-09 session:** local `main` == `origin/main` at **`1449259`** — one commit on top of `9543d96`: Concerts + Sports collections, five new Portraits photos, uppercase work-card headings. Pushed; Vercel building the deploy. (This HANDOFF update is a follow-up commit on top of `1449259`.)
   - **The wedding-video loop and its 16 MB blob never reached `origin`.** Earlier in the session the loop was reverted (`ea0d012` add → `8bb86bc` revert). A first push attempt of that chain failed mid-upload (`curl 55 Send failure: Connection was reset` — the 16 MB blob in `ea0d012` made the pack too big for the flaky uplink). That failure turned out to be useful: `git reset --soft 9543d96` then dropped both `ea0d012` and `8bb86bc`, keeping the photography changes staged, and only the lean photography commit was pushed. No `video-editing-loop.*` blob anywhere — not the tree, not history, not the live site. (`git reset --hard` is blocked in this environment; `--soft` is not.)
   - **Photography section changes** (`lib/work.js`, `app/globals.css`, new images under `public/work/`):
@@ -93,6 +96,10 @@ Newest first. Each entry: what was asked, what changed, state left in.
 - **Docs:** new `ADMIN.md` (Supabase setup checklist, env vars, usage, known limits, file map); `.env.local.example` gains `SUPABASE_SERVICE_ROLE_KEY` + `ADMIN_EMAIL`.
 - **Verified (localhost, placeholder Supabase env):** `npm run build` passes — `/admin*` dynamic, public pages keep `1m` revalidate, Proxy detected. `/admin` → redirects to `/admin/login`; login page renders with no promo bar; a bad-credentials submit shows "That email and password did not match." All of `/api/admin/{media,content}` return **401** unauthenticated. Public pages (`/`, `/offers`, `/services`, `/work/photography/portraits`) render 200 with the hardcoded fallback content while Supabase is unreachable. No dev-server errors. **Not verified:** real login, uploads, and content saves — needs the owner's real Supabase keys + dashboard setup.
 - **State left in:** all committed locally on `main`; **not pushed**. `.env.local` created with **placeholder** values (gitignored). See the two new Outstanding items.
+- **Follow-ups same session:**
+  - Owner did the Supabase dashboard steps for auth: created the `oskelo.co@gmail.com` user, disabled public sign-ups. Provided the project ref (`ropdifjuyekfnltpfdyy`) and the new-format `sb_publishable_` / `sb_secret_` keys, which replaced the placeholders in `.env.local`. Dev server restarted; a probe of `/auth/v1/token` returned `invalid_credentials` for a wrong password (i.e. URL + key + user all valid) — real login is ready on localhost.
+  - Added a low-key **"Admin"** link to the site footer (`app/components/Footer.js`, styled in `app/globals.css` as `.footer-admin` — 12px, 50% opacity, full opacity on hover) pointing at `/admin` (which redirects to `/admin/login` when signed out). Verified in the DOM: footer now reads "© 2026 Oskelo | Pennsylvania | Terms | Admin".
+  - Not yet done: `media` bucket, `site_content` table, Vercel env vars, push.
 
 ### 2026-09-09 — Photography section: Concerts + Sports collections, more Portraits, uppercase headings
 
