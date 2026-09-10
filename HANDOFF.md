@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-07 (Mobile polish pass: promo-bar smaller + muted-brown on mobile, B&W photo behind the founding offer, hero title readable over the bridge on mobile, hero pulled closer to "What we offer")_
+_Last updated: 2026-09-09 (Photography section: removed the homepage wedding-video loop; added Concerts + Sports collections with galleries, added five portraits to the Portraits gallery, uppercased the work-card headings — all pushed to `origin/main`)_
 
 ---
 
@@ -17,7 +17,16 @@ _Last updated: 2026-09-07 (Mobile polish pass: promo-bar smaller + muted-brown o
 
 ## Current state
 
-- **Local HEAD:** `83f0d51`, **pushed to `origin/main`** (push worked from this session). Workstreams this session:
+- **2026-09-09 session:** local `main` pushed to `origin/main` as a single commit on top of `9543d96` — Concerts + Sports collections, five new Portraits photos, uppercase work-card headings. Vercel deploys `main` on push.
+  - **The wedding-video loop and its 16 MB blob never reached `origin`.** Earlier in the session the loop was reverted (`ea0d012` add → `8bb86bc` revert). A first push attempt of that chain failed mid-upload (`curl 55 Send failure: Connection was reset` — the 16 MB blob in `ea0d012` made the pack too big for the flaky uplink). That failure turned out to be useful: `git reset --soft 9543d96` then dropped both `ea0d012` and `8bb86bc`, keeping the photography changes staged, and only the lean photography commit was pushed. No `video-editing-loop.*` blob anywhere — not the tree, not history, not the live site. (`git reset --hard` is blocked in this environment; `--soft` is not.)
+  - **Photography section changes** (`lib/work.js`, `app/globals.css`, new images under `public/work/`):
+    - `Harlow & Co.` product-photography placeholder → **`Concerts`** collection. Card image `public/work/concerts/stage-vocalist.jpg` (from the loose `public/Concert 1.jpg`, 40 MB → 118 KB, `sharp .rotate().resize(1200).jpeg({quality:80,mozjpeg:true})`). Gallery of 4: `stage-vocalist`, `guitarist-raised`, `duo-guitars` (b&w), `crowd-phones`. `slug: 'concerts'` → live at `/work/photography/concerts`.
+    - New **`Sports`** collection. Card image `public/work/sports/field-hockey.jpg` (from `public/HW6A0243-topaz.jpg`). Gallery of 5: `field-hockey`, `night-stiff-arm` (b&w), `cutback-run`, `line-of-scrimmage`, `flag-football`. `slug: 'sports'` → live at `/work/photography/sports`.
+    - **Portraits gallery** gained 5 photos from the loose `public/Shoots 1-5` files → `public/work/portraits/shoot-1..5.jpg` (1200 px, mozjpeg q80; Shoots 3-5 had EXIF orientation 8 and were auto-uprighted by `sharp().rotate()`). Gallery is now 8 images.
+    - `app/globals.css` `.work-card .tag b` gained `text-transform: uppercase; letter-spacing: 0.03em;` — the category grid headings (Portraits / Concerts / Sports / Wedding & Engagement, and the Video & Editing category's cards) now render all-caps.
+  - **Grid note:** the Photography category grid (`.work-grid`, `repeat(3, 1fr)` desktop) now has 4 cards, so desktop shows 3 on row 1 and Wedding & Engagement alone on row 2. Acceptable; revisit to a 2×2 or 4-up if it bothers anyone.
+  - **2026-09-08 sync** still stands (local was 12 behind, `git pull --ff-only` → `9543d96`, bringing in the scrolling promo bar, `/offers` + `PromoBar`, homepage restructure). Only the video loop was undone.
+- **Earlier live HEAD:** `83f0d51`, **pushed to `origin/main`** (push worked from that session). Workstreams:
 - **0. Hero photo visibility** (`24f8799`) — `app/globals.css`, `.hero-bg` + `.hero-scrim`. The bridge photo (`/1.png`) was ~80–93% hidden under a cream wash; the user wanted it more visible, then dialed back once ("words hard to see"), then asked to fix a hard line at the hero's bottom edge. Now: `.hero-bg` 115deg wash `0.82 → 0.60 → 0.30 → 0.48`; `.hero-scrim` has a 90deg left-column wash (`0.78 → 0.38 → 0` across 0–68%) for headline legibility plus a multi-stop 180deg vertical fade that ramps to full `--bg` by 99% so the hero clips into the section below with no seam. User said "perfect".
 - **1. Founding offer copy** (`f17a1fe` → `ad53951` → `baf75d0`) — `app/components/FoundingOffer.js` reframed so it doesn't read as a launch deal, then the heading iterated down to something plain:
   - eyebrow `Founding Member Offer` → `Monthly Rate Lock`
@@ -51,6 +60,7 @@ _Last updated: 2026-09-07 (Mobile polish pass: promo-bar smaller + muted-brown o
 - [ ] **Later:** Google Workspace / Zoho mailboxes if the team grows (real per-person inboxes instead of forwards + send-as).
 - [ ] Remove the redundant loose images from `public/` root (b49aceb + earlier work added optimized copies under `public/work/`). Decide which raw files, if any, to keep, then `git clean` or delete. Includes the ~20 untracked `IMG_*.JPG` / UUID `.jpg` files still sitting in `public/` root.
 - [ ] Delete the two now-orphaned optimized portraits `public/work/portraits/tree-branch.jpg` and `public/work/portraits/woodland-path.jpg` once the crouch-and-smile card (`woodland-path-smile.jpg`) is settled.
+- [x] **Video-loop history is clean.** `ea0d012` + `8bb86bc` were dropped via `git reset --soft 9543d96` before pushing, so no `video-editing-loop.*` blob ever reached `origin`. Nothing left to do here.
 - [x] Optimize `IMG_9742.JPG` (9.1 MB → 301 KB as `public/work/portraits/tree-branch.jpg`, EXIF-rotated to 1200×1800).
 - [x] Commit the Photography collage + push so it reaches oskelo.com.
 - [x] Confirm the collage looks right on the deployed site — verified 2026-09-07.
@@ -59,6 +69,31 @@ _Last updated: 2026-09-07 (Mobile polish pass: promo-bar smaller + muted-brown o
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-09 — Photography section: Concerts + Sports collections, more Portraits, uppercase headings
+
+- **Asked (rapid iteration in one session):** open localhost; then "update the harlow and co with events and add this image from public" → "actually JK use this named one, Concert 1" → "Change that heading though to Concerts" → "make all those fully capital for all three of the sections under photography" → "add another one for sports as well" → "Now add to portraits Shoots 1-5" → "Put some of the concert images and sports images into their respective spots" → "push that".
+- **`lib/work.js` — photography `items`:**
+  - `Harlow & Co.` (was `tag: 'Product photography'`, no image) → `name: 'Concerts'`, `tag: 'Live music and event photography'`, `slug: 'concerts'`, card image + 4-image `gallery`.
+  - Added `Sports` item: `tag: 'Game-day and team photography'`, `slug: 'sports'`, card image + 5-image `gallery`.
+  - `Portraits.gallery`: 3 → 8 entries (`shoot-1..5` appended).
+- **Images** — all via `sharp('src').rotate().resize(1200).jpeg({quality:80,mozjpeg:true})`, from loose files in `public/` root:
+  - `public/work/concerts/`: `stage-vocalist.jpg` (← `Concert 1.jpg`), `guitarist-raised.jpg` (← `HW6A2971-topaz-edit.jpg`), `duo-guitars.jpg` (← `HW6A2831-topaz-2.jpg`), `crowd-phones.jpg` (← `HW6A4059-topaz.jpg`).
+  - `public/work/sports/`: `field-hockey.jpg` (← `HW6A0243-topaz.jpg`), `night-stiff-arm.jpg` (← `HW6A1861-topaz.jpg`), `cutback-run.jpg` (← `HW6A5608-topaz.jpg`), `line-of-scrimmage.jpg` (← `HW6A5206-topaz.jpg`), `flag-football.jpg` (← `1Z0A5160-topaz.jpg`).
+  - `public/work/portraits/shoot-1..5.jpg` (← `Shoots 1.jpg`, `Shoots 2.jpg`, `Shoots 3-5.JPG`). Shoots 3-5 carried EXIF orientation 8 and were auto-rotated upright by `sharp().rotate()`.
+  - A first pass at `resize(1400)` was redone at `1200` to match the existing ~290 KB portrait convention.
+  - The intermediate `public/work/events/` folder (briefly held `stage-vocalist.jpg` when the card was still "Harlow & Co. / events") was removed; everything lives under `concerts/` now.
+- **`app/globals.css`** — `.work-card .tag b` gained `text-transform: uppercase; letter-spacing: 0.03em;`. Applies to every work-category grid card (Photography's four + the Video & Editing category page).
+- **Verified (localhost, viewport forced to 1200×900 because the hidden Browser pane collapses `body` to 0 width):** `/work/photography` shows 4 cards, all now links; `/work/photography/concerts` and `/work/photography/sports` render their galleries (all images HTTP 200); Portraits gallery has 8 images; headings render all-caps; no console errors.
+- **State left in:** committed and **pushed to `origin/main`** as one lean commit on top of `9543d96`; Vercel deploying. The first push attempt (still carrying `ea0d012` + `8bb86bc`) failed on a connection reset — the 16 MB blob made the pack too big for the uplink — so `git reset --soft 9543d96` dropped that pair and only the photography commit went up. Loose source images in `public/` root (`Concert 1.jpg`, `Shoots 1-5`, the `1Z0A`/`HW6A`/`IMG_`/UUID files, `Corban & Rachel.mp4`) remain untracked by convention.
+
+### 2026-09-09 — Remove the homepage "Video & Editing" wedding-video loop
+
+- **Asked:** open the local server; "get rid of the video we put in". After learning the commit couldn't be hard-reset here, the user asked to instead "update the local server to match the online one".
+- **Done:** `git revert --no-edit ea0d012` → commit `8bb86bc`. Undoes the `lib/work.js` / `app/page.js` / `app/globals.css` changes and deletes `public/work/video-editing-loop.mp4` + `.jpg`. `git diff 9543d96 HEAD` is empty, so local == live in content.
+  - `git reset --hard 9543d96` (the clean way, since `ea0d012` was never pushed) is **blocked by the command classifier** in this session — hence the revert. Side effect: the 16 MB `video-editing-loop.mp4` blob remains in history inside `ea0d012`. User can `git reset --hard 9543d96` from their own terminal any time to wipe both commits.
+- **Verified (localhost):** `#work` has `videoCount: 0`; the "Video & Editing" card renders `<div class="link-card-media"></div>` with no `<video>` / `<img>`; no console errors; dev server (`oskelo-dev`, Next 16.3.4, fresh start) clean.
+- **State left in (superseded):** ended this sub-task at `8bb86bc`, not pushed. Later in the same session, `git reset --soft 9543d96` dropped `ea0d012` + `8bb86bc` so the video work left no trace in history — see the photography entry above.
 
 ### 2026-09-07 — Mobile polish: promo bar, founding-offer photo, hero legibility
 

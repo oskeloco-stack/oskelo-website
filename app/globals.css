@@ -491,6 +491,8 @@ header{
   font-family:'Archivo', sans-serif;
   font-size: 17px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 .work-card .tag span{ font-size: 12px; color: var(--grey); }
 .work-card:hover{ transform: translateY(-4px); }
