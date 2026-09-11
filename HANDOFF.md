@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-09-10 (Built an admin area at `/admin`: Supabase-Auth login, image uploads to Supabase Storage, and a form + raw-JSON editor for Work / Services / Offers content. Added a discreet "Admin" link in the site footer. Real Supabase keys are now in the local `.env.local` and the connection is verified. Code committed locally; NOT pushed. Still need the `media` bucket + `site_content` table in Supabase, and the Vercel env vars, before it works live — see ADMIN.md.)_
+_Last updated: 2026-09-11 (Finished provisioning Supabase for the admin area — created the missing `site_content` table and `media` bucket that were blocking Images/Content — and rebuilt the admin into a full control panel: first-party Analytics (traffic charts, top pages/referrers/devices/countries, no cookies) and a Messages inbox for the contact form, plus a redesigned dark-sidebar/stat-tile UI. Also sorted 16 of the ~50 loose photos sitting in `public/` into the Work galleries. Committed locally; NOT pushed.)_
 
 ---
 
@@ -17,6 +17,14 @@ _Last updated: 2026-09-10 (Built an admin area at `/admin`: Supabase-Auth login,
 
 ## Current state
 
+- **2026-09-11 session — Supabase fully provisioned + admin control panel.** Local `main` is ahead of `origin/main` (see task log for the commit); **not pushed**. `npm run build` passes.
+  - Supabase (`ropdifjuyekfnltpfdyy`) now has everything `/admin` needs: `site_content` table, `media` public bucket (25 MB, image mimes only), and a new `analytics_events` table. `messages` gained `read_at` + `archived` columns. All via tracked migrations (`create_site_content`, `create_media_storage_bucket`, `create_analytics_events`, `messages_inbox_columns`).
+  - `/admin` is now a real control panel, not just Images + Content: **Dashboard** (14-day traffic + inbox + storage snapshot), **Analytics** (7/30/90-day charts, top pages/referrers/devices/browsers/OS/countries), **Messages** (inbox for the contact form — read/unread, archive, delete). Whole UI redesigned (dark sidebar with icons, stat tiles, panels, inline-SVG charts — no chart library).
+  - Analytics is first-party and cookie-free: `app/components/Analytics.js` beacons page views to `/api/track`, which classifies device/browser/OS/bot and stores a daily one-way visitor hash (no IPs or user-agents kept). Verified end-to-end on localhost (a real pageview and a `Googlebot` UA were sent; the bot was correctly dropped, the real one classified correctly), then the test rows were truncated so production analytics start clean.
+  - **Not verified this session:** the three authed screens' visuals (Dashboard/Analytics/Messages) — doing so needs the real admin password, which this session doesn't have. Everything that could be checked without it was: `npm run build`, all `/admin/*` routes 307-redirect (not 500) when signed out, all `/api/admin/*` routes 401 when unauthenticated, and the ingest pipeline end-to-end. A Supabase magic-link workaround to self-verify the authed UI was attempted and abandoned (browser navigation to the Supabase auth domain was blocked) — **please eyeball the three new pages once and report back if anything looks off.**
+  - **Leaked password protection** (Supabase Auth) is still off — flagged in ADMIN.md as a manual dashboard toggle; not exposed through the available tooling.
+  - Separately, sorted loose photos in `public/`: the user meant the ~50 untouched camera photos left in `public/` root from earlier sessions (not Supabase uploads — the `media` bucket was confirmed empty). Cross-referenced against `lib/work.js` and past HANDOFF entries to find genuinely new/unused ones, then optimized (`sharp` `.rotate().resize(1200).jpeg({quality:80,mozjpeg:true})`) and added **16** to the Work galleries: **Wedding & Engagement** +3 (`cheek-embrace`, `floral-field-walk`, `lawn-portrait` — a different couple from the existing 6), **Sports** +6 (`golf-tee-marker`, `basketball-drive`, `sprint-start`, `relay-handoff`, `freestyle-lap`, `sideline-cheer` — diversifying away from the existing football-heavy set), **Concerts** +4 (`green-light-vocalist`, `guitarist-bw`, `rapper-spotlight`, `singer-crouch`), **Portraits** +3 (`formal-couple-steps`, `formal-couple-kiss`, `warm-light-portrait`). Verified via curl (200s) and rendered-HTML image counts (Sports 11, Concerts 8, Wedding 9, Portraits 11) — screenshot-checked `/work/photography/sports`.
+  - **Left untouched, still loose in `public/`:** ~7 Boston street/architecture photos (`IMG_8777`–`9021`) with no obvious category fit; 3 more outtakes of the "Isaac" portrait subject (`IMG_9518`, `9690`, `9818`) skipped to avoid over-representing one subject; and **`Corban & Rachel.mp4` — a 4.6 GB video file. This must never be committed or put in `public/`** (repo/deploy size limits; the project's own history shows a 16 MB video blob alone broke a push) — it needs real video hosting (Vimeo/Mux/YouTube unlisted/Vercel Blob) before it can be used anywhere on the site.
 - **2026-09-10 session — admin area.** Local `main` is ahead of `origin/main` by the admin-area work + a footer "Admin" link (see task log); **not pushed**. `npm run build` passes.
   - **Local `.env.local` now holds the real Supabase values** (project `ropdifjuyekfnltpfdyy`, new-style `sb_publishable_` / `sb_secret_` keys, `ADMIN_EMAIL=oskelo.co@gmail.com`). Gitignored. Connection verified from the dev server — Supabase auth recognizes the `oskelo.co@gmail.com` user, so localhost login works once the owner enters the password they set in the Supabase dashboard.
   - **Still pending before Images/Content work, and before anything works on the live site:** create the **`media`** public Storage bucket and run the **`site_content`** table SQL (both in the Supabase dashboard — see ADMIN.md); add `SUPABASE_SERVICE_ROLE_KEY` (= the `sb_secret_` key) and `ADMIN_EMAIL` to Vercel env vars; then `git push`.
@@ -52,9 +60,13 @@ _Last updated: 2026-09-10 (Built an admin area at `/admin`: Supabase-Auth login,
 
 ## Outstanding / next steps
 
-- [ ] **Admin area — finish enabling it.** Do the `ADMIN.md` Supabase setup (auth user, disable public sign-ups, `media` public bucket, `site_content` table + public-read RLS). Add `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_EMAIL` to `.env.local` (real values) and to Vercel env vars. Then `git push` and redeploy. There is **no login yet** — the account is whatever you create in Supabase → Authentication → Users; the email must match `ADMIN_EMAIL` (defaults to `oskelo.co@gmail.com`).
-- [ ] **Admin area — verify against real Supabase** once keys are in: wrong password shows an error; right password reaches `/admin`; upload/copy-URL/delete on `/admin/images`; edit a gallery on `/admin/content`, save, confirm it shows on `/work/photography/...` within ~60s; "Reset to built-in default" works.
-- [ ] **Admin area — later polish (v1 gaps):** header/footer nav still lives in code; a brand-new category/service *slug* needs a deploy before its detail page pre-builds; no edit history/undo (only reset-to-default).
+- [ ] **Push this session's work** (`git push origin main`) once the new admin screens have been eyeballed — see the 2026-09-11 entry above for exactly what's unverified.
+- [ ] **Look at the three new admin pages once, signed in:** `/admin` (dashboard), `/admin/analytics`, `/admin/messages`. Everything mechanical checks out (build, routing, auth-gating, the ingest pipeline); only the actual on-screen look of the new UI hasn't been eyeballed this session.
+- [ ] **Set `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_EMAIL` in Vercel** (Settings → Environment Variables) if not already done, then redeploy — until then `/admin/images`, `/admin/content`, `/admin/analytics`, `/admin/messages` all 500 on the live site (public pages + login are unaffected).
+- [ ] **Turn on "Leaked password protection"** in Supabase → Authentication → Policies/Auth settings (flagged by the security advisor; not exposed through the available tooling).
+- [ ] **Decide what to do with `public/Corban & Rachel.mp4`** (4.6 GB) — needs real video hosting (Vimeo/Mux/YouTube unlisted/Vercel Blob), must never be committed to this repo.
+- [ ] **Optional:** use the remaining loose photos in `public/` — 7 Boston architecture/street shots with no obvious category, and 3 more "Isaac" portrait outtakes — or leave them; see the 2026-09-11 entry.
+- [ ] **Admin area — later polish (v1 gaps):** header/footer nav still lives in code; a brand-new category/service *slug* needs a deploy before its detail page pre-builds; no edit history/undo on Content (Messages has Archive as the reversible alternative to Delete).
 - [x] Push the hero copy change to `origin/main` — done 2026-09-07.
 - [x] Confirmed live: www.oskelo.com serves the new eyebrow, blurb, and `<title>` (checked via curl 2026-09-07). Note oskelo.com 308-redirects to www.oskelo.com.
 - [x] Rewrote the hero body paragraph to match the "we do it all" positioning.
@@ -76,6 +88,31 @@ _Last updated: 2026-09-10 (Built an admin area at `/admin`: Supabase-Auth login,
 ## Task log
 
 Newest first. Each entry: what was asked, what changed, state left in.
+
+### 2026-09-11 — Finish Supabase setup, build out the admin panel, sort loose photos into galleries
+
+- **Asked:** "you can now use supabase" → then "can you fix everthing and also make the admin page have more things I can do like see the website analytics etc like make it really high end" → mid-task: "images i put in the admin section can you use them? Also can you make it so I can edit the website?" (clarified via question: meant the loose photos already sitting in `public/`, not a Supabase upload).
+- **Supabase fixes** (project `ropdifjuyekfnltpfdyy`), via tracked migrations:
+  - `create_site_content` — the table + public-read RLS policy from `ADMIN.md` step 4, which had never been run. This alone was why the Content editor couldn't save.
+  - `create_media_storage_bucket` — the `media` bucket (public, 25 MB, `image/{jpeg,png,webp,gif,avif}` only) from step 3, also never created. This was why Images uploads would 500/fail.
+  - `create_analytics_events` — new table for first-party analytics. RLS enabled with **no** policies on purpose (service-role-only access; flagged by the linter as `rls_enabled_no_policy`, which is expected here, not a bug).
+  - `messages_inbox_columns` — added `read_at` (timestamptz) and `archived` (boolean) to the existing `messages` table so it doubles as the admin inbox.
+  - Confirmed via `get_advisors`: only remaining item is "Leaked password protection disabled" (Auth setting, not reachable via the available tooling — added to Outstanding).
+- **New — analytics pipeline** (no cookies, no third-party service):
+  - `app/components/Analytics.js` — client beacon, fires once per route change, `navigator.sendBeacon` to `/api/track`, respects Do Not Track/GPC, skips `/admin`. Wired into `app/layout.js`.
+  - `app/api/track/route.js` — public ingest route. Filters bots/crawlers by user-agent, classifies device/browser/OS, resolves country from Vercel's edge headers, computes a same-day one-way `visitor_hash` (`sha256(salt+day+ip+ua)`, no IP/UA stored), inserts into `analytics_events` via the service-role client. Always returns 204, never surfaces failures.
+  - `lib/analytics.js` (classification + `aggregate()` roll-up: totals w/ period-over-period deltas, daily series, top pages/referrers/devices/browsers/OS/countries) and `lib/analyticsQuery.js` (shared Supabase fetch, range parsing).
+  - `app/api/admin/analytics/route.js` (full roll-up for the Analytics page, `?range=7d|30d|90d`) and the traffic portion of `app/api/admin/stats/route.js` (14-day dashboard snapshot).
+  - **Verified end-to-end on localhost:** posted a real (iPhone/Safari, `referrer=google.com`, `utm_source=newsletter`) event and a `Googlebot` UA — the real one was classified correctly (mobile/Safari/iOS/google.com/newsletter) and inserted; the bot produced no row. Test rows (including a few the dev-server's own page load generated) were truncated afterward so production analytics start empty/clean.
+- **New — messages inbox:** `app/api/admin/messages/route.js` (GET `?filter=inbox|archived|all`, PATCH read/unread/archive/unarchive, DELETE). UI at `app/admin/(dash)/messages/page.js` + `_components/MessagesView.js` — per-message actions, a `mailto:` Reply link, delete requires confirmation.
+- **Rebuilt the admin UI:**
+  - `app/admin/admin.css` — full visual pass: dark gradient sidebar with icon nav, warm on-brand light content area, stat tiles with delta chips, panels, a bar-list component, and inline-SVG chart styling. All prior class names kept so Images/Content needed no JS changes.
+  - `app/admin/(dash)/_components/{ui.js,TrafficChart.js}` — shared pieces (StatTile, Panel, BarList, RangePicker, Sparkline, DeltaChip, and a dependency-free hover-enabled area/line chart).
+  - `app/admin/(dash)/_components/Dashboard.js` (new dashboard: traffic chart, top pages/referrers, recent inquiries, content-override notice) and `_components/AnalyticsView.js` (range-switchable deep dive: devices/browsers/OS/countries added). `AdminNav.js` gained Analytics + Messages links with inline SVG icons.
+- **Docs:** `ADMIN.md` rewritten (pages table, analytics/messages "how it works" sections, setup steps marked done-for-reference); `.env.local.example` gained optional `ANALYTICS_SALT` + `NEXT_PUBLIC_SITE_HOST`.
+- **Image sorting** — see the Current state entry above for the full breakdown (16 photos added across 4 Work galleries via `lib/work.js`; the 4.6 GB wedding video and a handful of others deliberately left alone).
+- **Verified:** `npm run build` passes (all new routes present, public pages keep their `1m` revalidate); every `/admin/*` route 307-redirects to login signed-out (not 500, so all four new pages compile); every new `/api/admin/*` route 401s unauthenticated; new gallery images spot-checked 200 and counted in the rendered HTML. **Not verified:** the signed-in look of Dashboard/Analytics/Messages (no admin password available this session — see Outstanding).
+- **State left in:** all committed locally on `main`; **not pushed**. `.env.local` unchanged (already had real values from the prior session).
 
 ### 2026-09-10 — Admin area (`/admin`): image uploads + content editor
 

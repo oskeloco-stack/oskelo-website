@@ -1,5 +1,6 @@
 import './globals.css';
 import PromoBar from './components/PromoBar';
+import Analytics from './components/Analytics';
 
 export const metadata = {
   title: 'Oskelo — Video & Photo for Businesses, Individuals & Events',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
       <body>
         <PromoBar />
         {children}
+        <Analytics />
       </body>
     </html>
   );
