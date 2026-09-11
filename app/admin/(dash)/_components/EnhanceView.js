@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Lightbox from './Lightbox';
+import MaskCanvas from './MaskCanvas';
 
 const NEUTRAL = { brightness: 0, contrast: 0, saturation: 0, sharpen: 0, rotate: 0 };
+const NEUTRAL_REGION = { brightness: 0, contrast: 0, saturation: 0, sharpen: 0 };
+const NEUTRAL_BG_REGION = { ...NEUTRAL_REGION, blur: 0 };
 
 function baseName(name) {
   const dot = name.lastIndexOf('.');
@@ -23,7 +26,9 @@ function uid() {
 // A rough-but-instant live preview of the slider values, layered as CSS on
 // top of the server-corrected image — no network round-trip while dragging.
 // Sharpening has no CSS equivalent, so it only shows up once you hit "Update
-// preview" or "Save", which re-run the real sharp pipeline.
+// preview" or "Save", which re-run the real sharp pipeline. Doesn't apply
+// once a mask is in play (a spatial split can't be approximated with a
+// single filter), so masked previews only update via the real thing.
 function liveStyle(adj) {
   return {
     filter: `brightness(${100 + adj.brightness}%) contrast(${100 + adj.contrast}%) saturate(${100 + adj.saturation}%)`,
@@ -41,17 +46,78 @@ function Slider({ label, value, onChange, min = -100, max = 100 }) {
   );
 }
 
-function ManualPanel({ item, onAdjust, onRotate, onReset, onRefresh, onSave, onToggleManual, onDiscard }) {
+function RegionAdjust({ title, adj, onChange, withBlur }) {
+  return (
+    <div>
+      <span className="enhance-group-label">{title}</span>
+      <Slider label="Brightness" value={adj.brightness} onChange={(v) => onChange({ ...adj, brightness: v })} />
+      <Slider label="Contrast" value={adj.contrast} onChange={(v) => onChange({ ...adj, contrast: v })} />
+      <Slider label="Saturation" value={adj.saturation} onChange={(v) => onChange({ ...adj, saturation: v })} />
+      <Slider label="Sharpen" value={adj.sharpen} onChange={(v) => onChange({ ...adj, sharpen: v })} min={0} max={100} />
+      {withBlur && (
+        <Slider label="Blur" value={adj.blur} onChange={(v) => onChange({ ...adj, blur: v })} min={0} max={25} />
+      )}
+    </div>
+  );
+}
+
+// Everything to do with "Edit manually": the global sliders (or, once a mask
+// exists, separate foreground/background ones), rotate, the paint-a-mask
+// tool, and the save/discard/done actions.
+function ManualPanel({
+  item, onAdjust, onRotate, onReset, onRefresh, onSave, onToggleManual, onDiscard,
+  maskMode, setMaskMode, hasMask, setHasMask, brushSize, setBrushSize, erasing, setErasing,
+  fgAdj, setFgAdj, bgAdj, setBgAdj, maskCanvasRef, clearMask,
+}) {
   const adj = item.adjustments;
+
   return (
     <div className="enhance-manual">
-      <Slider label="Brightness" value={adj.brightness} onChange={(v) => onAdjust('brightness', v)} />
-      <Slider label="Contrast" value={adj.contrast} onChange={(v) => onAdjust('contrast', v)} />
-      <Slider label="Saturation" value={adj.saturation} onChange={(v) => onAdjust('saturation', v)} />
-      <Slider label="Sharpen" value={adj.sharpen} onChange={(v) => onAdjust('sharpen', v)} min={0} max={100} />
+      <div className="enhance-mask-tools">
+        <button
+          type="button"
+          className={`admin-mini${maskMode ? ' is-active' : ''}`}
+          onClick={() => setMaskMode(!maskMode)}
+        >
+          {maskMode ? 'Hide brush' : hasMask ? 'Edit mask' : 'Paint a mask'}
+        </button>
+        {maskMode && (
+          <>
+            <label>
+              Brush
+              <input type="range" min={10} max={200} value={brushSize} onChange={(e) => setBrushSize(Number(e.target.value))} />
+            </label>
+            <button type="button" className={`admin-mini${!erasing ? ' is-active' : ''}`} onClick={() => setErasing(false)}>Paint</button>
+            <button type="button" className={`admin-mini${erasing ? ' is-active' : ''}`} onClick={() => setErasing(true)}>Erase</button>
+            <button type="button" className="admin-mini admin-mini-danger" onClick={clearMask}>Clear mask</button>
+          </>
+        )}
+        {(maskMode || hasMask) && (
+          <span className="enhance-mask-hint">
+            {maskMode
+              ? "Brush over one part of the photo — the part you paint gets its own adjustments below, separate from everything else."
+              : 'Mask painted — adjust the painted area and the rest separately below.'}
+          </span>
+        )}
+      </div>
+
+      {hasMask ? (
+        <div className="enhance-dual-adjust">
+          <RegionAdjust title="Painted area" adj={fgAdj} onChange={setFgAdj} />
+          <RegionAdjust title="Everything else" adj={bgAdj} onChange={setBgAdj} withBlur />
+        </div>
+      ) : (
+        <>
+          <Slider label="Brightness" value={adj.brightness} onChange={(v) => onAdjust('brightness', v)} />
+          <Slider label="Contrast" value={adj.contrast} onChange={(v) => onAdjust('contrast', v)} />
+          <Slider label="Saturation" value={adj.saturation} onChange={(v) => onAdjust('saturation', v)} />
+          <Slider label="Sharpen" value={adj.sharpen} onChange={(v) => onAdjust('sharpen', v)} min={0} max={100} />
+        </>
+      )}
+
       <div className="enhance-manual-row">
         <button type="button" className="admin-mini" onClick={onRotate}>⟲ Rotate 90°</button>
-        <span className="enhance-hint">Sharpen won't show until you update the preview.</span>
+        <span className="enhance-hint">Sharpen (and a mask) won't show until you update the preview.</span>
       </div>
       <div className="enhance-manual-actions">
         <button type="button" className="admin-mini" onClick={onRefresh} disabled={item.refreshing}>
@@ -73,6 +139,32 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // Mask/region-editing state — only meaningful in the 'reviewing' stage,
+  // but hooks have to be called unconditionally regardless of which stage
+  // this render actually is.
+  const [maskMode, setMaskMode] = useState(false);
+  const [hasMask, setHasMask] = useState(false);
+  const [brushSize, setBrushSize] = useState(60);
+  const [erasing, setErasing] = useState(false);
+  const [fgAdj, setFgAdj] = useState({ ...NEUTRAL_REGION });
+  const [bgAdj, setBgAdj] = useState({ ...NEUTRAL_BG_REGION });
+  const maskCanvasRef = useRef(null);
+
+  function clearMask() {
+    maskCanvasRef.current?.clear();
+    setHasMask(false);
+    setFgAdj({ ...NEUTRAL_REGION });
+    setBgAdj({ ...NEUTRAL_BG_REGION });
+  }
+
+  // Builds what onRefresh/onSave need: null (plain single-adjustment path)
+  // or { maskBlob, fg, bg } once something's actually been painted.
+  async function currentMaskPayload() {
+    if (!hasMask || !maskCanvasRef.current?.hasPaint()) return null;
+    const maskBlob = await maskCanvasRef.current.toBlob();
+    return { maskBlob, fg: fgAdj, bg: bgAdj };
+  }
 
   if (item.stage === 'correcting') {
     return (
@@ -155,6 +247,12 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
   }
 
   // stage === 'reviewing': the auto-corrected result, not saved anywhere yet.
+  // Once painting has started, keep the <canvas> element mounted for the
+  // rest of the session — unmounting it (e.g. by switching back to a plain
+  // <img> when the brush toolbar is hidden) would throw away the painted
+  // pixels along with the DOM node. "Hide brush" only hides the toolbar.
+  const showCanvas = item.manualOpen && (maskMode || hasMask);
+
   return (
     <div className={`enhance-row${item.manualOpen ? ' enhance-row--editing' : ''}`}>
       <div className="enhance-compare">
@@ -163,14 +261,26 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
           <figcaption>Before</figcaption>
         </figure>
         <figure>
-          <img
-            className="is-zoomable"
-            src={item.previewUrl}
-            alt=""
-            style={liveStyle(item.adjustments)}
-            onClick={() => onZoom(item.previewUrl, liveStyle(item.adjustments))}
-          />
-          <figcaption>{item.manualOpen ? 'After (your adjustments)' : 'After — auto-corrected'}</figcaption>
+          {showCanvas ? (
+            <MaskCanvas ref={maskCanvasRef} imageUrl={item.previewUrl} brushSize={brushSize} erasing={erasing} paintable={maskMode} />
+          ) : (
+            <img
+              className="is-zoomable"
+              src={item.previewUrl}
+              alt=""
+              style={hasMask ? undefined : liveStyle(item.adjustments)}
+              onClick={() => onZoom(item.previewUrl, hasMask ? undefined : liveStyle(item.adjustments))}
+            />
+          )}
+          <figcaption>
+            {item.manualOpen
+              ? maskMode
+                ? 'Paint over the part you mean'
+                : hasMask
+                  ? 'Masked — adjust each part below'
+                  : 'After (your adjustments)'
+              : 'After — auto-corrected'}
+          </figcaption>
         </figure>
       </div>
       <div className="enhance-meta">
@@ -181,15 +291,35 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
             item={item}
             onAdjust={(key, v) => onAdjust(item, key, v)}
             onRotate={() => onRotate(item)}
-            onReset={() => onReset(item)}
-            onRefresh={() => onRefresh(item)}
-            onSave={() => onSave(item)}
+            onReset={() => { onReset(item); clearMask(); }}
+            onRefresh={async () => onRefresh(item, await currentMaskPayload())}
+            onSave={async () => onSave(item, await currentMaskPayload())}
             onToggleManual={() => onToggleManual(item)}
             onDiscard={() => onDiscard(item)}
+            maskMode={maskMode}
+            setMaskMode={(v) => {
+              // Leaving the canvas visible commits nothing extra — the paint
+              // is already on the canvas element, which stays mounted (it's
+              // just hidden behind the plain <img> again).
+              if (!v && maskCanvasRef.current?.hasPaint()) setHasMask(true);
+              setMaskMode(v);
+            }}
+            hasMask={hasMask}
+            setHasMask={setHasMask}
+            brushSize={brushSize}
+            setBrushSize={setBrushSize}
+            erasing={erasing}
+            setErasing={setErasing}
+            fgAdj={fgAdj}
+            setFgAdj={setFgAdj}
+            bgAdj={bgAdj}
+            setBgAdj={setBgAdj}
+            maskCanvasRef={maskCanvasRef}
+            clearMask={clearMask}
           />
         ) : (
           <div className="admin-media-actions">
-            <button type="button" className="admin-primary" onClick={() => onSave(item)} disabled={item.stage === 'saving'}>
+            <button type="button" className="admin-primary" onClick={() => onSave(item, null)} disabled={item.stage === 'saving'}>
               {item.stage === 'saving' ? 'Saving…' : 'Send to Images'}
             </button>
             <button type="button" className="admin-mini" onClick={() => onToggleManual(item)}>Edit manually</button>
@@ -199,6 +329,29 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
       </div>
     </div>
   );
+}
+
+// Appends the shared fields (file, save flag, auto, rotate) plus either the
+// flat single-adjustment set or a mask + separate foreground/background
+// sets, depending on whether a mask was painted.
+function buildForm(item, maskPayload, save) {
+  const form = new FormData();
+  form.append('file', item.file);
+  form.append('save', save ? '1' : '0');
+  form.append('auto', '1');
+  form.append('rotate', item.adjustments.rotate);
+
+  if (maskPayload) {
+    form.append('mask', maskPayload.maskBlob, 'mask.png');
+    for (const [k, v] of Object.entries(maskPayload.fg)) form.append(`fg${k[0].toUpperCase()}${k.slice(1)}`, v);
+    for (const [k, v] of Object.entries(maskPayload.bg)) form.append(`bg${k[0].toUpperCase()}${k.slice(1)}`, v);
+  } else {
+    form.append('brightness', item.adjustments.brightness);
+    form.append('contrast', item.adjustments.contrast);
+    form.append('saturation', item.adjustments.saturation);
+    form.append('sharpen', item.adjustments.sharpen);
+  }
+  return form;
 }
 
 export default function EnhanceView() {
@@ -235,52 +388,33 @@ export default function EnhanceView() {
     files.forEach((file) => {
       const id = uid();
       const beforeUrl = URL.createObjectURL(file);
-      setItems((prev) => [
-        { id, file, beforeUrl, sourceName: file.name, stage: 'correcting', adjustments: { ...NEUTRAL }, manualOpen: false, error: '' },
-        ...prev,
-      ]);
-      runCorrection(id, file, NEUTRAL);
+      const item = { id, file, beforeUrl, sourceName: file.name, stage: 'correcting', adjustments: { ...NEUTRAL }, manualOpen: false, error: '' };
+      setItems((prev) => [item, ...prev]);
+      runCorrection(item, null);
     });
   }
 
-  async function runCorrection(id, file, adjustments) {
+  async function runCorrection(item, maskPayload) {
     try {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('save', '0');
-      form.append('auto', '1');
-      form.append('brightness', adjustments.brightness);
-      form.append('contrast', adjustments.contrast);
-      form.append('saturation', adjustments.saturation);
-      form.append('sharpen', adjustments.sharpen);
-      form.append('rotate', adjustments.rotate);
+      const form = buildForm(item, maskPayload, false);
       const res = await fetch('/api/admin/enhance', { method: 'POST', body: form });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Could not process that image.');
-      patchItem(id, { stage: 'reviewing', previewUrl: data.preview, previewBytes: data.bytes, refreshing: false });
+      patchItem(item.id, { stage: 'reviewing', previewUrl: data.preview, previewBytes: data.bytes, refreshing: false, error: '' });
     } catch (err) {
-      patchItem(id, { stage: 'error', error: err.message });
+      patchItem(item.id, { stage: item.stage === 'reviewing' ? 'reviewing' : 'error', refreshing: false, error: err.message });
     }
   }
 
-  function refreshPreview(item) {
+  function refreshPreview(item, maskPayload) {
     patchItem(item.id, { refreshing: true });
-    runCorrection(item.id, item.file, item.adjustments);
+    runCorrection(item, maskPayload);
   }
 
-  async function saveToImages(item) {
+  async function saveToImages(item, maskPayload) {
     patchItem(item.id, { stage: 'saving' });
     try {
-      const adj = item.adjustments;
-      const form = new FormData();
-      form.append('file', item.file);
-      form.append('save', '1');
-      form.append('auto', '1');
-      form.append('brightness', adj.brightness);
-      form.append('contrast', adj.contrast);
-      form.append('saturation', adj.saturation);
-      form.append('sharpen', adj.sharpen);
-      form.append('rotate', adj.rotate);
+      const form = buildForm(item, maskPayload, true);
       const res = await fetch('/api/admin/enhance', { method: 'POST', body: form });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Could not save that image.');
@@ -340,8 +474,9 @@ export default function EnhanceView() {
       <h1>Enhance</h1>
       <p className="admin-lead">
         Drop in any photo and it's automatically color- and contrast-corrected. Nothing is saved
-        until you choose to — review the result, fine-tune it by hand if you want, then send it to
-        Images or discard it. The original file is never changed.
+        until you choose to — review the result, fine-tune it by hand if you want (including
+        painting a mask to edit part of the photo separately), then send it to Images or discard
+        it. The original file is never changed.
       </p>
 
       <div

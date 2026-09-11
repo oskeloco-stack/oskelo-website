@@ -286,6 +286,21 @@
 }
 .enhance-row--editing .enhance-meta { width: 100%; min-width: 0; }
 
+/* ---------- Mask brush (paint the subject or background) ---------- */
+.mask-canvas-wrap { position: relative; display: block; width: 100%; }
+.mask-canvas-overlay { position: absolute; touch-action: none; cursor: crosshair; }
+.mask-canvas-overlay.is-erasing { cursor: cell; }
+.mask-canvas-overlay.is-inert { pointer-events: none; cursor: default; }
+.enhance-mask-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; background: var(--a-bg); border: 1px solid var(--a-line); border-radius: 10px; }
+.enhance-mask-tools label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--a-dim); }
+.enhance-mask-tools .admin-mini.is-active { background: var(--a-accent); color: #fff; border-color: var(--a-accent); }
+.enhance-mask-tools input[type="range"] { width: 100px; accent-color: var(--a-accent); }
+.enhance-mask-hint { font-size: 11px; color: var(--a-faint); width: 100%; }
+.enhance-dual-adjust { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.enhance-dual-adjust > div { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--a-line); border-radius: 10px; background: var(--a-bg); }
+.enhance-group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--a-dim); }
+@media (max-width: 640px) { .enhance-dual-adjust { grid-template-columns: 1fr; } }
+
 .enhance-manual {
   display: flex; flex-direction: column; gap: 10px; padding: 12px;
   background: var(--a-bg); border: 1px solid var(--a-line); border-radius: 10px;
