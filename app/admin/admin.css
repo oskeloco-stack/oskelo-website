@@ -344,6 +344,25 @@
 .admin-picker-item span { font-size: 10px; color: var(--a-dim); padding: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-picker-item:hover { border-color: var(--a-accent); }
 
+/* ---------- Lightbox (click any thumbnail for full size) ---------- */
+.admin-lightbox-backdrop {
+  position: fixed; inset: 0; background: rgba(12,10,8,.82); display: grid; place-items: center;
+  padding: 40px; z-index: 60; cursor: zoom-out;
+}
+.admin-lightbox-img {
+  max-width: 100%; max-height: 100%; border-radius: 6px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.6);
+  cursor: default;
+}
+.admin-lightbox-close {
+  position: fixed; top: 18px; right: 22px; width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-size: 16px;
+  cursor: pointer; z-index: 61;
+}
+.admin-lightbox-close:hover { background: rgba(0,0,0,.6); }
+
+/* Clickable thumbnails that open the lightbox get a subtle affordance. */
+.is-zoomable { cursor: zoom-in; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .admin-shell { grid-template-columns: 1fr; }

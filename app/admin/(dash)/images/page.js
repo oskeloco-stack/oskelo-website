@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Lightbox from '../_components/Lightbox';
 
 function baseName(name) {
   const dot = name.lastIndexOf('.');
@@ -17,6 +18,7 @@ export default function ImagesPage() {
   const [renaming, setRenaming] = useState(null); // name currently being edited
   const [renameValue, setRenameValue] = useState('');
   const [justUploaded, setJustUploaded] = useState(() => new Set());
+  const [zoomedUrl, setZoomedUrl] = useState(null);
   const fileInput = useRef(null);
 
   function refresh() {
@@ -180,7 +182,13 @@ export default function ImagesPage() {
       <div className="admin-media-grid">
         {filtered.map((item) => (
           <figure className={`admin-media${justUploaded.has(item.name) ? ' is-new' : ''}`} key={item.name}>
-            <img src={item.url} alt="" loading="lazy" />
+            <img
+              className="is-zoomable"
+              src={item.url}
+              alt=""
+              loading="lazy"
+              onClick={() => setZoomedUrl(item.url)}
+            />
             <figcaption>
               {renaming === item.name ? (
                 <input
@@ -227,6 +235,8 @@ export default function ImagesPage() {
       {status === 'ready' && items.length > 0 && filtered.length === 0 && (
         <p className="admin-empty">No images match "{query}".</p>
       )}
+
+      {zoomedUrl && <Lightbox src={zoomedUrl} onClose={() => setZoomedUrl(null)} />}
     </div>
   );
 }

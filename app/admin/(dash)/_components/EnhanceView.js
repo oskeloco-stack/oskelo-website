@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Lightbox from './Lightbox';
 
 const NEUTRAL = { brightness: 0, contrast: 0, saturation: 0, sharpen: 0, rotate: 0 };
 
@@ -65,7 +66,7 @@ function ManualPanel({ item, onAdjust, onRotate, onReset, onRefresh, onSave }) {
   );
 }
 
-function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotate, onReset, onRefresh, onRename, onDelete }) {
+function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotate, onReset, onRefresh, onRename, onDelete, onZoom }) {
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const [busy, setBusy] = useState(false);
@@ -74,7 +75,10 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
     return (
       <div className="enhance-row">
         <div className="enhance-compare">
-          <figure><img src={item.beforeUrl} alt="" /><figcaption>{item.sourceName}</figcaption></figure>
+          <figure>
+            <img className="is-zoomable" src={item.beforeUrl} alt="" onClick={() => onZoom(item.beforeUrl)} />
+            <figcaption>{item.sourceName}</figcaption>
+          </figure>
         </div>
         <div className="enhance-meta"><span className="enhance-size">Correcting…</span></div>
       </div>
@@ -85,7 +89,10 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
     return (
       <div className="enhance-row">
         <div className="enhance-compare">
-          <figure><img src={item.beforeUrl} alt="" /><figcaption>{item.sourceName}</figcaption></figure>
+          <figure>
+            <img className="is-zoomable" src={item.beforeUrl} alt="" onClick={() => onZoom(item.beforeUrl)} />
+            <figcaption>{item.sourceName}</figcaption>
+          </figure>
         </div>
         <div className="enhance-meta">
           <p className="admin-json-error" style={{ margin: 0 }}>{item.error}</p>
@@ -110,8 +117,14 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
     return (
       <div className="enhance-row">
         <div className="enhance-compare">
-          <figure><img src={item.beforeUrl} alt="" /><figcaption>Before</figcaption></figure>
-          <figure><img src={item.url} alt="" /><figcaption>Saved</figcaption></figure>
+          <figure>
+            <img className="is-zoomable" src={item.beforeUrl} alt="" onClick={() => onZoom(item.beforeUrl)} />
+            <figcaption>Before</figcaption>
+          </figure>
+          <figure>
+            <img className="is-zoomable" src={item.url} alt="" onClick={() => onZoom(item.url)} />
+            <figcaption>Saved</figcaption>
+          </figure>
         </div>
         <div className="enhance-meta">
           {renaming ? (
@@ -142,9 +155,18 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
   return (
     <div className="enhance-row">
       <div className="enhance-compare">
-        <figure><img src={item.beforeUrl} alt="" /><figcaption>Before</figcaption></figure>
         <figure>
-          <img src={item.previewUrl} alt="" style={liveStyle(item.adjustments)} />
+          <img className="is-zoomable" src={item.beforeUrl} alt="" onClick={() => onZoom(item.beforeUrl)} />
+          <figcaption>Before</figcaption>
+        </figure>
+        <figure>
+          <img
+            className="is-zoomable"
+            src={item.previewUrl}
+            alt=""
+            style={liveStyle(item.adjustments)}
+            onClick={() => onZoom(item.previewUrl, liveStyle(item.adjustments))}
+          />
           <figcaption>{item.manualOpen ? 'Preview (with your adjustments)' : 'After — auto-corrected'}</figcaption>
         </figure>
       </div>
@@ -177,7 +199,12 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
 export default function EnhanceView() {
   const [items, setItems] = useState([]);
   const [dragOver, setDragOver] = useState(false);
+  const [zoomed, setZoomed] = useState(null); // { src, style } | null
   const fileInput = useRef(null);
+
+  function zoom(src, style) {
+    setZoomed({ src, style });
+  }
 
   // Paste an image straight from the clipboard (a screenshot, or something
   // copied from another app) — one more way in besides drag-drop and the
@@ -353,9 +380,14 @@ export default function EnhanceView() {
               onRefresh={refreshPreview}
               onRename={onRename}
               onDelete={onDelete}
+              onZoom={zoom}
             />
           ))}
         </div>
+      )}
+
+      {zoomed && (
+        <Lightbox src={zoomed.src} style={zoomed.style} onClose={() => setZoomed(null)} />
       )}
     </div>
   );
