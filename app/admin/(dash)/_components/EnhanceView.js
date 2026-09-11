@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function baseName(name) {
   const dot = name.lastIndexOf('.');
@@ -77,6 +77,21 @@ export default function EnhanceView() {
   const [dragOver, setDragOver] = useState(false);
   const fileInput = useRef(null);
 
+  // Paste an image straight from the clipboard (a screenshot, or something
+  // copied from another app) — one more way in besides drag-drop and the
+  // file picker.
+  useEffect(() => {
+    function onPaste(e) {
+      const files = Array.from(e.clipboardData?.items || [])
+        .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+        .map((item) => item.getAsFile())
+        .filter(Boolean);
+      if (files.length > 0) processFiles(files);
+    }
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, []);
+
   async function processFiles(fileList) {
     const files = Array.from(fileList || []);
     if (files.length === 0) return;
@@ -135,7 +150,7 @@ export default function EnhanceView() {
   const working = queue.some((q) => q.status === 'working');
 
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-page-wide">
       <h1>Enhance</h1>
       <p className="admin-lead">
         Drop in any photo and it's automatically color- and contrast-corrected — auto white
@@ -144,7 +159,7 @@ export default function EnhanceView() {
       </p>
 
       <div
-        className={`admin-drop${dragOver ? ' is-over' : ''}`}
+        className={`admin-drop admin-drop-lg${dragOver ? ' is-over' : ''}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => { e.preventDefault(); setDragOver(false); processFiles(e.dataTransfer.files); }}
@@ -153,13 +168,18 @@ export default function EnhanceView() {
         <input
           ref={fileInput}
           type="file"
-          accept="image/*"
+          // The MIME wildcard covers anything the OS/browser already calls an
+          // image; the extensions are appended so formats with inconsistent
+          // MIME reporting (older cameras, some phones) still show up in the
+          // picker. What actually happens with each format is decided
+          // server-side, not by this list — see /api/admin/enhance.
+          accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.avif,.tif,.tiff,.heic,.heif,.bmp"
           multiple
           hidden
           onChange={(e) => processFiles(e.target.files)}
         />
-        <p>{working ? 'Correcting…' : 'Drop photos here, or click to choose'}</p>
-        <span>JPG, PNG, WebP, GIF or AVIF · up to 25 MB each</span>
+        <p>{working ? 'Correcting…' : 'Drop photos here, or click to choose — or paste with ⌘/Ctrl+V'}</p>
+        <span>JPG, PNG, WebP, GIF, AVIF or TIFF · up to 60 MB each</span>
       </div>
 
       {queue.some((q) => q.status === 'error') && (
