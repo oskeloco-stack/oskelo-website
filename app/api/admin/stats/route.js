@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAdminUser } from '../../../../lib/adminAuth';
-import { createAdminClient } from '../../../../lib/supabase/admin';
+import { requireAdminClient } from '../../../../lib/adminAuth';
 import { CONTENT_KEYS } from '../../../../lib/siteContent';
 import { fetchEvents } from '../../../../lib/analyticsQuery';
 import { aggregate } from '../../../../lib/analytics';
@@ -13,15 +12,14 @@ const BUCKET = 'media';
 // One call that powers the whole dashboard landing page: a 14-day traffic
 // snapshot plus counts for messages, stored images and active content overrides.
 export async function GET(request) {
-  const user = await getAdminUser();
-  if (!user) return NextResponse.json({ error: 'Not authorized.' }, { status: 401 });
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   const tzOffsetMinutes = Math.max(
     -840,
     Math.min(840, parseInt(new URL(request.url).searchParams.get('tz') || '0', 10) || 0)
   );
 
-  const supabase = createAdminClient();
   const now = new Date();
   const windowStart = new Date(now.getTime() - 14 * 86400000); // last 14 days
   const prevStart = new Date(windowStart.getTime() - 14 * 86400000);
@@ -37,7 +35,7 @@ export async function GET(request) {
 
   // --- Traffic (never fatal: a fresh analytics table just means zeros) ---
   try {
-    const rows = await fetchEvents(prevStart);
+    const rows = await fetchEvents(supabase, prevStart);
     const agg = aggregate(rows, {
       windowStart,
       windowEnd: now,

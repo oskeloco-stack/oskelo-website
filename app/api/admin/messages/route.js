@@ -1,22 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getAdminUser } from '../../../../lib/adminAuth';
-import { createAdminClient } from '../../../../lib/supabase/admin';
+import { requireAdminClient } from '../../../../lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
-async function requireAdmin() {
-  const user = await getAdminUser();
-  if (!user) return NextResponse.json({ error: 'Not authorized.' }, { status: 401 });
-  return null;
-}
-
 // GET /api/admin/messages?filter=inbox|archived|all
 export async function GET(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   const filter = new URL(request.url).searchParams.get('filter') || 'inbox';
-  const supabase = createAdminClient();
 
   let query = supabase
     .from('messages')
@@ -36,8 +28,8 @@ export async function GET(request) {
 
 // PATCH { id, action: 'read' | 'unread' | 'archive' | 'unarchive' }
 export async function PATCH(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   let body;
   try {
@@ -58,7 +50,6 @@ export async function PATCH(request) {
 
   if (!patch) return NextResponse.json({ error: 'Unknown action.' }, { status: 400 });
 
-  const supabase = createAdminClient();
   const { error } = await supabase.from('messages').update(patch).eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
@@ -67,8 +58,8 @@ export async function PATCH(request) {
 
 // DELETE { id } — permanent. The UI confirms first; use Archive for the reversible path.
 export async function DELETE(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   let body;
   try {
@@ -78,7 +69,6 @@ export async function DELETE(request) {
   }
   if (!body?.id) return NextResponse.json({ error: 'Missing id.' }, { status: 400 });
 
-  const supabase = createAdminClient();
   const { error } = await supabase.from('messages').delete().eq('id', body.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

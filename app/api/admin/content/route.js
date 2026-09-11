@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAdminUser } from '../../../../lib/adminAuth';
-import { createAdminClient } from '../../../../lib/supabase/admin';
+import { requireAdminClient } from '../../../../lib/adminAuth';
 import { CONTENT_KEYS } from '../../../../lib/siteContent';
 import { WORK_CATEGORIES } from '../../../../lib/work';
 import { SERVICES } from '../../../../lib/services';
@@ -35,22 +34,15 @@ function isValidShape(key, value) {
   return wantsArray ? Array.isArray(value) : value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-async function requireAdmin() {
-  const user = await getAdminUser();
-  if (!user) return NextResponse.json({ error: 'Not authorized.' }, { status: 401 });
-  return null;
-}
-
 export async function GET(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   const key = new URL(request.url).searchParams.get('key');
   if (!CONTENT_KEYS.includes(key)) {
     return NextResponse.json({ error: 'Unknown content key.' }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from('site_content')
     .select('value, updated_at')
@@ -79,8 +71,8 @@ export async function GET(request) {
 }
 
 export async function PUT(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   let body;
   try {
@@ -107,7 +99,6 @@ export async function PUT(request) {
     return NextResponse.json({ error: 'That is too many entries.' }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
   const { error } = await supabase
     .from('site_content')
     .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
@@ -121,8 +112,8 @@ export async function PUT(request) {
 
 // "Reset to built-in default" — drop the row so the site falls back to code.
 export async function DELETE(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   let body;
   try {
@@ -135,7 +126,6 @@ export async function DELETE(request) {
     return NextResponse.json({ error: 'Unknown content key.' }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
   const { error } = await supabase.from('site_content').delete().eq('key', key);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

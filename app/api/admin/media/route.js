@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAdminUser } from '../../../../lib/adminAuth';
-import { createAdminClient } from '../../../../lib/supabase/admin';
+import { requireAdminClient } from '../../../../lib/adminAuth';
 import {
   MEDIA_BUCKET as BUCKET,
   MEDIA_MAX_BYTES as MAX_BYTES,
@@ -11,19 +10,10 @@ import {
   uploadToMedia,
 } from '../../../../lib/mediaUpload';
 
-async function requireAdmin() {
-  const user = await getAdminUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Not authorized.' }, { status: 401 });
-  }
-  return null;
-}
-
 export async function GET() {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
-  const supabase = createAdminClient();
   const { data, error } = await supabase.storage.from(BUCKET).list('', {
     limit: 1000,
     sortBy: { column: 'created_at', order: 'desc' },
@@ -46,8 +36,8 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   let form;
   try {
@@ -61,7 +51,6 @@ export async function POST(request) {
     return NextResponse.json({ error: 'No files provided.' }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
   const uploaded = [];
   const errors = [];
 
@@ -100,8 +89,8 @@ export async function POST(request) {
 // use" can be a name you just typed, not a camera filename). `to` keeps
 // whatever extension `from` had if none is given.
 export async function PATCH(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   let body;
   try {
@@ -134,7 +123,6 @@ export async function PATCH(request) {
     return NextResponse.json({ ok: true, name: from });
   }
 
-  const supabase = createAdminClient();
   const { error } = await supabase.storage.from(BUCKET).move(from, to);
   if (error) {
     const msg = /exist/i.test(error.message || '') ? 'That name is already taken.' : error.message;
@@ -149,8 +137,8 @@ export async function PATCH(request) {
 }
 
 export async function DELETE(request) {
-  const denied = await requireAdmin();
-  if (denied) return denied;
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   let body;
   try {
@@ -163,7 +151,6 @@ export async function DELETE(request) {
     return NextResponse.json({ error: 'Missing file name.' }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
   const { error } = await supabase.storage.from(BUCKET).remove([name]);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

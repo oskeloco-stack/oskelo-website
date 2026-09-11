@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import sharp from 'sharp';
-import { getAdminUser } from '../../../../lib/adminAuth';
-import { createAdminClient } from '../../../../lib/supabase/admin';
+import { requireAdminClient } from '../../../../lib/adminAuth';
 import { baseNameFrom, uploadToMedia } from '../../../../lib/mediaUpload';
 
 export const runtime = 'nodejs';
@@ -33,8 +32,11 @@ async function autoCorrect(buffer) {
 }
 
 export async function POST(request) {
-  const user = await getAdminUser();
-  if (!user) return NextResponse.json({ error: 'Not authorized.' }, { status: 401 });
+  // Check auth AND that the service-role key is actually configured before
+  // doing any file work, so a misconfigured deployment fails fast with a
+  // clear message instead of after running the correction.
+  const { client: supabase, error: authError } = await requireAdminClient();
+  if (authError) return authError;
 
   let form;
   try {
@@ -78,7 +80,6 @@ export async function POST(request) {
       );
     }
 
-    const supabase = createAdminClient();
     const base = `${baseNameFrom(file.name || 'photo.jpg')}-enhanced`;
     const { name, url } = await uploadToMedia(supabase, correctedBuffer, base, 'jpg', 'image/jpeg');
 
