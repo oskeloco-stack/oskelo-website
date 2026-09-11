@@ -95,6 +95,10 @@ for existing submissions (they all start unread, in the inbox).
 
 4. **Create the image bucket** — `media`, public, already done via migration
    `create_media_storage_bucket` (25 MB limit, JPEG/PNG/WebP/GIF/AVIF only).
+   There's also `enhance-tmp` (migration `create_enhance_tmp_bucket`) — private,
+   60 MB, no MIME restriction — a holding spot for the original photo while
+   Enhance processes it; nothing in the UI links to it and the server deletes
+   each file right after use.
 
 5. **Create the content + analytics tables** — `site_content` and
    `analytics_events`, already done via migrations `create_site_content` /
@@ -127,7 +131,9 @@ for existing submissions (they all start unread, in the inbox).
 | Page-view beacon (public site) | `app/components/Analytics.js` → `app/api/track/route.js` |
 | Analytics helpers | `lib/analytics.js` (classify + aggregate), `lib/analyticsQuery.js` (fetch) |
 | Media naming/upload helper | `lib/mediaUpload.js` — clean-name generation, collision-avoiding upload, used by both Images and Enhance |
-| Auto color-correction | `app/api/admin/enhance/route.js` (sharp: rotate → normalize → modulate → sharpen) |
-| Admin APIs | `app/api/admin/{media,content,stats,analytics,messages,enhance}/route.js` |
+| Auto color-correction + masking | `app/api/admin/enhance/route.js` (sharp: rotate → normalize → modulate → sharpen; masked photos blend a separately-adjusted foreground/background per-pixel using the mask's alpha) |
+| Enhance's original-photo upload | `app/api/admin/enhance/upload-url/route.js` — signed upload straight to the private `enhance-tmp` Supabase bucket, bypassing Vercel's ~4.5 MB request-body limit; `enhance/route.js` downloads from there by path instead of receiving the file directly |
+| Mask painting | `app/admin/(dash)/_components/MaskCanvas.js` — brush canvas overlaid on the full-size photo |
+| Admin APIs | `app/api/admin/{media,content,stats,analytics,messages,enhance,enhance/upload-url}/route.js` |
 | Admin UI shell | `app/admin/(dash)/{layout.js,AdminNav.js}`, `app/admin/admin.css` |
 | Dashboard / Analytics / Messages screens | `app/admin/(dash)/_components/{Dashboard,AnalyticsView,MessagesView,TrafficChart,ui}.js` |
