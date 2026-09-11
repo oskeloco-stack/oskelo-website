@@ -276,6 +276,16 @@
 .enhance-meta { display: flex; flex-direction: column; gap: 8px; min-width: 220px; flex: 1; justify-content: flex-start; }
 .enhance-size { font-size: 12px; color: var(--a-dim); }
 
+/* While "Edit manually" is open: stack the whole row, show the full photo
+   (no crop) at a real comparison size instead of the small list thumbnail. */
+.enhance-row--editing { flex-direction: column; }
+.enhance-row--editing .enhance-compare { width: 100%; }
+.enhance-row--editing .enhance-compare img {
+  aspect-ratio: auto; object-fit: contain; width: 100%; max-height: 52vh;
+  background: var(--a-bg);
+}
+.enhance-row--editing .enhance-meta { width: 100%; min-width: 0; }
+
 .enhance-manual {
   display: flex; flex-direction: column; gap: 10px; padding: 12px;
   background: var(--a-bg); border: 1px solid var(--a-line); border-radius: 10px;
@@ -286,6 +296,7 @@
 .enhance-manual-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .enhance-hint { font-size: 11px; color: var(--a-faint); }
 .enhance-manual-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.enhance-manual-spacer { flex: 1; min-width: 8px; }
 
 /* ---------- Content editor ---------- */
 .admin-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -350,7 +361,9 @@
   padding: 40px; z-index: 60; cursor: zoom-out;
 }
 .admin-lightbox-img {
-  max-width: 100%; max-height: 100%; border-radius: 6px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.6);
+  /* A big, comfortable preview — not a blow-up to the edges of the screen. */
+  max-width: min(78vw, 780px); max-height: 75vh; width: auto; height: auto;
+  border-radius: 6px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.6);
   cursor: default;
 }
 .admin-lightbox-close {

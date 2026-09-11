@@ -41,7 +41,7 @@ function Slider({ label, value, onChange, min = -100, max = 100 }) {
   );
 }
 
-function ManualPanel({ item, onAdjust, onRotate, onReset, onRefresh, onSave }) {
+function ManualPanel({ item, onAdjust, onRotate, onReset, onRefresh, onSave, onToggleManual, onDiscard }) {
   const adj = item.adjustments;
   return (
     <div className="enhance-manual">
@@ -61,6 +61,9 @@ function ManualPanel({ item, onAdjust, onRotate, onReset, onRefresh, onSave }) {
         <button type="button" className="admin-primary" onClick={onSave} disabled={item.stage === 'saving'}>
           {item.stage === 'saving' ? 'Saving…' : 'Save to Images'}
         </button>
+        <span className="enhance-manual-spacer" />
+        <button type="button" className="admin-mini" onClick={onToggleManual}>Done adjusting</button>
+        <button type="button" className="admin-mini admin-mini-danger" onClick={onDiscard}>Discard photo</button>
       </div>
     </div>
   );
@@ -153,7 +156,7 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
 
   // stage === 'reviewing': the auto-corrected result, not saved anywhere yet.
   return (
-    <div className="enhance-row">
+    <div className={`enhance-row${item.manualOpen ? ' enhance-row--editing' : ''}`}>
       <div className="enhance-compare">
         <figure>
           <img className="is-zoomable" src={item.beforeUrl} alt="" onClick={() => onZoom(item.beforeUrl)} />
@@ -167,7 +170,7 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
             style={liveStyle(item.adjustments)}
             onClick={() => onZoom(item.previewUrl, liveStyle(item.adjustments))}
           />
-          <figcaption>{item.manualOpen ? 'Preview (with your adjustments)' : 'After — auto-corrected'}</figcaption>
+          <figcaption>{item.manualOpen ? 'After (your adjustments)' : 'After — auto-corrected'}</figcaption>
         </figure>
       </div>
       <div className="enhance-meta">
@@ -181,6 +184,8 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
             onReset={() => onReset(item)}
             onRefresh={() => onRefresh(item)}
             onSave={() => onSave(item)}
+            onToggleManual={() => onToggleManual(item)}
+            onDiscard={() => onDiscard(item)}
           />
         ) : (
           <div className="admin-media-actions">
