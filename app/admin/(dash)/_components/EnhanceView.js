@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Lightbox from './Lightbox';
 import MaskCanvas from './MaskCanvas';
+import { createClient } from '../../../../lib/supabase/browser';
 
 const NEUTRAL = { brightness: 0, contrast: 0, saturation: 0, sharpen: 0, rotate: 0 };
 const NEUTRAL_REGION = { brightness: 0, contrast: 0, saturation: 0, sharpen: 0 };
@@ -159,11 +160,10 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
   }
 
   // Builds what onRefresh/onSave need: null (plain single-adjustment path)
-  // or { maskBlob, fg, bg } once something's actually been painted.
-  async function currentMaskPayload() {
+  // or { maskDataUrl, fg, bg } once something's actually been painted.
+  function currentMaskPayload() {
     if (!hasMask || !maskCanvasRef.current?.hasPaint()) return null;
-    const maskBlob = await maskCanvasRef.current.toBlob();
-    return { maskBlob, fg: fgAdj, bg: bgAdj };
+    return { maskDataUrl: maskCanvasRef.current.toDataURL(), fg: fgAdj, bg: bgAdj };
   }
 
   if (item.stage === 'correcting') {
@@ -175,7 +175,7 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
             <figcaption>{item.sourceName}</figcaption>
           </figure>
         </div>
-        <div className="enhance-meta"><span className="enhance-size">Correcting…</span></div>
+        <div className="enhance-meta"><span className="enhance-size">{item.phase === 'uploading' ? 'Uploading…' : 'Correcting…'}</span></div>
       </div>
     );
   }
@@ -331,27 +331,50 @@ function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotat
   );
 }
 
-// Appends the shared fields (file, save flag, auto, rotate) plus either the
-// flat single-adjustment set or a mask + separate foreground/background
-// sets, depending on whether a mask was painted.
-function buildForm(item, maskPayload, save) {
-  const form = new FormData();
-  form.append('file', item.file);
-  form.append('save', save ? '1' : '0');
-  form.append('auto', '1');
-  form.append('rotate', item.adjustments.rotate);
+// Builds the JSON body (shared fields plus either the flat single-adjustment
+// set or a mask + separate foreground/background sets, depending on whether
+// a mask was painted). The original photo itself isn't in here — it already
+// lives in the enhance-tmp bucket by the time this is called; see
+// uploadOriginal() and /api/admin/enhance/upload-url.
+function buildRequestBody(item, maskPayload, save) {
+  const body = {
+    tmpPath: item.tmpPath,
+    fileName: item.sourceName,
+    save,
+    auto: true,
+    rotate: item.adjustments.rotate,
+  };
 
   if (maskPayload) {
-    form.append('mask', maskPayload.maskBlob, 'mask.png');
-    for (const [k, v] of Object.entries(maskPayload.fg)) form.append(`fg${k[0].toUpperCase()}${k.slice(1)}`, v);
-    for (const [k, v] of Object.entries(maskPayload.bg)) form.append(`bg${k[0].toUpperCase()}${k.slice(1)}`, v);
+    body.mask = maskPayload.maskDataUrl;
+    for (const [k, v] of Object.entries(maskPayload.fg)) body[`fg${k[0].toUpperCase()}${k.slice(1)}`] = v;
+    for (const [k, v] of Object.entries(maskPayload.bg)) body[`bg${k[0].toUpperCase()}${k.slice(1)}`] = v;
   } else {
-    form.append('brightness', item.adjustments.brightness);
-    form.append('contrast', item.adjustments.contrast);
-    form.append('saturation', item.adjustments.saturation);
-    form.append('sharpen', item.adjustments.sharpen);
+    body.brightness = item.adjustments.brightness;
+    body.contrast = item.adjustments.contrast;
+    body.saturation = item.adjustments.saturation;
+    body.sharpen = item.adjustments.sharpen;
   }
-  return form;
+  return body;
+}
+
+// Uploads the original file straight to Supabase Storage (bypassing our own
+// server entirely for the big payload — see upload-url/route.js for why) and
+// returns the path to reference in every later /api/admin/enhance call for
+// this item. Only needs to happen once per item; the raw bytes don't change
+// between a preview, a re-preview after adjusting sliders, and the final save.
+async function uploadOriginal(file) {
+  const res = await fetch('/api/admin/enhance/upload-url', { method: 'POST' });
+  const { path, token, error } = await res.json().catch(() => ({}));
+  if (!res.ok || !path) throw new Error(error || 'Could not start the upload.');
+
+  const supabase = createClient();
+  const { error: uploadError } = await supabase.storage
+    .from('enhance-tmp')
+    .uploadToSignedUrl(path, token, file);
+  if (uploadError) throw new Error(uploadError.message || 'Upload failed.');
+
+  return path;
 }
 
 export default function EnhanceView() {
@@ -385,19 +408,33 @@ export default function EnhanceView() {
 
   function processFiles(fileList) {
     const files = Array.from(fileList || []);
-    files.forEach((file) => {
+    files.forEach(async (file) => {
       const id = uid();
       const beforeUrl = URL.createObjectURL(file);
-      const item = { id, file, beforeUrl, sourceName: file.name, stage: 'correcting', adjustments: { ...NEUTRAL }, manualOpen: false, error: '' };
+      const item = {
+        id, file, beforeUrl, sourceName: file.name, stage: 'correcting', phase: 'uploading',
+        adjustments: { ...NEUTRAL }, manualOpen: false, error: '',
+      };
       setItems((prev) => [item, ...prev]);
-      runCorrection(item, null);
+
+      try {
+        const tmpPath = await uploadOriginal(file);
+        const uploaded = { ...item, tmpPath };
+        patchItem(id, { tmpPath, phase: 'correcting' });
+        runCorrection(uploaded, null);
+      } catch (err) {
+        patchItem(id, { stage: 'error', error: err.message });
+      }
     });
   }
 
   async function runCorrection(item, maskPayload) {
     try {
-      const form = buildForm(item, maskPayload, false);
-      const res = await fetch('/api/admin/enhance', { method: 'POST', body: form });
+      const res = await fetch('/api/admin/enhance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildRequestBody(item, maskPayload, false)),
+      });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Could not process that image.');
       patchItem(item.id, { stage: 'reviewing', previewUrl: data.preview, previewBytes: data.bytes, refreshing: false, error: '' });
@@ -414,8 +451,11 @@ export default function EnhanceView() {
   async function saveToImages(item, maskPayload) {
     patchItem(item.id, { stage: 'saving' });
     try {
-      const form = buildForm(item, maskPayload, true);
-      const res = await fetch('/api/admin/enhance', { method: 'POST', body: form });
+      const res = await fetch('/api/admin/enhance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildRequestBody(item, maskPayload, true)),
+      });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Could not save that image.');
       patchItem(item.id, { stage: 'saved', name: data.name, url: data.url, bytes: data.bytes });
@@ -426,6 +466,13 @@ export default function EnhanceView() {
 
   function discardItem(item) {
     URL.revokeObjectURL(item.beforeUrl);
+    if (item.tmpPath) {
+      fetch('/api/admin/enhance/upload-url', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: item.tmpPath }),
+      }).catch(() => {});
+    }
     setItems((prev) => prev.filter((it) => it.id !== item.id));
   }
 

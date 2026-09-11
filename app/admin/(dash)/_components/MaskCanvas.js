@@ -68,8 +68,8 @@ const MaskCanvas = forwardRef(function MaskCanvas({ imageUrl, brushSize, erasing
       canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
       painted.current = false;
     },
-    toBlob() {
-      return new Promise((resolve) => canvasRef.current.toBlob(resolve, 'image/png'));
+    toDataURL() {
+      return canvasRef.current.toDataURL('image/png');
     },
   }));
 

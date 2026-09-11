@@ -6,6 +6,8 @@ import { baseNameFrom, uploadToMedia } from '../../../../lib/mediaUpload';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const TMP_BUCKET = 'enhance-tmp';
+
 // This tool takes a wider range of input than the plain image uploader — raw
 // camera exports (TIFF) run well over the site's usual 25 MB image cap.
 const MAX_BYTES = 60 * 1024 * 1024;
@@ -15,17 +17,17 @@ function clamp(n, min, max) {
 }
 
 function numOr(value, fallback, min, max) {
-  const n = parseFloat(value);
+  const n = Number(value);
   return Number.isFinite(n) ? clamp(n, min, max) : fallback;
 }
 
-function readAdjustments(form, prefix) {
+function readAdjustments(body, prefix) {
   return {
-    brightness: numOr(form.get(`${prefix}Brightness`), 0, -100, 100),
-    contrast: numOr(form.get(`${prefix}Contrast`), 0, -100, 100),
-    saturation: numOr(form.get(`${prefix}Saturation`), 0, -100, 100),
-    sharpen: numOr(form.get(`${prefix}Sharpen`), 0, 0, 100),
-    blur: numOr(form.get(`${prefix}Blur`), 0, 0, 25),
+    brightness: numOr(body[`${prefix}Brightness`], 0, -100, 100),
+    contrast: numOr(body[`${prefix}Contrast`], 0, -100, 100),
+    saturation: numOr(body[`${prefix}Saturation`], 0, -100, 100),
+    sharpen: numOr(body[`${prefix}Sharpen`], 0, 0, 100),
+    blur: numOr(body[`${prefix}Blur`], 0, 0, 25),
   };
 }
 
@@ -110,11 +112,23 @@ async function buildMaskedBuffer(buffer, { auto, rotateDeg, fg, bg, maskBuffer }
     .toBuffer();
 }
 
+function decodeDataUrl(dataUrl) {
+  const comma = dataUrl.indexOf(',');
+  return Buffer.from(dataUrl.slice(comma + 1), 'base64');
+}
+
 // POST — always runs the correction; `save=1` also uploads the result to the
 // media library, otherwise it just returns a preview (nothing is written
 // anywhere), so trying different settings costs nothing until you actually
-// choose to keep one. A `mask` file switches to the split foreground/
-// background pipeline; without one it's the plain single-adjustment path.
+// choose to keep one. A `mask` switches to the split foreground/background
+// pipeline; without one it's the plain single-adjustment path.
+//
+// The original photo travels as a JSON `tmpPath` reference into the
+// `enhance-tmp` bucket, not as a multipart file upload — see
+// /api/admin/enhance/upload-url for why: Vercel's Node serverless functions
+// cap an incoming request body around 4.5 MB, which real photos exceed
+// easily, so the browser uploads the raw file straight to Supabase first and
+// this route just downloads it server-side (no such limit there).
 export async function POST(request) {
   // Check auth AND that the service-role key is actually configured before
   // doing any file work, so a misconfigured deployment fails fast with a
@@ -122,57 +136,55 @@ export async function POST(request) {
   const { client: supabase, error: authError } = await requireAdminClient();
   if (authError) return authError;
 
-  let form;
+  let body;
   try {
-    form = await request.formData();
+    body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'Expected multipart/form-data.' }, { status: 400 });
+    return NextResponse.json({ error: 'Body must be JSON.' }, { status: 400 });
   }
 
-  const file = form.get('file');
-  if (!file || typeof file !== 'object') {
-    return NextResponse.json({ error: 'No file provided.' }, { status: 400 });
-  }
-  if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: 'File is larger than 60 MB.' }, { status: 400 });
-  }
-  // Deliberately permissive: don't pre-reject on an enumerated MIME list (browsers
-  // are inconsistent about what they report, especially for less common formats).
-  // Only rule out things that are obviously not photos; let sharp's own decode be
-  // the real gate, and translate its failure into a plain-English message below.
-  if (file.type && !file.type.startsWith('image/')) {
-    return NextResponse.json({ error: `${file.type} isn't an image file.` }, { status: 400 });
+  const { tmpPath, fileName } = body || {};
+  if (!tmpPath || typeof tmpPath !== 'string') {
+    return NextResponse.json({ error: 'Missing the uploaded file reference.' }, { status: 400 });
   }
 
-  const auto = form.get('auto') !== '0';
-  const rotateDeg = ((numOr(form.get('rotate'), 0, -270, 270) % 360) + 360) % 360;
-  const maskFile = form.get('mask');
-  const hasMask = maskFile && typeof maskFile === 'object' && maskFile.size > 0;
-
-  const wantsSave = form.get('save') === '1';
+  const auto = body.auto !== false && body.auto !== '0';
+  const rotateDeg = ((numOr(body.rotate, 0, -270, 270) % 360) + 360) % 360;
+  const hasMask = typeof body.mask === 'string' && body.mask.startsWith('data:');
+  const wantsSave = body.save === true || body.save === '1';
 
   try {
-    const inputBuffer = Buffer.from(await file.arrayBuffer());
+    const { data: fileData, error: downloadError } = await supabase.storage.from(TMP_BUCKET).download(tmpPath);
+    if (downloadError) {
+      return NextResponse.json(
+        { error: "Couldn't read the uploaded file — it may have expired. Please drop the photo in again." },
+        { status: 400 }
+      );
+    }
+    const inputBuffer = Buffer.from(await fileData.arrayBuffer());
+
+    if (inputBuffer.length > MAX_BYTES) {
+      return NextResponse.json({ error: 'File is larger than 60 MB.' }, { status: 400 });
+    }
 
     let correctedBuffer;
     try {
       if (hasMask) {
-        const maskBuffer = Buffer.from(await maskFile.arrayBuffer());
         correctedBuffer = await buildMaskedBuffer(inputBuffer, {
           auto,
           rotateDeg,
-          fg: readAdjustments(form, 'fg'),
-          bg: readAdjustments(form, 'bg'),
-          maskBuffer,
+          fg: readAdjustments(body, 'fg'),
+          bg: readAdjustments(body, 'bg'),
+          maskBuffer: decodeDataUrl(body.mask),
         });
       } else {
         correctedBuffer = await buildCorrectedBuffer(inputBuffer, {
           auto,
           rotateDeg,
-          brightness: numOr(form.get('brightness'), 0, -100, 100),
-          contrast: numOr(form.get('contrast'), 0, -100, 100),
-          saturation: numOr(form.get('saturation'), 0, -100, 100),
-          sharpen: numOr(form.get('sharpen'), 0, 0, 100),
+          brightness: numOr(body.brightness, 0, -100, 100),
+          contrast: numOr(body.contrast, 0, -100, 100),
+          saturation: numOr(body.saturation, 0, -100, 100),
+          sharpen: numOr(body.sharpen, 0, 0, 100),
           blur: 0,
         });
       }
@@ -197,8 +209,14 @@ export async function POST(request) {
       });
     }
 
-    const base = `${baseNameFrom(file.name || 'photo.jpg')}-enhanced`;
+    const base = `${baseNameFrom(fileName || 'photo.jpg')}-enhanced`;
     const { name, url } = await uploadToMedia(supabase, correctedBuffer, base, 'jpg', 'image/jpeg');
+
+    // Only clean up the temp original once it's actually been saved — a
+    // preview call (wantsSave=false) still needs it for the next preview or
+    // the eventual save, which reuses the same tmpPath rather than
+    // re-uploading the file.
+    supabase.storage.from(TMP_BUCKET).remove([tmpPath]).catch(() => {});
 
     return NextResponse.json({
       name,
