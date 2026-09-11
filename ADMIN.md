@@ -24,15 +24,18 @@ touching code or waiting for a deploy.
 | **Dashboard** (`/admin`) | 14-day traffic snapshot, unread-message count, stored-image count, recent inquiries, and which content sections have edits saved. |
 | **Analytics** (`/admin/analytics`) | Page views, unique visitors, top pages, referrers, devices, browsers, OS and country over 7/30/90 days. |
 | **Messages** (`/admin/messages`) | Every contact-form submission. Mark read/unread, archive, reply (opens your mail client), or delete. |
-| **Images** (`/admin/images`) | Drag in or pick image files (JPG/PNG/WebP/GIF/AVIF, ≤25 MB). Each has **Copy URL** and **Delete**. |
-| **Content** (`/admin/content`) | Edit Work / Services / Offers. **Form** tab has structured fields (image fields get a **Pick** button from your uploads); **Raw JSON** tab edits the section directly. **Reset to built-in default** deletes your override so the site falls back to the values in `lib/work.js` / `lib/services.js` / `lib/offers.js`. |
+| **Images** (`/admin/images`) | Drag in or pick image files (JPG/PNG/WebP/GIF/AVIF, ≤25 MB). Uploads get a clean auto-generated name (no cryptic hash); click any name to rename it to something you'll recognize later — that's what to tell Claude when you want a specific photo used somewhere. Each also has **Copy URL** and **Delete**. |
+| **Enhance** (`/admin/enhance`) | Drop in any photo for instant auto color/contrast correction (auto white balance via histogram normalization, a light saturation/sharpness lift) — the result is saved as a new image in the library; the original is untouched. Rename or delete the result right there, or find it later in Images. |
+| **Content** (`/admin/content`) | Edit the words on every page — Homepage, About, Contact, Terms, the rate-lock banner, the top promo bar, the footer — plus Work / Services / Offers. **Form** tab has structured fields (image fields get a **Pick** button from your uploads); **Raw JSON** tab edits the section directly. **Reset to built-in default** deletes your override so the site falls back to the hardcoded value in code. |
 
 ## Known limits (v1)
 
-- The header/footer **navigation** is still defined in code (`app/components/
-  Header.js` / `Footer.js`), not editable here.
-- Adding a brand-new category or service **slug** still needs a deploy before its
-  own detail page pre-builds. Editing existing entries updates live.
+- The header **navigation links themselves** (Services/Work/Offers/Team/
+  Contact and their dropdown structure) are still defined in code
+  (`app/components/Header.js`) — only the footer's text is editable. Wording
+  on every other page is editable (see the Content table above).
+- Adding a brand-new Work category or service **slug** still needs a deploy
+  before its own detail page pre-builds. Editing existing entries updates live.
 - No edit history / undo on Content — use **Reset to built-in default** to get
   back to the code values, or re-edit. Messages you **Delete** are gone for
   good; **Archive** is the reversible way to clear the inbox.
@@ -54,6 +57,18 @@ Privacy: no IP address or user-agent string is stored. Each row's
 "unique visitors" be counted within a single day but can't be reversed to an
 IP or linked across days. The beacon also honors Do Not Track / Global Privacy
 Control and skips `/admin` entirely.
+
+## Page content — how it works
+
+Every editable page's copy is a plain object keyed by page (`home`, `about`,
+`contact`, `terms`, `foundingOffer`, `promoBar`, `footer`), the same
+`site_content` mechanism as Work/Services/Offers — just an object instead of a
+list. Defaults live in `lib/pageContent.js`, one export per page, matching
+whatever was previously hardcoded. Components that appear on several pages
+(`FoundingOffer`, `Footer`, `PromoBar`) fetch their own content, so every call
+site picks up an edit automatically with no extra wiring. The Terms page's
+final "Contact" paragraph (with the `mailto:` link) is intentionally left out
+of the editable `sections` list so a plain-text edit can't break the link.
 
 ## Messages — how it works
 
@@ -108,8 +123,11 @@ for existing submissions (they all start unread, in the inbox).
 | Auth gate (authoritative) | `app/admin/(dash)/layout.js` via `lib/adminAuth.js` |
 | Supabase clients | `lib/supabase/{browser,server,admin}.js` |
 | Public pages read overrides | `lib/siteContent.js` → `getContent(key, fallback)` |
+| Page copy defaults | `lib/pageContent.js` (home/about/contact/terms/foundingOffer/promoBar/footer) |
 | Page-view beacon (public site) | `app/components/Analytics.js` → `app/api/track/route.js` |
 | Analytics helpers | `lib/analytics.js` (classify + aggregate), `lib/analyticsQuery.js` (fetch) |
-| Admin APIs | `app/api/admin/{media,content,stats,analytics,messages}/route.js` |
+| Media naming/upload helper | `lib/mediaUpload.js` — clean-name generation, collision-avoiding upload, used by both Images and Enhance |
+| Auto color-correction | `app/api/admin/enhance/route.js` (sharp: rotate → normalize → modulate → sharpen) |
+| Admin APIs | `app/api/admin/{media,content,stats,analytics,messages,enhance}/route.js` |
 | Admin UI shell | `app/admin/(dash)/{layout.js,AdminNav.js}`, `app/admin/admin.css` |
 | Dashboard / Analytics / Messages screens | `app/admin/(dash)/_components/{Dashboard,AnalyticsView,MessagesView,TrafficChart,ui}.js` |

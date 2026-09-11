@@ -140,11 +140,15 @@ export default function Dashboard() {
         </a>
         <a className="admin-card" href="/admin/images">
           <h2>Images →</h2>
-          <p>Upload photos and copy their URLs, or delete ones you no longer need.</p>
+          <p>Upload photos, rename them to something you'll recognize, copy URLs, or delete.</p>
+        </a>
+        <a className="admin-card" href="/admin/enhance">
+          <h2>Enhance →</h2>
+          <p>Drop in a photo for instant auto color correction, saved as a new image.</p>
         </a>
         <a className="admin-card" href="/admin/content">
           <h2>Content →</h2>
-          <p>Edit the Work galleries, Services and Offers — structured form or raw JSON.</p>
+          <p>Edit every page's words — headlines, intros, team bios, terms — form or raw JSON.</p>
         </a>
       </div>
 

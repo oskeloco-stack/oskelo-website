@@ -5,12 +5,35 @@ import { CONTENT_KEYS } from '../../../../lib/siteContent';
 import { WORK_CATEGORIES } from '../../../../lib/work';
 import { SERVICES } from '../../../../lib/services';
 import { OFFERS } from '../../../../lib/offers';
+import {
+  HOME_DEFAULT,
+  ABOUT_DEFAULT,
+  CONTACT_PAGE_DEFAULT,
+  FOUNDING_OFFER_DEFAULT,
+  PROMO_BAR_DEFAULT,
+  FOOTER_DEFAULT,
+  TERMS_DEFAULT,
+} from '../../../../lib/pageContent';
 
 const DEFAULTS = {
   work: WORK_CATEGORIES,
   services: SERVICES,
   offers: OFFERS,
+  home: HOME_DEFAULT,
+  about: ABOUT_DEFAULT,
+  contact: CONTACT_PAGE_DEFAULT,
+  foundingOffer: FOUNDING_OFFER_DEFAULT,
+  promoBar: PROMO_BAR_DEFAULT,
+  footer: FOOTER_DEFAULT,
+  terms: TERMS_DEFAULT,
 };
+
+// work/services/offers/terms.sections are lists; everything else here is one
+// page's copy as a plain object. The saved value has to match that shape.
+function isValidShape(key, value) {
+  const wantsArray = Array.isArray(DEFAULTS[key]);
+  return wantsArray ? Array.isArray(value) : value !== null && typeof value === 'object' && !Array.isArray(value);
+}
 
 async function requireAdmin() {
   const user = await getAdminUser();
@@ -70,13 +93,17 @@ export async function PUT(request) {
   if (!CONTENT_KEYS.includes(key)) {
     return NextResponse.json({ error: 'Unknown content key.' }, { status: 400 });
   }
-  if (!Array.isArray(value)) {
+  if (!isValidShape(key, value)) {
     return NextResponse.json(
-      { error: 'Content for this section must be a JSON array.' },
+      {
+        error: Array.isArray(DEFAULTS[key])
+          ? 'Content for this section must be a JSON array.'
+          : 'Content for this section must be a JSON object.',
+      },
       { status: 400 }
     );
   }
-  if (value.length > 500) {
+  if (Array.isArray(value) && value.length > 500) {
     return NextResponse.json({ error: 'That is too many entries.' }, { status: 400 });
   }
 

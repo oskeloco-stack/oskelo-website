@@ -1,31 +1,10 @@
-'use client';
+import { getContent } from '../../lib/siteContent';
+import { PROMO_BAR_DEFAULT } from '../../lib/pageContent';
+import PromoBarClient from './PromoBarClient';
 
-import { usePathname } from 'next/navigation';
-
-const MESSAGE =
-  'Start any monthly plan this month and keep today’s rate for good — limited to 5 spots';
-
-function Group() {
-  // repeated a few times so one group is always wider than the viewport
-  return (
-    <span className="promo-bar-group" aria-hidden="true">
-      <span>{MESSAGE}</span>
-      <span>{MESSAGE}</span>
-      <span>{MESSAGE}</span>
-    </span>
-  );
-}
-
-export default function PromoBar() {
-  const pathname = usePathname();
-  if (pathname?.startsWith('/admin')) return null;
-
-  return (
-    <a className="promo-bar" href="/offers" aria-label={MESSAGE}>
-      <div className="promo-bar-track">
-        <Group />
-        <Group />
-      </div>
-    </a>
-  );
+// Server wrapper so the banner text is admin-editable; the marquee/hide-on-
+// /admin behavior needs the client for usePathname, so that part is split out.
+export default async function PromoBar() {
+  const c = await getContent('promoBar', PROMO_BAR_DEFAULT);
+  return <PromoBarClient message={c.message} />;
 }

@@ -5,13 +5,20 @@ import StructuredEditor from './StructuredEditor';
 import JsonEditor from './JsonEditor';
 
 const SECTIONS = [
+  { key: 'home', label: 'Homepage' },
+  { key: 'about', label: 'About page' },
+  { key: 'contact', label: 'Contact page' },
+  { key: 'terms', label: 'Terms page' },
+  { key: 'foundingOffer', label: 'Rate-lock banner' },
+  { key: 'promoBar', label: 'Top promo bar' },
+  { key: 'footer', label: 'Footer' },
   { key: 'work', label: 'Work & galleries' },
   { key: 'services', label: 'Services' },
   { key: 'offers', label: 'Offers' },
 ];
 
 export default function ContentPage() {
-  const [section, setSection] = useState('work');
+  const [section, setSection] = useState('home');
   const [mode, setMode] = useState('form'); // 'form' | 'json'
 
   const [value, setValue] = useState(null); // working copy

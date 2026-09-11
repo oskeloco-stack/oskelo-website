@@ -1,22 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getAdminUser } from '../../../../lib/adminAuth';
 import { createAdminClient } from '../../../../lib/supabase/admin';
-
-const BUCKET = 'media';
-const MAX_BYTES = 25 * 1024 * 1024; // 25 MB per file
-const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
-
-function slugifyName(filename) {
-  const dot = filename.lastIndexOf('.');
-  const ext = dot > -1 ? filename.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, '') : 'jpg';
-  const base = (dot > -1 ? filename.slice(0, dot) : filename)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    .slice(0, 60) || 'image';
-  const hash = Math.random().toString(36).slice(2, 8);
-  return `${base}-${hash}.${ext}`;
-}
+import {
+  MEDIA_BUCKET as BUCKET,
+  MEDIA_MAX_BYTES as MAX_BYTES,
+  MEDIA_ALLOWED_TYPES as ALLOWED,
+  baseNameFrom,
+  extFrom,
+  isSafeObjectName,
+  uploadToMedia,
+} from '../../../../lib/mediaUpload';
 
 async function requireAdmin() {
   const user = await getAdminUser();
@@ -82,26 +75,77 @@ export async function POST(request) {
       continue;
     }
 
-    const key = slugifyName(file.name || 'image.jpg');
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const { error } = await supabase.storage.from(BUCKET).upload(key, buffer, {
-      contentType: file.type || 'application/octet-stream',
-      upsert: false,
-    });
-
-    if (error) {
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const base = baseNameFrom(file.name || 'image.jpg');
+      const ext = extFrom(file.name || 'image.jpg');
+      const { name, url } = await uploadToMedia(
+        supabase,
+        buffer,
+        base,
+        ext,
+        file.type || 'application/octet-stream'
+      );
+      uploaded.push({ name, url });
+    } catch (error) {
       errors.push(`${file.name}: ${error.message}`);
-      continue;
     }
-
-    uploaded.push({
-      name: key,
-      url: supabase.storage.from(BUCKET).getPublicUrl(key).data.publicUrl,
-    });
   }
 
   const status = uploaded.length > 0 ? 200 : 400;
   return NextResponse.json({ uploaded, errors }, { status });
+}
+
+// PATCH { from, to } — rename a file in place (so "tell me which photo to
+// use" can be a name you just typed, not a camera filename). `to` keeps
+// whatever extension `from` had if none is given.
+export async function PATCH(request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Body must be JSON.' }, { status: 400 });
+  }
+
+  const from = body?.from;
+  let to = (body?.to || '').trim();
+  if (!from || typeof from !== 'string') {
+    return NextResponse.json({ error: 'Missing source file name.' }, { status: 400 });
+  }
+  if (!to) {
+    return NextResponse.json({ error: 'Enter a name.' }, { status: 400 });
+  }
+
+  if (!to.includes('.')) {
+    to = `${to}.${extFrom(from)}`;
+  }
+  to = to.toLowerCase().replace(/\s+/g, '-');
+
+  if (!isSafeObjectName(to)) {
+    return NextResponse.json(
+      { error: 'Use letters, numbers, dashes and a single file extension only.' },
+      { status: 400 }
+    );
+  }
+  if (to === from) {
+    return NextResponse.json({ ok: true, name: from });
+  }
+
+  const supabase = createAdminClient();
+  const { error } = await supabase.storage.from(BUCKET).move(from, to);
+  if (error) {
+    const msg = /exist/i.test(error.message || '') ? 'That name is already taken.' : error.message;
+    return NextResponse.json({ error: msg }, { status: 400 });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    name: to,
+    url: supabase.storage.from(BUCKET).getPublicUrl(to).data.publicUrl,
+  });
 }
 
 export async function DELETE(request) {

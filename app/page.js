@@ -4,6 +4,7 @@ import Contact from './components/Contact';
 import FoundingOffer from './components/FoundingOffer';
 import { SERVICES } from '../lib/services';
 import { WORK_CATEGORIES } from '../lib/work';
+import { HOME_DEFAULT } from '../lib/pageContent';
 import { getContent } from '../lib/siteContent';
 
 export const revalidate = 60;
@@ -19,6 +20,7 @@ const REELS = [
 export default async function Home() {
   const services = await getContent('services', SERVICES);
   const categories = await getContent('work', WORK_CATEGORIES);
+  const c = await getContent('home', HOME_DEFAULT);
 
   return (
     <>
@@ -34,11 +36,11 @@ export default async function Home() {
           </div>
           <div className="hero-scrim"></div>
           <div className="hero-content">
-            <div className="eyebrow">Video &amp; photo for businesses, individuals &amp; events</div>
-            <h1>Content built<br />to stand out</h1>
+            <div className="eyebrow">{c.heroEyebrow}</div>
+            <h1>{c.heroHeadingLine1}<br />{c.heroHeadingLine2}</h1>
             <div className="hero-ctas">
-              <a className="btn btn-solid" href="/services">See the packages</a>
-              <a className="btn btn-outline" href="/work">View our work</a>
+              <a className="btn btn-solid" href="/services">{c.heroCta1Label}</a>
+              <a className="btn btn-outline" href="/work">{c.heroCta2Label}</a>
             </div>
           </div>
         </section>
@@ -47,10 +49,10 @@ export default async function Home() {
           <section className="section offers" id="services">
             <div className="section-head">
               <div>
-                <div className="eyebrow">Services</div>
-                <h2>What we offer</h2>
+                <div className="eyebrow">{c.offersEyebrow}</div>
+                <h2>{c.offersHeading}</h2>
               </div>
-              <p>Three ways to work with us. Tap through for full details and pricing.</p>
+              <p>{c.offersIntro}</p>
             </div>
             <div className="offers-inner">
               <ul className="offer-list">
@@ -81,21 +83,13 @@ export default async function Home() {
             <section className="section mission" id="mission">
               <div className="section-head">
                 <div>
-                  <div className="eyebrow">What we do</div>
-                  <h2>Our mission</h2>
+                  <div className="eyebrow">{c.missionEyebrow}</div>
+                  <h2>{c.missionHeading}</h2>
                 </div>
               </div>
               <div className="mission-body">
-                <p>
-                  Oskelo makes video and photography for businesses, individuals,
-                  and events — brand films, portraits, product shoots, and event
-                  coverage.
-                </p>
-                <p>
-                  Hand us your footage to edit, or have us on-site to shoot and
-                  produce the whole piece. Either way the goal is the same:
-                  content built to stand out, made simple to get.
-                </p>
+                <p>{c.missionBody1}</p>
+                <p>{c.missionBody2}</p>
               </div>
             </section>
           </div>
@@ -107,10 +101,10 @@ export default async function Home() {
           <section className="section" id="work">
             <div className="section-head">
               <div>
-                <div className="eyebrow">Selected work</div>
-                <h2>Recent projects</h2>
+                <div className="eyebrow">{c.workEyebrow}</div>
+                <h2>{c.workHeading}</h2>
               </div>
-              <p>A short survey of business and brand work delivered in the last year.</p>
+              <p>{c.workIntro}</p>
             </div>
             <div className="link-cards cols-2">
               {categories.map((category) => (
@@ -133,10 +127,10 @@ export default async function Home() {
           <section className="section reels-section" id="reels">
             <div className="section-head">
               <div>
-                <div className="eyebrow">In motion</div>
-                <h2>Short-form, built for scroll</h2>
+                <div className="eyebrow">{c.reelsEyebrow}</div>
+                <h2>{c.reelsHeading}</h2>
               </div>
-              <p>A preview of the vertical video content we create for social feeds.</p>
+              <p>{c.reelsIntro}</p>
             </div>
             <div className="reels-row">
               {REELS.map((reel) => (

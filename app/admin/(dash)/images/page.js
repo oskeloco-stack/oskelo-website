@@ -1,6 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+function baseName(name) {
+  const dot = name.lastIndexOf('.');
+  return dot > -1 ? name.slice(0, dot) : name;
+}
 
 export default function ImagesPage() {
   const [items, setItems] = useState([]);
@@ -8,6 +13,10 @@ export default function ImagesPage() {
   const [message, setMessage] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [copiedName, setCopiedName] = useState('');
+  const [query, setQuery] = useState('');
+  const [renaming, setRenaming] = useState(null); // name currently being edited
+  const [renameValue, setRenameValue] = useState('');
+  const [justUploaded, setJustUploaded] = useState(() => new Set());
   const fileInput = useRef(null);
 
   function refresh() {
@@ -48,8 +57,11 @@ export default function ImagesPage() {
         `${data.uploaded?.length || 0} uploaded. Problems: ${data.errors.join(' ')}`
       );
     } else {
-      setMessage(`${data.uploaded?.length || 0} image(s) uploaded.`);
+      setMessage(
+        `${data.uploaded?.length || 0} image(s) uploaded — click a name below to rename it to something you'll recognize.`
+      );
     }
+    setJustUploaded(new Set((data.uploaded || []).map((u) => u.name)));
     refresh();
   }
 
@@ -70,6 +82,37 @@ export default function ImagesPage() {
     setItems((prev) => prev.filter((i) => i.name !== name));
   }
 
+  function startRename(item) {
+    setRenaming(item.name);
+    setRenameValue(baseName(item.name));
+    setJustUploaded((prev) => {
+      const next = new Set(prev);
+      next.delete(item.name);
+      return next;
+    });
+  }
+
+  async function commitRename(name) {
+    const typed = renameValue.trim();
+    setRenaming(null);
+    if (!typed || typed === baseName(name)) return;
+
+    const res = await fetch('/api/admin/media', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: name, to: typed }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setMessage(data.error || 'Rename failed.');
+      return;
+    }
+    setItems((prev) =>
+      prev.map((i) => (i.name === name ? { ...i, name: data.name, url: data.url || i.url } : i))
+    );
+    setMessage(`Renamed to "${data.name}".`);
+  }
+
   async function copyUrl(url, name) {
     try {
       await navigator.clipboard.writeText(url);
@@ -80,12 +123,19 @@ export default function ImagesPage() {
     }
   }
 
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((i) => i.name.toLowerCase().includes(q));
+  }, [items, query]);
+
   return (
     <div className="admin-page">
       <h1>Images</h1>
       <p className="admin-lead">
         Upload photos here, then use “Copy URL” — or the “Pick” buttons on the
-        Content page — to place them on the site.
+        Content page — to place them on the site. Click any name to rename it
+        to something you'll recognize later.
       </p>
 
       <div
@@ -117,12 +167,43 @@ export default function ImagesPage() {
       {message && <p className="admin-json-ok">{message}</p>}
       {status === 'error' && <p className="admin-json-error">{message}</p>}
 
+      {items.length > 0 && (
+        <input
+          type="text"
+          className="admin-search"
+          placeholder={`Search ${items.length} image name${items.length === 1 ? '' : 's'}…`}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      )}
+
       <div className="admin-media-grid">
-        {items.map((item) => (
-          <figure className="admin-media" key={item.name}>
+        {filtered.map((item) => (
+          <figure className={`admin-media${justUploaded.has(item.name) ? ' is-new' : ''}`} key={item.name}>
             <img src={item.url} alt="" loading="lazy" />
             <figcaption>
-              <span className="admin-media-name" title={item.name}>{item.name}</span>
+              {renaming === item.name ? (
+                <input
+                  className="admin-media-rename"
+                  autoFocus
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onBlur={() => commitRename(item.name)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') e.currentTarget.blur();
+                    if (e.key === 'Escape') setRenaming(null);
+                  }}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="admin-media-name"
+                  title="Click to rename"
+                  onClick={() => startRename(item)}
+                >
+                  {item.name}
+                </button>
+              )}
               <div className="admin-media-actions">
                 <button type="button" className="admin-mini" onClick={() => copyUrl(item.url, item.name)}>
                   {copiedName === item.name ? 'Copied!' : 'Copy URL'}
@@ -142,6 +223,9 @@ export default function ImagesPage() {
 
       {status === 'ready' && items.length === 0 && (
         <p className="admin-empty">No images uploaded yet.</p>
+      )}
+      {status === 'ready' && items.length > 0 && filtered.length === 0 && (
+        <p className="admin-empty">No images match "{query}".</p>
       )}
     </div>
   );

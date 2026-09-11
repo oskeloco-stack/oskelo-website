@@ -2,6 +2,12 @@ import './globals.css';
 import PromoBar from './components/PromoBar';
 import Analytics from './components/Analytics';
 
+// PromoBar reads admin-edited content; this keeps it (and any other
+// layout-level Supabase reads) refreshing on the same cadence as the rest of
+// the content-driven pages. Routes with a stricter config of their own (e.g.
+// /admin's force-dynamic) still take precedence for that subtree.
+export const revalidate = 60;
+
 export const metadata = {
   title: 'Oskelo — Video & Photo for Businesses, Individuals & Events',
   description:

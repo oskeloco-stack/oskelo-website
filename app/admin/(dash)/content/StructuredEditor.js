@@ -220,13 +220,49 @@ function Field({ label, path, value, onChange, onPick }) {
   );
 }
 
+// A page's own copy (home/about/contact/...) is a plain object, not a list —
+// render its fields directly instead of the "list of entries" UI below.
+function ObjectForm({ value, onChange }) {
+  const [pickerPath, setPickerPath] = useState(null);
+
+  function handleChange(path, newValue) {
+    onChange(setAt(value, path, newValue));
+  }
+
+  return (
+    <div className="admin-structured admin-structured-flat">
+      {Object.keys(value).map((k) => (
+        <Field
+          key={k}
+          label={k}
+          path={[k]}
+          value={value[k]}
+          onChange={handleChange}
+          onPick={setPickerPath}
+        />
+      ))}
+      <ImagePickerModal
+        open={pickerPath !== null}
+        onClose={() => setPickerPath(null)}
+        onPick={(url) => {
+          handleChange(pickerPath, url);
+          setPickerPath(null);
+        }}
+      />
+    </div>
+  );
+}
+
 export default function StructuredEditor({ value, onChange }) {
   const [pickerPath, setPickerPath] = useState(null);
 
   if (!Array.isArray(value)) {
+    if (value && typeof value === 'object') {
+      return <ObjectForm value={value} onChange={onChange} />;
+    }
     return (
       <p className="admin-json-error">
-        This section isn’t a list, so it can only be edited in the Raw JSON tab.
+        This section can only be edited in the Raw JSON tab.
       </p>
     );
   }
