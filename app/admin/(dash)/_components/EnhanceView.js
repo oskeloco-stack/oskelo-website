@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+const NEUTRAL = { brightness: 0, contrast: 0, saturation: 0, sharpen: 0, rotate: 0 };
+
 function baseName(name) {
   const dot = name.lastIndexOf('.');
   return dot > -1 ? name.slice(0, dot) : name;
@@ -13,67 +15,167 @@ function formatBytes(n) {
   return `${Math.round(n / 1024)} KB`;
 }
 
-// One row: the original file (previewed locally, never uploaded as-is) and
-// the auto-corrected result the server saved to the media library.
-function ResultRow({ result, onRename, onDelete }) {
+function uid() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// A rough-but-instant live preview of the slider values, layered as CSS on
+// top of the server-corrected image — no network round-trip while dragging.
+// Sharpening has no CSS equivalent, so it only shows up once you hit "Update
+// preview" or "Save", which re-run the real sharp pipeline.
+function liveStyle(adj) {
+  return {
+    filter: `brightness(${100 + adj.brightness}%) contrast(${100 + adj.contrast}%) saturate(${100 + adj.saturation}%)`,
+    transform: adj.rotate ? `rotate(${adj.rotate}deg)` : undefined,
+  };
+}
+
+function Slider({ label, value, onChange, min = -100, max = 100 }) {
+  return (
+    <label className="enhance-slider">
+      <span>{label}</span>
+      <input type="range" min={min} max={max} value={value} onChange={(e) => onChange(Number(e.target.value))} />
+      <span className="enhance-slider-value">{value > 0 ? `+${value}` : value}</span>
+    </label>
+  );
+}
+
+function ManualPanel({ item, onAdjust, onRotate, onReset, onRefresh, onSave }) {
+  const adj = item.adjustments;
+  return (
+    <div className="enhance-manual">
+      <Slider label="Brightness" value={adj.brightness} onChange={(v) => onAdjust('brightness', v)} />
+      <Slider label="Contrast" value={adj.contrast} onChange={(v) => onAdjust('contrast', v)} />
+      <Slider label="Saturation" value={adj.saturation} onChange={(v) => onAdjust('saturation', v)} />
+      <Slider label="Sharpen" value={adj.sharpen} onChange={(v) => onAdjust('sharpen', v)} min={0} max={100} />
+      <div className="enhance-manual-row">
+        <button type="button" className="admin-mini" onClick={onRotate}>⟲ Rotate 90°</button>
+        <span className="enhance-hint">Sharpen won't show until you update the preview.</span>
+      </div>
+      <div className="enhance-manual-actions">
+        <button type="button" className="admin-mini" onClick={onRefresh} disabled={item.refreshing}>
+          {item.refreshing ? 'Updating…' : 'Update preview'}
+        </button>
+        <button type="button" className="admin-mini" onClick={onReset}>Reset adjustments</button>
+        <button type="button" className="admin-primary" onClick={onSave} disabled={item.stage === 'saving'}>
+          {item.stage === 'saving' ? 'Saving…' : 'Save to Images'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EnhanceRow({ item, onSave, onDiscard, onToggleManual, onAdjust, onRotate, onReset, onRefresh, onRename, onDelete }) {
   const [renaming, setRenaming] = useState(false);
-  const [value, setValue] = useState(baseName(result.name));
+  const [renameValue, setRenameValue] = useState('');
   const [busy, setBusy] = useState(false);
 
-  async function commit() {
-    setRenaming(false);
-    const typed = value.trim();
-    if (!typed || typed === baseName(result.name)) return;
-    setBusy(true);
-    await onRename(result, typed);
-    setBusy(false);
+  if (item.stage === 'correcting') {
+    return (
+      <div className="enhance-row">
+        <div className="enhance-compare">
+          <figure><img src={item.beforeUrl} alt="" /><figcaption>{item.sourceName}</figcaption></figure>
+        </div>
+        <div className="enhance-meta"><span className="enhance-size">Correcting…</span></div>
+      </div>
+    );
   }
 
+  if (item.stage === 'error') {
+    return (
+      <div className="enhance-row">
+        <div className="enhance-compare">
+          <figure><img src={item.beforeUrl} alt="" /><figcaption>{item.sourceName}</figcaption></figure>
+        </div>
+        <div className="enhance-meta">
+          <p className="admin-json-error" style={{ margin: 0 }}>{item.error}</p>
+          <div className="admin-media-actions">
+            <button type="button" className="admin-mini admin-mini-danger" onClick={() => onDiscard(item)}>Dismiss</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (item.stage === 'saved') {
+    async function commitRename() {
+      setRenaming(false);
+      const typed = renameValue.trim();
+      if (!typed || typed === baseName(item.name)) return;
+      setBusy(true);
+      await onRename(item, typed);
+      setBusy(false);
+    }
+
+    return (
+      <div className="enhance-row">
+        <div className="enhance-compare">
+          <figure><img src={item.beforeUrl} alt="" /><figcaption>Before</figcaption></figure>
+          <figure><img src={item.url} alt="" /><figcaption>Saved</figcaption></figure>
+        </div>
+        <div className="enhance-meta">
+          {renaming ? (
+            <input
+              className="admin-media-rename"
+              autoFocus
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); if (e.key === 'Escape') setRenaming(false); }}
+            />
+          ) : (
+            <button type="button" className="admin-media-name" onClick={() => { setRenameValue(baseName(item.name)); setRenaming(true); }}>
+              {item.name}
+            </button>
+          )}
+          <span className="enhance-size">{formatBytes(item.bytes)} · saved to Images</span>
+          <div className="admin-media-actions">
+            <a className="admin-mini" href="/admin/images" target="_blank" rel="noreferrer">Open Images</a>
+            <button type="button" className="admin-mini admin-mini-danger" disabled={busy} onClick={() => onDelete(item)}>Delete</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // stage === 'reviewing': the auto-corrected result, not saved anywhere yet.
   return (
     <div className="enhance-row">
       <div className="enhance-compare">
+        <figure><img src={item.beforeUrl} alt="" /><figcaption>Before</figcaption></figure>
         <figure>
-          <img src={result.beforeUrl} alt="" />
-          <figcaption>Before</figcaption>
-        </figure>
-        <figure>
-          <img src={result.url} alt="" />
-          <figcaption>After — auto-corrected</figcaption>
+          <img src={item.previewUrl} alt="" style={liveStyle(item.adjustments)} />
+          <figcaption>{item.manualOpen ? 'Preview (with your adjustments)' : 'After — auto-corrected'}</figcaption>
         </figure>
       </div>
       <div className="enhance-meta">
-        {renaming ? (
-          <input
-            className="admin-media-rename"
-            autoFocus
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onBlur={commit}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') e.currentTarget.blur();
-              if (e.key === 'Escape') setRenaming(false);
-            }}
+        <span className="enhance-size">{formatBytes(item.previewBytes)} · not saved yet</span>
+        {item.error && <p className="admin-json-error" style={{ margin: 0 }}>{item.error}</p>}
+        {item.manualOpen ? (
+          <ManualPanel
+            item={item}
+            onAdjust={(key, v) => onAdjust(item, key, v)}
+            onRotate={() => onRotate(item)}
+            onReset={() => onReset(item)}
+            onRefresh={() => onRefresh(item)}
+            onSave={() => onSave(item)}
           />
         ) : (
-          <button type="button" className="admin-media-name" onClick={() => { setValue(baseName(result.name)); setRenaming(true); }}>
-            {result.name}
-          </button>
+          <div className="admin-media-actions">
+            <button type="button" className="admin-primary" onClick={() => onSave(item)} disabled={item.stage === 'saving'}>
+              {item.stage === 'saving' ? 'Saving…' : 'Send to Images'}
+            </button>
+            <button type="button" className="admin-mini" onClick={() => onToggleManual(item)}>Edit manually</button>
+            <button type="button" className="admin-mini admin-mini-danger" onClick={() => onDiscard(item)}>Discard</button>
+          </div>
         )}
-        <span className="enhance-size">{formatBytes(result.bytes)} · saved to Images</span>
-        <div className="admin-media-actions">
-          <a className="admin-mini" href="/admin/images" target="_blank" rel="noreferrer">Open Images</a>
-          <button type="button" className="admin-mini admin-mini-danger" disabled={busy} onClick={() => onDelete(result)}>
-            Delete
-          </button>
-        </div>
       </div>
     </div>
   );
 }
 
 export default function EnhanceView() {
-  const [queue, setQueue] = useState([]); // { id, fileName, status, error }
-  const [results, setResults] = useState([]);
+  const [items, setItems] = useState([]);
   const [dragOver, setDragOver] = useState(false);
   const fileInput = useRef(null);
 
@@ -92,70 +194,122 @@ export default function EnhanceView() {
     return () => window.removeEventListener('paste', onPaste);
   }, []);
 
-  async function processFiles(fileList) {
+  function patchItem(id, patch) {
+    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
+  }
+
+  function processFiles(fileList) {
     const files = Array.from(fileList || []);
-    if (files.length === 0) return;
-
-    const jobs = files.map((file) => ({
-      id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      fileName: file.name,
-      status: 'working',
-      error: '',
-    }));
-    setQueue((prev) => [...jobs, ...prev]);
-
-    for (let i = 0; i < files.length; i += 1) {
-      const file = files[i];
-      const job = jobs[i];
+    files.forEach((file) => {
+      const id = uid();
       const beforeUrl = URL.createObjectURL(file);
+      setItems((prev) => [
+        { id, file, beforeUrl, sourceName: file.name, stage: 'correcting', adjustments: { ...NEUTRAL }, manualOpen: false, error: '' },
+        ...prev,
+      ]);
+      runCorrection(id, file, NEUTRAL);
+    });
+  }
 
-      try {
-        const form = new FormData();
-        form.append('file', file);
-        const res = await fetch('/api/admin/enhance', { method: 'POST', body: form });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || 'Could not process that image.');
-
-        setResults((prev) => [{ ...data, beforeUrl, sourceName: file.name }, ...prev]);
-        setQueue((prev) => prev.map((q) => (q.id === job.id ? { ...q, status: 'done' } : q)));
-      } catch (err) {
-        setQueue((prev) => prev.map((q) => (q.id === job.id ? { ...q, status: 'error', error: err.message } : q)));
-      }
+  async function runCorrection(id, file, adjustments) {
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('save', '0');
+      form.append('auto', '1');
+      form.append('brightness', adjustments.brightness);
+      form.append('contrast', adjustments.contrast);
+      form.append('saturation', adjustments.saturation);
+      form.append('sharpen', adjustments.sharpen);
+      form.append('rotate', adjustments.rotate);
+      const res = await fetch('/api/admin/enhance', { method: 'POST', body: form });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not process that image.');
+      patchItem(id, { stage: 'reviewing', previewUrl: data.preview, previewBytes: data.bytes, refreshing: false });
+    } catch (err) {
+      patchItem(id, { stage: 'error', error: err.message });
     }
   }
 
-  async function onRename(result, typed) {
+  function refreshPreview(item) {
+    patchItem(item.id, { refreshing: true });
+    runCorrection(item.id, item.file, item.adjustments);
+  }
+
+  async function saveToImages(item) {
+    patchItem(item.id, { stage: 'saving' });
+    try {
+      const adj = item.adjustments;
+      const form = new FormData();
+      form.append('file', item.file);
+      form.append('save', '1');
+      form.append('auto', '1');
+      form.append('brightness', adj.brightness);
+      form.append('contrast', adj.contrast);
+      form.append('saturation', adj.saturation);
+      form.append('sharpen', adj.sharpen);
+      form.append('rotate', adj.rotate);
+      const res = await fetch('/api/admin/enhance', { method: 'POST', body: form });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not save that image.');
+      patchItem(item.id, { stage: 'saved', name: data.name, url: data.url, bytes: data.bytes });
+    } catch (err) {
+      patchItem(item.id, { stage: 'reviewing', error: err.message });
+    }
+  }
+
+  function discardItem(item) {
+    URL.revokeObjectURL(item.beforeUrl);
+    setItems((prev) => prev.filter((it) => it.id !== item.id));
+  }
+
+  function toggleManual(item) {
+    patchItem(item.id, { manualOpen: !item.manualOpen });
+  }
+
+  function adjust(item, key, value) {
+    patchItem(item.id, { adjustments: { ...item.adjustments, [key]: value } });
+  }
+
+  function rotate(item) {
+    const next = { ...item.adjustments, rotate: (item.adjustments.rotate + 90) % 360 };
+    patchItem(item.id, { adjustments: next });
+  }
+
+  function resetAdjustments(item) {
+    patchItem(item.id, { adjustments: { ...NEUTRAL } });
+  }
+
+  async function onRename(item, typed) {
     const res = await fetch('/api/admin/media', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: result.name, to: typed }),
+      body: JSON.stringify({ from: item.name, to: typed }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return;
-    setResults((prev) =>
-      prev.map((r) => (r === result ? { ...r, name: data.name, url: data.url || r.url } : r))
-    );
+    patchItem(item.id, { name: data.name, url: data.url || item.url });
   }
 
-  async function onDelete(result) {
-    if (!confirm(`Delete "${result.name}" from the image library?`)) return;
+  async function onDelete(item) {
+    if (!confirm(`Delete "${item.name}" from the image library?`)) return;
     await fetch('/api/admin/media', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: result.name }),
+      body: JSON.stringify({ name: item.name }),
     });
-    setResults((prev) => prev.filter((r) => r !== result));
+    setItems((prev) => prev.filter((it) => it.id !== item.id));
   }
 
-  const working = queue.some((q) => q.status === 'working');
+  const working = items.some((it) => it.stage === 'correcting');
 
   return (
     <div className="admin-page admin-page-wide">
       <h1>Enhance</h1>
       <p className="admin-lead">
-        Drop in any photo and it's automatically color- and contrast-corrected — auto white
-        balance, levels, a light saturation/sharpness boost — then saved as a new image in your
-        library. The original file is never changed or uploaded as-is.
+        Drop in any photo and it's automatically color- and contrast-corrected. Nothing is saved
+        until you choose to — review the result, fine-tune it by hand if you want, then send it to
+        Images or discard it. The original file is never changed.
       </p>
 
       <div
@@ -182,20 +336,24 @@ export default function EnhanceView() {
         <span>JPG, PNG, WebP, GIF, AVIF or TIFF · up to 60 MB each</span>
       </div>
 
-      {queue.some((q) => q.status === 'error') && (
-        <div className="admin-error" style={{ marginBottom: 16 }}>
-          {queue.filter((q) => q.status === 'error').map((q) => (
-            <div key={q.id}>{q.fileName}: {q.error}</div>
-          ))}
-        </div>
-      )}
-
-      {results.length === 0 ? (
+      {items.length === 0 ? (
         <p className="admin-empty">Nothing corrected yet this session.</p>
       ) : (
         <div className="enhance-list">
-          {results.map((r) => (
-            <ResultRow key={r.name + r.sourceName} result={r} onRename={onRename} onDelete={onDelete} />
+          {items.map((item) => (
+            <EnhanceRow
+              key={item.id}
+              item={item}
+              onSave={saveToImages}
+              onDiscard={discardItem}
+              onToggleManual={toggleManual}
+              onAdjust={adjust}
+              onRotate={rotate}
+              onReset={resetAdjustments}
+              onRefresh={refreshPreview}
+              onRename={onRename}
+              onDelete={onDelete}
+            />
           ))}
         </div>
       )}
