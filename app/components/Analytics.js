@@ -12,7 +12,7 @@ export default function Analytics() {
   const lastSent = useRef(null);
 
   useEffect(() => {
-    if (!pathname || pathname.startsWith('/admin')) return;
+    if (!pathname || pathname.startsWith('/admin') || pathname.startsWith('/preview')) return;
     if (lastSent.current === pathname) return;
 
     const dnt =

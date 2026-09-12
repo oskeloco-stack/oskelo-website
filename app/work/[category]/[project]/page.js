@@ -61,6 +61,11 @@ export default async function WorkProjectPage({ params }) {
                       src={photo.src}
                       alt={photo.alt ?? `${project.name} — photo ${index + 1}`}
                       loading="lazy"
+                      style={
+                        photo.focalX != null
+                          ? { objectPosition: `${photo.focalX}% ${photo.focalY}%` }
+                          : undefined
+                      }
                     />
                   </figure>
                 ))}

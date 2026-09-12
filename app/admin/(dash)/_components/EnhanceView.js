@@ -530,7 +530,7 @@ export default function EnhanceView() {
         className={`admin-drop admin-drop-lg${dragOver ? ' is-over' : ''}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => { e.preventDefault(); setDragOver(false); processFiles(e.dataTransfer.files); }}
+        onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); processFiles(e.dataTransfer.files); }}
         onClick={() => fileInput.current?.click()}
       >
         <input

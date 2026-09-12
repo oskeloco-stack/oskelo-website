@@ -15,7 +15,7 @@ function Group({ message }) {
 
 export default function PromoBarClient({ message }) {
   const pathname = usePathname();
-  if (pathname?.startsWith('/admin')) return null;
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/preview')) return null;
 
   return (
     <a className="promo-bar" href="/offers" aria-label={message}>

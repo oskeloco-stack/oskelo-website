@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import StructuredEditor from './StructuredEditor';
 import JsonEditor from './JsonEditor';
+import VisualEditor from '../_components/VisualEditor';
 
 const SECTIONS = [
   { key: 'home', label: 'Homepage' },
@@ -17,15 +18,21 @@ const SECTIONS = [
   { key: 'offers', label: 'Offers' },
 ];
 
+// Sections with a matching /preview/[key] template — see app/preview/[key]/page.js.
+// Work/Services/Offers are lists of cards/galleries, not page copy, so they
+// stay on the Form + Raw JSON pair only.
+const VISUAL_KEYS = new Set(['home', 'about', 'contact', 'terms', 'foundingOffer', 'promoBar', 'footer']);
+
 export default function ContentPage() {
   const [section, setSection] = useState('home');
-  const [mode, setMode] = useState('form'); // 'form' | 'json'
+  const [mode, setMode] = useState('visual'); // 'visual' | 'form' | 'json'
 
   const [value, setValue] = useState(null); // working copy
   const [jsonValid, setJsonValid] = useState(true);
   const [meta, setMeta] = useState({ isDefault: true, updatedAt: null });
   const [status, setStatus] = useState('loading'); // loading | ready | saving | saved | error
   const [message, setMessage] = useState('');
+  const savedSnapshot = useRef(null); // JSON string of `value` as last loaded/saved, for the unsaved-changes guard
 
   const load = useCallback((key) => {
     setStatus('loading');
@@ -39,6 +46,7 @@ export default function ContentPage() {
           return;
         }
         setValue(data.value);
+        savedSnapshot.current = JSON.stringify(data.value);
         setMeta({ isDefault: data.isDefault, updatedAt: data.updatedAt });
         setJsonValid(true);
         setStatus('ready');
@@ -51,10 +59,50 @@ export default function ContentPage() {
 
   useEffect(() => {
     load(section);
+    setMode(VISUAL_KEYS.has(section) ? 'visual' : 'form');
   }, [section, load]);
 
+  const isDirty = value != null && JSON.stringify(value) !== savedSnapshot.current;
+
+  // Warn before leaving the tab/window with unsaved edits — this is the one
+  // place in the admin where a stray tab close could quietly lose real work.
+  useEffect(() => {
+    function onBeforeUnload(e) {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = '';
+    }
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [isDirty]);
+
+  // Cmd/Ctrl+S saves the current section instead of triggering the browser's
+  // save-page dialog. Kept in a ref so the listener (attached once) always
+  // calls the save() from the latest render, not a stale closure.
+  const saveRef = useRef(() => {});
+  useEffect(() => {
+    function onKeyDown(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        saveRef.current();
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  function changeSection(key) {
+    if (key === section) return;
+    if (isDirty && !confirm('You have unsaved changes to this section. Switch anyway and lose them?')) {
+      return;
+    }
+    setSection(key);
+  }
+
   async function save() {
+    if (status === 'saving' || status === 'loading') return;
     if (mode === 'json' && !jsonValid) return;
+    if (value == null) return;
     setStatus('saving');
     setMessage('');
     const res = await fetch('/api/admin/content', {
@@ -68,10 +116,12 @@ export default function ContentPage() {
       setMessage(data.error || 'Save failed.');
       return;
     }
+    savedSnapshot.current = JSON.stringify(value);
     setStatus('saved');
     setMeta((m) => ({ ...m, isDefault: false, updatedAt: new Date().toISOString() }));
     setMessage('Saved. Live on the site within about a minute.');
   }
+  saveRef.current = save;
 
   async function resetToDefault() {
     if (!confirm('Discard your saved edits for this section and go back to the built-in content?')) {
@@ -90,6 +140,7 @@ export default function ContentPage() {
       return;
     }
     setValue(data.value);
+    savedSnapshot.current = JSON.stringify(data.value);
     setMeta({ isDefault: true, updatedAt: null });
     setStatus('saved');
     setMessage('Reset to the built-in content.');
@@ -101,8 +152,10 @@ export default function ContentPage() {
     value !== null &&
     (mode !== 'json' || jsonValid);
 
+  const supportsVisual = VISUAL_KEYS.has(section);
+
   return (
-    <div className="admin-page">
+    <div className={`admin-page${mode === 'visual' ? ' admin-page-wide' : ''}`}>
       <h1>Content</h1>
       <p className="admin-lead">
         Edit what the public pages show. Changes are stored in Supabase and picked
@@ -115,7 +168,7 @@ export default function ContentPage() {
             key={s.key}
             type="button"
             className={s.key === section ? 'is-active' : undefined}
-            onClick={() => setSection(s.key)}
+            onClick={() => changeSection(s.key)}
           >
             {s.label}
           </button>
@@ -124,6 +177,15 @@ export default function ContentPage() {
 
       <div className="admin-subbar">
         <div className="admin-modeswitch">
+          {supportsVisual && (
+            <button
+              type="button"
+              className={mode === 'visual' ? 'is-active' : undefined}
+              onClick={() => setMode('visual')}
+            >
+              Visual
+            </button>
+          )}
           <button
             type="button"
             className={mode === 'form' ? 'is-active' : undefined}
@@ -141,6 +203,7 @@ export default function ContentPage() {
         </div>
         <span className="admin-src-tag">
           {meta.isDefault ? 'Showing built-in content' : 'Showing your saved edits'}
+          {isDirty && <span className="admin-dirty-dot" title="Unsaved changes — Cmd/Ctrl+S to save"> ● Unsaved</span>}
         </span>
       </div>
 
@@ -148,7 +211,9 @@ export default function ContentPage() {
 
       {status !== 'loading' && value != null && (
         <>
-          {mode === 'form' ? (
+          {mode === 'visual' ? (
+            <VisualEditor pageKey={section} value={value} onChange={setValue} />
+          ) : mode === 'form' ? (
             <StructuredEditor value={value} onChange={setValue} />
           ) : (
             <JsonEditor

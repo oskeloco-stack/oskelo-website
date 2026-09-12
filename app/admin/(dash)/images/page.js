@@ -149,6 +149,7 @@ export default function ImagesPage() {
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => {
           e.preventDefault();
+          e.stopPropagation(); // this page has its own upload flow — don't also trigger the global drop zone
           setDragOver(false);
           upload(e.dataTransfer.files);
         }}
