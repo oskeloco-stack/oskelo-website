@@ -262,6 +262,19 @@
   font-family: inherit; width: 100%;
 }
 .admin-media-actions { display: flex; gap: 6px; }
+.admin-media { position: relative; }
+.admin-media.is-selected { border-color: var(--a-accent); box-shadow: 0 0 0 3px var(--a-accent-wash); }
+.admin-media-select {
+  position: absolute; top: 8px; left: 8px; z-index: 1; width: 22px; height: 22px;
+  display: grid; place-items: center; background: rgba(255,255,255,.9); border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.admin-media-select input { width: 15px; height: 15px; accent-color: var(--a-accent); margin: 0; }
+.admin-select-bar {
+  display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 8px 12px;
+  background: var(--a-accent-wash); border: 1px solid var(--a-accent); border-radius: 9px; font-size: 13px;
+}
+.admin-select-bar span { font-weight: 600; color: var(--a-text); }
 
 /* ---------- Enhance (auto color-correct) ---------- */
 .enhance-list { display: flex; flex-direction: column; gap: 16px; }

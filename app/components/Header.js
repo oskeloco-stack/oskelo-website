@@ -1,21 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { SERVICES } from '../../lib/services';
 import { WORK_CATEGORIES } from '../../lib/work';
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const closeMobile = () => setMobileOpen(false);
   const pathname = usePathname();
   const isHome = pathname === '/';
 
+  // The header's translucent fade only looks right over the homepage hero
+  // photo — anywhere else (or once scrolled past it) it lets page text show
+  // through and overlap the nav, so it goes solid as soon as you scroll.
+  useEffect(() => {
+    if (!isHome) return;
+    function onScroll() {
+      setScrolled(window.scrollY > 10);
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isHome]);
+
+  const isSolid = !isHome || scrolled;
+
   return (
-    <header>
+    <header className={isSolid ? 'is-solid' : undefined}>
       <div className="nav">
         <a className="logo" href="/#top">
-          <img className="logo-img" src="/4.png" alt="Oskelo" />
+          <img className="logo-img" src="/4.webp" alt="Oskelo" />
         </a>
         <nav className="nav-links">
           {!isHome && <a href="/">Home</a>}

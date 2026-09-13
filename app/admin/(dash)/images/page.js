@@ -19,6 +19,8 @@ export default function ImagesPage() {
   const [renameValue, setRenameValue] = useState('');
   const [justUploaded, setJustUploaded] = useState(() => new Set());
   const [zoomedUrl, setZoomedUrl] = useState(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState(() => new Set());
   const fileInput = useRef(null);
 
   function refresh() {
@@ -115,6 +117,47 @@ export default function ImagesPage() {
     setMessage(`Renamed to "${data.name}".`);
   }
 
+  function toggleSelected(name) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false);
+    setSelected(new Set());
+  }
+
+  async function removeSelected() {
+    const names = Array.from(selected);
+    if (names.length === 0) return;
+    if (!confirm(`Delete ${names.length} image${names.length === 1 ? '' : 's'}? Pages still using their URLs will show a broken image.`)) {
+      return;
+    }
+    setMessage('');
+    const results = await Promise.all(
+      names.map((name) =>
+        fetch('/api/admin/media', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name }),
+        }).then((r) => ({ name, ok: r.ok }))
+      )
+    );
+    const deleted = new Set(results.filter((r) => r.ok).map((r) => r.name));
+    const failed = results.filter((r) => !r.ok).map((r) => r.name);
+    setItems((prev) => prev.filter((i) => !deleted.has(i.name)));
+    setSelected(new Set());
+    setMessage(
+      failed.length > 0
+        ? `Deleted ${deleted.size}. Failed: ${failed.join(', ')}.`
+        : `Deleted ${deleted.size} image${deleted.size === 1 ? '' : 's'}.`
+    );
+  }
+
   async function copyUrl(url, name) {
     try {
       await navigator.clipboard.writeText(url);
@@ -171,24 +214,69 @@ export default function ImagesPage() {
       {status === 'error' && <p className="admin-json-error">{message}</p>}
 
       {items.length > 0 && (
-        <input
-          type="text"
-          className="admin-search"
-          placeholder={`Search ${items.length} image name${items.length === 1 ? '' : 's'}…`}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className="admin-field-row" style={{ marginBottom: 4 }}>
+          <input
+            type="text"
+            className="admin-search"
+            placeholder={`Search ${items.length} image name${items.length === 1 ? '' : 's'}…`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            style={{ marginBottom: 0 }}
+          />
+          {!selectMode ? (
+            <button type="button" className="admin-mini" onClick={() => setSelectMode(true)}>
+              Select
+            </button>
+          ) : (
+            <button type="button" className="admin-mini" onClick={exitSelectMode}>
+              Cancel
+            </button>
+          )}
+        </div>
+      )}
+
+      {selectMode && (
+        <div className="admin-select-bar">
+          <span>{selected.size} selected</span>
+          <button
+            type="button"
+            className="admin-mini"
+            onClick={() => setSelected(new Set(filtered.map((i) => i.name)))}
+          >
+            Select all {filtered.length !== items.length ? `(${filtered.length} shown)` : ''}
+          </button>
+          <button
+            type="button"
+            className="admin-mini admin-mini-danger"
+            disabled={selected.size === 0}
+            onClick={removeSelected}
+          >
+            Delete selected
+          </button>
+        </div>
       )}
 
       <div className="admin-media-grid">
         {filtered.map((item) => (
-          <figure className={`admin-media${justUploaded.has(item.name) ? ' is-new' : ''}`} key={item.name}>
+          <figure
+            className={`admin-media${justUploaded.has(item.name) ? ' is-new' : ''}${selected.has(item.name) ? ' is-selected' : ''}`}
+            key={item.name}
+          >
+            {selectMode && (
+              <label className="admin-media-select">
+                <input
+                  type="checkbox"
+                  checked={selected.has(item.name)}
+                  onChange={() => toggleSelected(item.name)}
+                />
+              </label>
+            )}
             <img
               className="is-zoomable"
               src={item.url}
               alt=""
               loading="lazy"
-              onClick={() => setZoomedUrl(item.url)}
+              onClick={() => (selectMode ? toggleSelected(item.name) : setZoomedUrl(item.url))}
             />
             <figcaption>
               {renaming === item.name ? (
