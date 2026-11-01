@@ -2,6 +2,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Contact from './components/Contact';
 import FoundingOffer from './components/FoundingOffer';
+import ReelVideo from './components/ReelVideo';
 import { SERVICES } from '../lib/services';
 import { WORK_CATEGORIES } from '../lib/work';
 import { HOME_DEFAULT } from '../lib/pageContent';
@@ -10,7 +11,7 @@ import { getContent } from '../lib/siteContent';
 export const revalidate = 60;
 
 const REELS = [
-  { label: 'Event Promo', video: '/work/reels/car-show-2027.mp4', poster: '/work/reels/car-show-2027.jpg' },
+  { label: 'Event Promo', title: 'Car Show 2027', video: '/work/reels/car-show-2027.mp4', poster: '/work/reels/car-show-2027.jpg' },
   { label: 'Brand Story' },
   { label: 'Product Launch' },
   { label: 'Social Cutdown' },
@@ -135,7 +136,7 @@ export default async function Home() {
             <div className="reels-row">
               {REELS.map((reel) => reel.video ? (
                 <div className="reel-card has-video" key={reel.label}>
-                  <video src={reel.video} poster={reel.poster} controls playsInline preload="none" aria-label={reel.label} />
+                  <ReelVideo src={reel.video} poster={reel.poster} eyebrow={reel.label} title={reel.title} />
                 </div>
               ) : (
                 <div className="reel-card" key={reel.label}>
