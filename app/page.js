@@ -10,10 +10,10 @@ import { getContent } from '../lib/siteContent';
 export const revalidate = 60;
 
 const REELS = [
+  { label: 'Event Promo', video: '/work/reels/car-show-2027.mp4', poster: '/work/reels/car-show-2027.jpg' },
   { label: 'Brand Story' },
   { label: 'Product Launch' },
   { label: 'Social Cutdown' },
-  { label: 'Event Recap' },
   { label: 'Behind the Scenes' },
 ];
 
@@ -133,7 +133,11 @@ export default async function Home() {
               <p>{c.reelsIntro}</p>
             </div>
             <div className="reels-row">
-              {REELS.map((reel) => (
+              {REELS.map((reel) => reel.video ? (
+                <div className="reel-card has-video" key={reel.label}>
+                  <video src={reel.video} poster={reel.poster} controls playsInline preload="none" aria-label={reel.label} />
+                </div>
+              ) : (
                 <div className="reel-card" key={reel.label}>
                   <span className="reel-play">▶</span>
                   <span className="reel-label">{reel.label}</span>

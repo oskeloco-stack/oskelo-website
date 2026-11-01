@@ -780,6 +780,13 @@ header.is-solid{
   transition: border-color .2s ease, transform .2s ease;
 }
 .reel-card:hover{ border-color: var(--amber); transform: translateY(-4px); }
+.reel-card.has-video{ background: #000; }
+.reel-card video{
+  position:absolute;
+  inset:0;
+  width:100%; height:100%;
+  object-fit: cover;
+}
 .reel-play{
   position:absolute;
   top:50%; left:50%;
