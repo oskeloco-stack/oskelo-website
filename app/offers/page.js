@@ -21,7 +21,7 @@ export default async function OffersPage() {
     <>
       <Header />
 
-      <main>
+      <main id="main">
         <div className="wrap">
           <section className="section page-intro" id="offers">
             <div className="section-head">

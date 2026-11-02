@@ -1,7 +1,6 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Contact from '../components/Contact';
-import FoundingOffer from '../components/FoundingOffer';
 import Plans from '../components/Plans';
 import OneTimeGrid from '../components/OneTimeGrid';
 import ServiceBlock from '../components/ServiceBlock';
@@ -28,7 +27,7 @@ export default async function ServicesPage() {
     <>
       <Header />
 
-      <main>
+      <main id="main">
         <div className="wrap">
           <section className="section page-intro" id="monthly-plans">
             <div className="section-head">
@@ -44,7 +43,9 @@ export default async function ServicesPage() {
               <p>{home.packagesIntro}</p>
             </div>
             <Plans service={monthly} />
-            <FoundingOffer />
+            <p className="more-link">
+              <a href="/services/monthly-plans">How footage, revisions and delivery work <span aria-hidden="true">→</span></a>
+            </p>
           </section>
         </div>
 

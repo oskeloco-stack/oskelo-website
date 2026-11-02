@@ -1,10 +1,10 @@
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Contact from './components/Contact';
-import FoundingOffer from './components/FoundingOffer';
 import Plans from './components/Plans';
 import OneTimeGrid from './components/OneTimeGrid';
 import ReelVideo from './components/ReelVideo';
+import Values from './components/Values';
 import { SERVICES, getService } from '../lib/services';
 import { WORK_CATEGORIES } from '../lib/work';
 import { HOME_DEFAULT } from '../lib/pageContent';
@@ -42,7 +42,7 @@ export default async function Home() {
     <>
       <Header />
 
-      <main id="top">
+      <main id="main">
         <section className="hero">
           <div className="hero-bg">
             <video className="hero-video" src={HERO_VIDEO.src} poster={HERO_VIDEO.poster} autoPlay muted loop playsInline preload="auto" aria-hidden="true" />
@@ -56,6 +56,12 @@ export default async function Home() {
               <a className="btn btn-solid" href="#plans">{c.heroCta1Label}</a>
               <a className="btn btn-outline" href="/work">{c.heroCta2Label}</a>
             </div>
+            {monthly?.plans?.[0] && (
+              <p className="hero-price">
+                Monthly plans from <b>{monthly.plans[0].price.replace(/^Starting at /, '')}</b>
+                <span aria-hidden="true">·</span> One-time projects available
+              </p>
+            )}
           </div>
         </section>
 
@@ -92,7 +98,6 @@ export default async function Home() {
               </div>
 
               <Plans service={monthly} />
-              <FoundingOffer />
 
               <div className="subhead">
                 <h3>{c.packagesOneTimeLabel}</h3>
@@ -155,9 +160,12 @@ export default async function Home() {
                 </div>
                 <div className="reels-row">
                   {reels.map((reel) => (
-                    <div className="reel-card has-video" key={reel.name}>
-                      <ReelVideo src={reel.video} poster={reel.image} eyebrow={reel.tag} title={reel.name} />
-                    </div>
+                    <figure className="reel-item" key={reel.name}>
+                      <div className="reel-card has-video">
+                        <ReelVideo src={reel.video} poster={reel.image} eyebrow={reel.tag} title={reel.name} />
+                      </div>
+                      {reel.description && <figcaption>{reel.description}</figcaption>}
+                    </figure>
                   ))}
                 </div>
               </section>
@@ -172,18 +180,9 @@ export default async function Home() {
                 <div className="eyebrow">{c.valuesEyebrow}</div>
                 <h2>{c.valuesHeading}</h2>
               </div>
+              {c.valuesIntro && <p>{c.valuesIntro}</p>}
             </div>
-            <dl className="values">
-              {c.values.map((v, i) => (
-                <div className="value" key={i}>
-                  <dt>
-                    <span className="value-letter" aria-hidden="true">{v.letter}</span>
-                    <span className="value-word">{v.word}</span>
-                  </dt>
-                  <dd>{v.body}</dd>
-                </div>
-              ))}
-            </dl>
+            <Values values={c.values} />
           </section>
         </div>
 

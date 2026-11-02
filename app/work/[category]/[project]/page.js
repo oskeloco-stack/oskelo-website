@@ -40,7 +40,7 @@ export default async function WorkProjectPage({ params }) {
     <>
       <Header />
 
-      <main>
+      <main id="main">
         <div className="wrap">
           <section className="section" id="work-project">
             <div className="section-head">

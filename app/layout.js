@@ -61,6 +61,7 @@ export default function RootLayout({ children }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
       </head>
       <body>
+        <a className="skip-link" href="#main">Skip to content</a>
         <PromoBar />
         {children}
         <Analytics />

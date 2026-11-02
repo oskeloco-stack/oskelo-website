@@ -19,7 +19,7 @@ export default async function ContactPage() {
     <>
       <Header />
 
-      <main>
+      <main id="main">
         <div className="wrap">
           <section className="section legal" id="contact-intro">
             <div className="section-head">

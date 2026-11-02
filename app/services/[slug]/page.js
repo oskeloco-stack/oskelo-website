@@ -5,7 +5,7 @@ import Contact from '../../components/Contact';
 import FoundingOffer from '../../components/FoundingOffer';
 import Plans from '../../components/Plans';
 import ServiceBlock from '../../components/ServiceBlock';
-import { SERVICES, getService } from '../../../lib/services';
+import { SERVICES, MONTHLY_GUIDE, getService } from '../../../lib/services';
 import { getContent } from '../../../lib/siteContent';
 
 export const revalidate = 60;
@@ -28,6 +28,85 @@ const SEO = {
     description: 'Business, headshot, portrait and event photography in Lancaster, PA. Contact OSKELO for a quote.',
   },
 };
+
+function MonthlyGuide({ guide }) {
+  return (
+    <>
+      <div className="section-alt">
+        <div className="wrap">
+          <section className="section" id="editing-vs-filming">
+            <div className="section-head">
+              <div>
+                <div className="eyebrow">Which plan fits</div>
+                <h2>You film, or we film</h2>
+              </div>
+              <p>The real difference between the plans is who captures the footage.</p>
+            </div>
+            <div className="modes">
+              {guide.modes.map((m) => (
+                <div className="mode" key={m.title}>
+                  <div className="mode-plans">{m.plans}</div>
+                  <h3>{m.title}</h3>
+                  <p>{m.body}</p>
+                  <ul>{m.points.map((pt) => <li key={pt}>{pt}</li>)}</ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div className="wrap">
+        <section className="section" id="sending-footage">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow">Starter &amp; Growth</div>
+              <h2>Sending us your footage</h2>
+            </div>
+            <p>No editing skills needed. If you can film on your phone, you can use these plans.</p>
+          </div>
+          <div className="footage-guide">
+            <ol className="footage-steps">
+              {guide.footageSteps.map((step, i) => (
+                <li key={i}>
+                  <span className="process-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="footage-tips">
+              <h3>Filming tips</h3>
+              <ul>{guide.filmingTips.map((t) => <li key={t}>{t}</li>)}</ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div className="section-alt">
+        <div className="wrap">
+          <section className="section" id="details">
+            <div className="section-head">
+              <div>
+                <div className="eyebrow">Details</div>
+                <h2>What to expect</h2>
+              </div>
+              <p>Anything specific to your business is agreed with you before your plan starts.</p>
+            </div>
+            <div className="faq">
+              {guide.details.map((d) => (
+                <details key={d.q}>
+                  <summary>{d.q}</summary>
+                  <p>{d.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}
 
 export function generateStaticParams() {
   return SERVICES.map((service) => ({ slug: service.slug }));
@@ -56,7 +135,7 @@ export default async function ServicePage({ params }) {
     <>
       <Header />
 
-      <main>
+      <main id="main">
         <div className="wrap">
           <section className="section page-intro" id="service-detail">
             {isMonthly ? (
@@ -76,6 +155,8 @@ export default async function ServicePage({ params }) {
             )}
           </section>
         </div>
+
+        {isMonthly && <MonthlyGuide guide={MONTHLY_GUIDE} />}
 
         <Contact />
       </main>

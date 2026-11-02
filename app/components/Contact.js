@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { INQUIRY_INTERESTS } from '../../lib/services';
+import { useEffect, useRef, useState } from 'react';
+import { INQUIRY_INTERESTS, resolveInterest } from '../../lib/services';
 
-const EMPTY = { name: '', business: '', email: '', interest: '', message: '', budget: '', timeline: '', website: '' };
+const EMPTY = { name: '', business: '', email: '', interest: '', detail: '', message: '', budget: '', timeline: '', website: '' };
 
 const BUDGETS = ['Under $300', '$300–$600', '$600–$1,000', '$1,000+', 'Not sure yet'];
 
@@ -13,18 +13,18 @@ export default function Contact({
 }) {
   const [form, setForm] = useState(EMPTY);
   const [status, setStatus] = useState({ state: 'idle', message: '' });
+  const startedAt = useRef(Date.now());
 
-  // Plan buttons link here with ?interest=… so the right option is preselected.
+  // Buttons elsewhere link here with ?interest=… so the right option is preselected.
   useEffect(() => {
-    const interest = new URLSearchParams(window.location.search).get('interest');
-    if (!interest) return;
-    const match = INQUIRY_INTERESTS.find((opt) => opt === interest)
-      || INQUIRY_INTERESTS.find((opt) => opt.toLowerCase().startsWith(interest.toLowerCase()));
-    if (match) setForm((f) => ({ ...f, interest: match }));
+    const match = resolveInterest(new URLSearchParams(window.location.search).get('interest'));
+    if (match) setForm((f) => ({ ...f, ...match }));
   }, []);
 
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // A different choice than the one a button preselected drops its detail line.
+    setForm((f) => ({ ...f, [name]: value, ...(name === 'interest' ? { detail: '' } : {}) }));
   }
 
   async function handleSubmit(e) {
@@ -35,7 +35,7 @@ export default function Contact({
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, elapsed: Date.now() - startedAt.current }),
       });
       const data = await res.json();
 
@@ -64,12 +64,17 @@ export default function Contact({
         </div>
 
         {status.state === 'success' ? (
-          <div className="form-done" role="status">
+          <div className="form-done" role="status" tabIndex={-1} ref={(el) => el?.focus()}>
             <div className="form-done-mark" aria-hidden="true">✓</div>
-            <h3>Thanks{status.message ? `, ${status.message}` : ''}. We’ve got your message.</h3>
+            <h3>Thanks{status.message ? `, ${status.message}` : ''}. Your message is in.</h3>
+            <ol className="form-done-steps">
+              <li><b>We read it</b> and look at what your business needs.</li>
+              <li><b>We reply by email</b>, usually within one business day, with questions or next steps.</li>
+              <li><b>If it’s a fit</b>, we set up a short call to plan your content.</li>
+            </ol>
             <p>
-              We’ll read it and reply to the email you gave us, usually within one business day.
-              If it’s urgent, email <a href="mailto:contact@oskelo.com">contact@oskelo.com</a>.
+              Nothing back in two business days? Check your spam folder, or email{' '}
+              <a href="mailto:contact@oskelo.com">contact@oskelo.com</a>.
             </p>
             <button type="button" className="btn btn-outline btn-sm" onClick={() => setStatus({ state: 'idle', message: '' })}>
               Send another message
@@ -80,42 +85,50 @@ export default function Contact({
             <div className="form-row">
               <div className="form-field">
                 <label htmlFor="name">Your name</label>
-                <input id="name" name="name" type="text" autoComplete="name" required value={form.name} onChange={handleChange} />
+                <input id="name" name="name" type="text" autoComplete="name" required maxLength={200} value={form.name} onChange={handleChange} />
               </div>
               <div className="form-field">
-                <label htmlFor="business">Business <span className="opt">(optional)</span></label>
-                <input id="business" name="business" type="text" autoComplete="organization" value={form.business} onChange={handleChange} />
+                <label htmlFor="email">Email</label>
+                <input id="email" name="email" type="email" autoComplete="email" required maxLength={200} value={form.email} onChange={handleChange} />
               </div>
-            </div>
-            <div className="form-field">
-              <label htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" autoComplete="email" required value={form.email} onChange={handleChange} />
-            </div>
-            <div className="form-field">
-              <label htmlFor="interest">What are you interested in?</label>
-              <select id="interest" name="interest" required value={form.interest} onChange={handleChange}>
-                <option value="" disabled>Choose one</option>
-                {INQUIRY_INTERESTS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-              </select>
             </div>
             <div className="form-field">
               <label htmlFor="message">Tell us about your project</label>
-              <textarea id="message" name="message" required value={form.message} onChange={handleChange}
+              <textarea id="message" name="message" required maxLength={5000} value={form.message} onChange={handleChange}
                 placeholder="What does your business do, and what kind of content do you need?" />
             </div>
-            <div className="form-row">
-              <div className="form-field">
-                <label htmlFor="budget">Budget <span className="opt">(optional)</span></label>
-                <select id="budget" name="budget" value={form.budget} onChange={handleChange}>
-                  <option value="">Prefer not to say</option>
-                  {BUDGETS.map((b) => <option key={b} value={b}>{b}</option>)}
-                </select>
+
+            <fieldset className="form-optional">
+              <legend>Optional, but helpful</legend>
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="interest">What can we help with?</label>
+                  <select id="interest" name="interest" value={form.interest} onChange={handleChange}>
+                    <option value="">Choose one</option>
+                    {INQUIRY_INTERESTS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  {form.detail && <span className="form-hint">Selected: {form.detail}</span>}
+                </div>
+                <div className="form-field">
+                  <label htmlFor="business">Business name</label>
+                  <input id="business" name="business" type="text" autoComplete="organization" maxLength={200} value={form.business} onChange={handleChange} />
+                </div>
               </div>
-              <div className="form-field">
-                <label htmlFor="timeline">Timeline <span className="opt">(optional)</span></label>
-                <input id="timeline" name="timeline" type="text" placeholder="e.g. next month" value={form.timeline} onChange={handleChange} />
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="budget">Budget</label>
+                  <select id="budget" name="budget" value={form.budget} onChange={handleChange}>
+                    <option value="">Prefer not to say</option>
+                    {BUDGETS.map((b) => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="timeline">Timeline</label>
+                  <input id="timeline" name="timeline" type="text" placeholder="e.g. next month" maxLength={200} value={form.timeline} onChange={handleChange} />
+                </div>
               </div>
-            </div>
+            </fieldset>
+
             {/* Honeypot: hidden from people, bots fill it in. */}
             <div className="form-hp" aria-hidden="true">
               <label htmlFor="website">Website</label>
@@ -124,6 +137,7 @@ export default function Contact({
             <button className="btn btn-solid" type="submit" disabled={status.state === 'loading'}>
               {status.state === 'loading' ? 'Sending…' : 'Send inquiry'}
             </button>
+            <p className="form-fine">We only use your details to reply to you.</p>
             {status.state === 'error' && <p className="form-status error" role="alert">{status.message}</p>}
           </form>
         )}

@@ -15,14 +15,19 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
-    // Honeypot filled in → pretend success, store nothing.
-    if (clean(body.website)) return NextResponse.json({ success: true });
+    // Spam checks: honeypot filled in, or submitted faster than a person could
+    // type (the form sends how long it was open). Pretend success, store nothing.
+    const elapsed = Number(body.elapsed);
+    if (clean(body.website) || (Number.isFinite(elapsed) && elapsed < 2500)) {
+      return NextResponse.json({ success: true });
+    }
 
     const name = clean(body.name, 200);
     const email = clean(body.email, 200);
     const message = clean(body.message, 5000);
     const business = clean(body.business, 200);
     const interest = clean(body.interest, 200);
+    const detail = clean(body.detail, 200);
     const budget = clean(body.budget, 100);
     const timeline = clean(body.timeline, 200);
 
@@ -40,7 +45,7 @@ export async function POST(request) {
     // inquiry details are stored as labeled lines above the message itself.
     const details = [
       business && `Business: ${business}`,
-      interest && `Interested in: ${interest}`,
+      interest && `Interested in: ${interest}${detail ? ` (${detail})` : ''}`,
       budget && `Budget: ${budget}`,
       timeline && `Timeline: ${timeline}`,
     ].filter(Boolean);

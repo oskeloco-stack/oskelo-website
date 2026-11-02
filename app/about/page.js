@@ -23,7 +23,7 @@ export default async function About() {
     <>
       <Header />
 
-      <main>
+      <main id="main">
         <div className="wrap">
           <section className="section page-intro" id="about">
             <div className="section-head">
@@ -41,6 +41,7 @@ export default async function About() {
               </div>
             )}
 
+            <div className="team-label">The team</div>
             <div className="team-grid">
               {(c.team || []).map((member) => (
                 <div className="team-card" key={member.name}>
@@ -57,6 +58,29 @@ export default async function About() {
             </div>
           </section>
         </div>
+
+        {c.promises?.length > 0 && (
+          <div className="section-alt">
+            <div className="wrap">
+              <section className="section" id="how-we-work">
+                <div className="section-head">
+                  <div>
+                    <div className="eyebrow">How we work</div>
+                    <h2>{c.promisesHeading}</h2>
+                  </div>
+                </div>
+                <div className="point-grid">
+                  {c.promises.map((p, i) => (
+                    <div className="point" key={i}>
+                      <h3>{p.title}</h3>
+                      <p>{p.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </div>
+        )}
 
         <Contact heading="Want to work with us?" />
       </main>

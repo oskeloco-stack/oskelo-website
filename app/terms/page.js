@@ -18,7 +18,7 @@ export default async function Terms() {
     <>
       <Header />
 
-      <main>
+      <main id="main">
         <div className="wrap">
           <section className="section legal">
             <div className="section-head">

@@ -19,7 +19,7 @@ export default async function WorkPage() {
     <>
       <Header />
 
-      <main>
+      <main id="main">
         <div className="wrap">
           <section className="section" id="work-overview">
             <div className="section-head">

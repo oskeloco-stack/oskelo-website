@@ -25,12 +25,20 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [isHome]);
 
+  // Escape closes the mobile menu.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function onKey(e) { if (e.key === 'Escape') setMobileOpen(false); }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileOpen]);
+
   const isSolid = !isHome || scrolled;
 
   return (
     <header className={isSolid ? 'is-solid' : undefined}>
       <div className="nav">
-        <a className="logo" href="/#top">
+        <a className="logo" href="/" aria-label="OSKELO home">
           <img className="logo-img" src="/4.webp" alt="Oskelo" />
         </a>
         <nav className="nav-links">
