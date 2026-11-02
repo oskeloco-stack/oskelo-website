@@ -21,7 +21,7 @@ _Previously (2026-09-11 session): finished Supabase setup (`site_content` table,
 
 ## Current state
 
-- **Round 5 (2026-11-02, QA/refinement brief). LOCAL ONLY — awaiting approval to publish.**
+- **Round 5 (2026-11-02, QA/refinement brief).** Owner said "Publish it" → committed `de9edce`, **pushed and confirmed live**: crawl of www.oskelo.com clean (17 pages, 67 URLs), `/preview/home` → 307 login, `/admin` → 307, `/api/admin/messages` → 401, comparison table only on monthly-plans.
   - **Reported issues re-checked live first:** `/work` and `/contact` on www.oskelo.com already have the current design (no promo-bar, no `/admin` link, new footer, new form, one h1, one "Contact" eyebrow) — the brief again described an older cached copy. Admin: `/admin*` → 307 login, `/api/admin/*` → 401.
   - **Security:** `/preview/*` (admin Visual-editor iframe) was publicly viewable (read-only, defaults); now gated by `proxy.js` like `/admin` (local check: 307 → `/admin/login?next=/preview/home`).
   - **Portfolio:** new shared `app/components/WorkGroups.js` (grouping + rendering) used by `/work/[category]` and the new `/work` landing, which now shows the real videos and photo galleries inline (video first) with jump chips and "View all" links instead of two link cards. Video groups are now `Small-Business Promotions / Short-Form Social / Events / Creative Production` (car-show reels = Events); headings appear only once 2+ groups have work. Photography stays its own category.
