@@ -1734,3 +1734,104 @@ footer{ padding: 56px 0 28px; border-top: 1px solid var(--line); font-size: 14px
   .reel-item figcaption{ font-size: 12px; }
   .work-block-head{ flex-direction: column; align-items: flex-start; }
 }
+
+/* ---------- Mobile tidy-up (phones only; desktop untouched) ---------- */
+
+@media (max-width: 700px){
+  /* rhythm: tighter, even spacing between and inside sections */
+  .section{ padding: 52px 0; }
+  .page-intro{ padding-top: 36px; }
+  .why-section{ padding-top: 44px; }
+  .section-head{ gap: 12px; margin-bottom: 26px; padding-bottom: 16px; }
+  .section-head h1, .section-head h2{ font-size: 27px; line-height: 1.1; }
+  .section-head p{ font-size: 14px; line-height: 1.55; }
+
+  /* hero: clear the header, equal full-width buttons, tidy price line */
+  .hero{ min-height: 0; padding: 44px 0 64px; align-items: flex-start; }
+  .hero-content .eyebrow{ font-size: 10.5px; letter-spacing: 0.14em; margin-bottom: 14px; }
+  .hero-content h1{ font-size: 38px; margin-bottom: 18px; }
+  .hero-content p{ font-size: 16px; line-height: 1.55; margin-bottom: 24px; }
+  .hero-ctas{ display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .hero-ctas .btn{ width: 100%; }
+  .hero-price{ margin-top: 18px !important; line-height: 1.7; }
+  .hero-price-dot{ display: none; }
+  .hero-price .hero-price-alt{ display: block; margin: 0; }
+
+  /* what we do: 2x2 instead of a long stack */
+  .point-grid.cols-4{ grid-template-columns: 1fr 1fr; gap: 26px 18px; }
+  .point-grid.cols-4 .point{ padding-top: 16px; }
+  .point-grid.cols-4 .point-num{ margin-bottom: 8px; }
+  .point-grid.cols-4 .point h3{ font-size: 15px; }
+  .point-grid.cols-4 .point p{ font-size: 13px; line-height: 1.55; }
+  .point-grid:not(.cols-4){ gap: 22px; }
+  .point h3{ font-size: 16px; }
+  .point p{ font-size: 14px; }
+
+  /* plan cards: compact, one-line buttons */
+  .plan-grid{ gap: 20px; }
+  .plan{ padding: 26px 20px 22px; }
+  .plan-price{ font-size: 30px; margin: 16px 0 8px; }
+  .plan-bestfor{ font-size: 13.5px; margin-bottom: 16px; padding-bottom: 16px; }
+  .plan-features{ gap: 8px; font-size: 13.5px; margin-bottom: 22px; }
+  .plan .btn, .package .btn, .service-detail .btn{ width: 100%; padding: 14px 12px; font-size: 12px; letter-spacing: 0.06em; }
+  .plan-note, .travel-note{ font-size: 11px; line-height: 1.55; }
+  .more-link{ font-size: 13px; }
+
+  /* how it works: number beside the text instead of above it */
+  .process li, .process li + li{ display: grid; grid-template-columns: 52px 1fr; column-gap: 10px; padding: 0; border-left: 0; }
+  .process-num{ grid-row: span 2; font-size: 34px; margin: 0; }
+  .process h3{ font-size: 15px; margin: 4px 0 6px; }
+  .process p{ font-size: 13.5px; }
+  .footage-steps li{ grid-template-columns: 52px 1fr; }
+
+  /* one-time list and photo strip */
+  .onetime{ padding: 18px 18px; }
+  .onetime-price{ font-size: 19px; }
+  .photo-strip{ margin-top: 40px; }
+  .photo-strip-grid{ gap: 10px; }
+
+  /* values letters */
+  .okv-panel-word{ font-size: 18px; }
+  .okv-panel p{ font-size: 15px; }
+
+  /* founding note */
+  .founding{ padding: 22px 20px; }
+  .founding h3{ font-size: 16px; }
+
+  /* photo gallery cards: smaller labels so 2 columns don't crowd */
+  .work-grid{ gap: 10px; }
+  .work-card--photo .tag{ left: 8px; right: 8px; bottom: 8px; padding: 8px 10px; }
+  .work-card .tag b{ font-size: 13px; letter-spacing: 0.02em; }
+  .work-card .tag span{ display: none; }
+  .work-group + .work-group{ margin-top: 32px; }
+  .work-block + .work-block{ margin-top: 48px; padding-top: 40px; }
+  .work-jump{ margin: -8px 0 32px; }
+
+  /* about: compact team cards with the avatar beside the name */
+  .about-story{ margin-bottom: 36px; }
+  .about-story p{ font-size: 16px; }
+  .team-grid{ gap: 12px; }
+  .team-card{ display: grid; grid-template-columns: 72px 1fr; column-gap: 16px; padding: 18px; }
+  .team-avatar{ width: 72px; grid-row: span 3; margin: 0; }
+  .team-avatar span{ font-size: 22px; }
+  .team-card p{ grid-column: 2; margin-top: 6px; font-size: 13px; }
+
+  /* monthly plans page */
+  .mode{ padding: 24px 20px; }
+  .footage-tips{ padding: 22px 20px; }
+  .faq summary{ font-size: 15px; padding: 16px 32px 16px 0; }
+
+  /* contact */
+  .contact-inner{ gap: 28px; }
+  .contact h1, .contact h2{ font-size: 30px; margin-bottom: 14px; }
+  .contact p{ font-size: 15px; margin-bottom: 22px; }
+  .contact-email a{ font-size: 17px; }
+  .contact form .btn{ width: 100%; }
+  .form-field{ margin-bottom: 16px; }
+  .form-done{ padding: 28px 22px; }
+
+  /* footer: copyright and terms on one line */
+  footer{ padding: 40px 0 24px; }
+  .footer-grid{ gap: 24px; margin-bottom: 24px; }
+  .footer-base{ flex-direction: row; justify-content: space-between; align-items: center; }
+}

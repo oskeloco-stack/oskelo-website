@@ -62,7 +62,8 @@ export default async function Home() {
             {monthly?.plans?.[0] && (
               <p className="hero-price">
                 Monthly plans from <b>{monthly.plans[0].price.replace(/^Starting at /, '')}</b>
-                <span aria-hidden="true">·</span> One-time projects available
+                <span className="hero-price-dot" aria-hidden="true">·</span>
+                <span className="hero-price-alt">One-time projects available</span>
               </p>
             )}
           </div>
