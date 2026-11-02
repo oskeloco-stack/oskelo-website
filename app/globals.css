@@ -1893,3 +1893,53 @@ footer{ padding: 56px 0 28px; border-top: 1px solid var(--line); font-size: 14px
   .team-avatar{ width: 72px; max-width: none; }
   .reel-duration{ top: 8px; right: 8px; font-size: 10px; }
 }
+
+/* ---------- Round 7: values — all six descriptions always visible ---------- */
+
+.okv-list{
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--line);
+}
+.okv-item{
+  padding: 22px 22px 24px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transition: background .25s ease;
+  outline: none;
+}
+.okv-item:nth-child(3n){ border-right: 0; }
+.okv-item:nth-last-child(-n+3){ border-bottom: 0; }
+.okv-item dt{
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.okv-item-letter{ color: var(--amber); font-size: 18px; }
+.okv-item dd{ margin: 0; font-size: 14px; line-height: 1.6; color: var(--grey); }
+.okv-item.is-active{ background: rgba(var(--amber-rgb),0.06); }
+.okv-item.is-active dd{ color: var(--ink); }
+.okv-item:focus-visible{ box-shadow: inset 0 0 0 2px var(--amber); }
+.okv-letter{ cursor: default; }
+
+@media (max-width: 900px){
+  .okv-list{ grid-template-columns: 1fr 1fr; }
+  .okv-item:nth-child(3n){ border-right: 1px solid var(--line); }
+  .okv-item:nth-child(2n){ border-right: 0; }
+  .okv-item:nth-last-child(-n+3){ border-bottom: 1px solid var(--line); }
+  .okv-item:nth-last-child(-n+2){ border-bottom: 0; }
+}
+@media (max-width: 560px){
+  .okv-list{ grid-template-columns: 1fr; }
+  .okv-item, .okv-item:nth-child(3n){ border-right: 0; padding: 16px 4px 18px; }
+  .okv-item:nth-last-child(-n+2){ border-bottom: 1px solid var(--line); }
+  .okv-item:last-child{ border-bottom: 0; }
+}
