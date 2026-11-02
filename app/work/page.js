@@ -25,12 +25,16 @@ export default async function WorkPage() {
       <main id="main">
         <div className="wrap">
           <section className="section page-intro" id="work-overview">
-            <div className="section-head">
-              <div>
+            <div className="work-hero">
+              <video className="work-hero-video" poster="/hero/showreel.jpg" autoPlay muted loop playsInline preload="metadata" aria-hidden="true">
+                <source src="/hero/showreel-mobile.mp4" type="video/mp4" media="(max-width: 700px)" />
+                <source src="/hero/showreel.mp4" type="video/mp4" />
+              </video>
+              <div className="work-hero-text">
                 <div className="eyebrow">Work</div>
                 <h1>See what we create</h1>
+                <p>Video and photography we&rsquo;ve produced ourselves. New projects are added as we finish them.</p>
               </div>
-              <p>Video and photography we&rsquo;ve produced ourselves. New projects are added as we finish them.</p>
             </div>
             <nav className="work-jump" aria-label="Portfolio sections">
               {ordered.map((category) => (

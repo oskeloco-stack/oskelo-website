@@ -19,7 +19,7 @@ function Cell({ value }) {
 
 // Monthly plan cards, with an optional comparison table underneath.
 // `service` is the monthly-plans entry from the (admin-editable) services list.
-export default function Plans({ service, compare = true, ctaHref = '/contact' }) {
+export default function Plans({ service, compare = true, travel = 'full', ctaHref = '/contact' }) {
   if (!service?.plans) return null;
   const plans = service.plans;
   const showCompare = compare && plans.every((p) => p.specs);
@@ -52,7 +52,7 @@ export default function Plans({ service, compare = true, ctaHref = '/contact' })
       </div>
 
       {showCompare && (
-        <div className="cmp-wrap">
+        <div className="cmp-wrap" id="compare">
           <table className="cmp">
             <caption className="sr-only">Monthly plan comparison</caption>
             <thead>
@@ -81,7 +81,13 @@ export default function Plans({ service, compare = true, ctaHref = '/contact' })
         </div>
       )}
 
-      {plans.some((p) => p.travel) && <p className="plan-note">{TRAVEL_NOTE}</p>}
+      {plans.some((p) => p.travel) && (travel === 'short' ? (
+        <p className="plan-note">
+          On-site plans include travel within about 15 miles. <a href="/services/monthly-plans#details">Travel details</a>
+        </p>
+      ) : (
+        <p className="plan-note">{TRAVEL_NOTE}</p>
+      ))}
     </>
   );
 }

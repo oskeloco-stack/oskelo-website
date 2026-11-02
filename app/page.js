@@ -105,7 +105,7 @@ export default async function Home() {
                   {reels.map((reel) => (
                     <figure className="reel-item" key={reel.name}>
                       <div className="reel-card has-video">
-                        <ReelVideo src={reel.video} poster={reel.image} eyebrow={reel.tag} title={reel.name} />
+                        <ReelVideo src={reel.video} poster={reel.image} eyebrow={reel.tag} title={reel.name} duration={reel.duration} />
                       </div>
                       {reel.description && <figcaption>{reel.description}</figcaption>}
                     </figure>
@@ -126,9 +126,9 @@ export default async function Home() {
               </div>
               <p>{c.packagesIntro}</p>
             </div>
-            <Plans service={monthly} compare={false} />
+            <Plans service={monthly} compare={false} travel="short" />
             <p className="more-link">
-              <a href="/services/monthly-plans">Compare plans in detail, plus how footage and delivery work <span aria-hidden="true">→</span></a>
+              <a href="/services/monthly-plans#compare">Compare all plans <span aria-hidden="true">→</span></a>
             </p>
           </section>
         </div>

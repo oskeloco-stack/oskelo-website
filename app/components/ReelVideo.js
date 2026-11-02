@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 // Poster + title cover until clicked. On devices with a real mouse, hovering
 // plays a silent preview (skipped for reduced-motion users); clicking starts
 // the full video from the top with sound and controls.
-export default function ReelVideo({ src, poster, eyebrow, title }) {
+export default function ReelVideo({ src, poster, eyebrow, title, duration }) {
   const videoRef = useRef(null);
   const [started, setStarted] = useState(false);
   const [previewing, setPreviewing] = useState(false);
@@ -80,6 +80,7 @@ export default function ReelVideo({ src, poster, eyebrow, title }) {
           aria-label={`Play ${title}`}
         >
           <span className="reel-play">▶</span>
+          {duration && <span className="reel-duration">{duration}</span>}
           <span className="reel-cover-text">
             <span className="reel-cover-eyebrow">{eyebrow}</span>
             <span className="reel-cover-title">{title}</span>
