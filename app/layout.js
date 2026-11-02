@@ -43,6 +43,8 @@ const JSON_LD = {
   areaServed: [
     { '@type': 'City', name: 'Lancaster', containedInPlace: { '@type': 'State', name: 'Pennsylvania' } },
     { '@type': 'AdministrativeArea', name: 'Lancaster County, PA' },
+    ...['Lititz', 'Ephrata', 'Manheim', 'Mount Joy', 'Elizabethtown', 'Millersville', 'Strasburg', 'Columbia']
+      .map((name) => ({ '@type': 'City', name, containedInPlace: { '@type': 'State', name: 'Pennsylvania' } })),
   ],
   address: { '@type': 'PostalAddress', addressLocality: 'Lancaster', addressRegion: 'PA', addressCountry: 'US' },
   knowsAbout: ['Video production', 'Short-form video editing', 'Social media videography', 'Business photography', 'Event videography'],

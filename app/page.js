@@ -5,6 +5,7 @@ import Plans from './components/Plans';
 import OneTimeGrid from './components/OneTimeGrid';
 import ReelVideo from './components/ReelVideo';
 import Values from './components/Values';
+import FoundingOffer from './components/FoundingOffer';
 import { SERVICES, getService } from '../lib/services';
 import { WORK_CATEGORIES } from '../lib/work';
 import { HOME_DEFAULT } from '../lib/pageContent';
@@ -15,7 +16,7 @@ export const revalidate = 60;
 export const metadata = {
   title: { absolute: 'OSKELO | Video Production & Content Creation in Lancaster, PA' },
   description:
-    'You run your business. We run your content. Monthly short-form video, social media videography, editing and business photography for small businesses in Lancaster, PA.',
+    'You run your business. We run your content. Monthly short-form video, social media videography, editing and business photography for small businesses in Lancaster, PA and surrounding Lancaster County.',
   alternates: { canonical: '/' },
 };
 
@@ -23,10 +24,6 @@ export const metadata = {
 // silent, ~15s, <5 MB MP4 + a poster frame into /public/hero/ and point these at them.
 const HERO_VIDEO = { src: '/hero/showreel.mp4', poster: '/hero/showreel.jpg' };
 
-// Cover media for work categories that have no photo collage of their own.
-const CATEGORY_VIDEO = {
-  'video-editing': HERO_VIDEO,
-};
 
 export default async function Home() {
   const services = await getContent('services', SERVICES);
@@ -37,6 +34,8 @@ export default async function Home() {
   const monthly = getService('monthly-plans', services);
   // Reels come from the Video & Editing portfolio, so adding one there shows it here too.
   const reels = (categories.find((cat) => cat.slug === 'video-editing')?.items || []).filter((item) => item.video);
+  // Photography gallery covers for the one-time section, straight from the portfolio.
+  const photoGalleries = (categories.find((cat) => cat.slug === 'photography')?.items || []).filter((item) => item.image && item.slug);
 
   return (
     <>
@@ -66,7 +65,7 @@ export default async function Home() {
         </section>
 
         <div className="wrap">
-          <section className="section why-section" id="why">
+          <section className="section why-section" id="what-we-do">
             <div className="section-head">
               <div>
                 <div className="eyebrow">{c.whyEyebrow}</div>
@@ -74,7 +73,7 @@ export default async function Home() {
               </div>
               <p>{c.whyIntro}</p>
             </div>
-            <div className="point-grid">
+            <div className="point-grid cols-4">
               {c.whyPoints.map((point, i) => (
                 <div className="point" key={i}>
                   <span className="point-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
@@ -83,67 +82,6 @@ export default async function Home() {
                 </div>
               ))}
             </div>
-          </section>
-        </div>
-
-        <div className="section-alt">
-          <div className="wrap">
-            <section className="section" id="plans">
-              <div className="section-head">
-                <div>
-                  <div className="eyebrow">{c.packagesEyebrow}</div>
-                  <h2>{c.packagesHeading}</h2>
-                </div>
-                <p>{c.packagesIntro}</p>
-              </div>
-
-              <Plans service={monthly} />
-
-              <div className="subhead">
-                <h3>{c.packagesOneTimeLabel}</h3>
-                <p>{c.packagesOneTimeIntro}</p>
-              </div>
-              <OneTimeGrid services={services} />
-            </section>
-          </div>
-        </div>
-
-        <div className="wrap">
-          <section className="intro-offer" id="preview">
-            <div className="intro-offer-main">
-              <div className="eyebrow">{c.introEyebrow}</div>
-              <h2>{c.introHeading}</h2>
-              <p>{c.introBody}</p>
-              <a className="btn btn-solid" href={`/contact?interest=${encodeURIComponent('Free first-video preview')}#contact`}>
-                {c.introCta}
-              </a>
-            </div>
-            <div className="intro-offer-terms">
-              <div className="intro-offer-terms-label">How it works</div>
-              <ul>
-                {c.introConditions.map((line, i) => <li key={i}>{line}</li>)}
-              </ul>
-            </div>
-          </section>
-        </div>
-
-        <div className="wrap">
-          <section className="section" id="how-it-works">
-            <div className="section-head">
-              <div>
-                <div className="eyebrow">{c.stepsEyebrow}</div>
-                <h2>{c.stepsHeading}</h2>
-              </div>
-            </div>
-            <ol className="process">
-              {c.steps.map((step, i) => (
-                <li key={i}>
-                  <span className="process-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-                  <h3>{step.title}</h3>
-                  <p>{step.body}</p>
-                </li>
-              ))}
-            </ol>
           </section>
         </div>
 
@@ -168,57 +106,97 @@ export default async function Home() {
                     </figure>
                   ))}
                 </div>
+                <p className="more-link"><a href="/work">See all our work <span aria-hidden="true">→</span></a></p>
               </section>
             </div>
           </div>
         )}
 
         <div className="wrap">
-          <section className="section" id="values">
+          <section className="section" id="plans">
             <div className="section-head">
               <div>
-                <div className="eyebrow">{c.valuesEyebrow}</div>
-                <h2>{c.valuesHeading}</h2>
+                <div className="eyebrow">{c.packagesEyebrow}</div>
+                <h2>{c.packagesHeading}</h2>
               </div>
-              {c.valuesIntro && <p>{c.valuesIntro}</p>}
+              <p>{c.packagesIntro}</p>
             </div>
-            <Values values={c.values} />
+            <Plans service={monthly} />
+            <p className="more-link">
+              <a href="/services/monthly-plans">How footage, revisions and delivery work <span aria-hidden="true">→</span></a>
+            </p>
           </section>
         </div>
 
         <div className="section-alt">
           <div className="wrap">
-            <section className="section" id="work">
+            <section className="section" id="how-it-works">
               <div className="section-head">
                 <div>
-                  <div className="eyebrow">{c.workEyebrow}</div>
-                  <h2>{c.workHeading}</h2>
+                  <div className="eyebrow">{c.stepsEyebrow}</div>
+                  <h2>{c.stepsHeading}</h2>
                 </div>
-                <p>{c.workIntro}</p>
               </div>
-              <div className="link-cards cols-2">
-                {categories.map((category) => (
-                  <a className="link-card" href={`/work/${category.slug}`} key={category.slug}>
-                    <div className={`link-card-media${category.images ? ' is-collage' : ''}`}>
-                      {category.images?.map((src) => (
-                        <img src={src} alt="" key={src} loading="lazy" />
-                      ))}
-                      {!category.images && CATEGORY_VIDEO[category.slug] && (
-                        <video
-                          src={CATEGORY_VIDEO[category.slug].src}
-                          poster={CATEGORY_VIDEO[category.slug].poster}
-                          autoPlay muted loop playsInline preload="metadata" aria-hidden="true"
-                        />
-                      )}
-                    </div>
-                    <h3>{category.title}</h3>
-                    <p>{category.subtitle}</p>
-                    <span className="link-card-cta">View work →</span>
-                  </a>
+              <ol className="process">
+                {c.steps.map((step, i) => (
+                  <li key={i}>
+                    <span className="process-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                    <h3>{step.title}</h3>
+                    <p>{step.body}</p>
+                  </li>
                 ))}
-              </div>
+              </ol>
             </section>
           </div>
+        </div>
+
+        <div className="wrap">
+          <section className="section" id="one-time">
+            <div className="section-head">
+              <div>
+                <div className="eyebrow">{c.packagesOneTimeLabel}</div>
+                <h2>{c.oneTimeHeading}</h2>
+              </div>
+              <p>{c.packagesOneTimeIntro}</p>
+            </div>
+            <OneTimeGrid services={services} />
+
+            {photoGalleries.length > 0 && (
+              <div className="photo-strip">
+                <div className="photo-strip-head">
+                  <h3>{c.photoHeading}</h3>
+                  <a href="/work/photography">View photography <span aria-hidden="true">→</span></a>
+                </div>
+                <div className="photo-strip-grid">
+                  {photoGalleries.map((g) => (
+                    <a className="photo-strip-item" href={`/work/photography/${g.slug}`} key={g.slug}>
+                      <img src={g.image} alt={`${g.name}: ${g.tag}`} loading="lazy" />
+                      <span>{g.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+
+        <div className="section-alt">
+          <div className="wrap">
+            <section className="section" id="values">
+              <div className="section-head">
+                <div>
+                  <div className="eyebrow">{c.valuesEyebrow}</div>
+                  <h2>{c.valuesHeading}</h2>
+                </div>
+                {c.valuesIntro && <p>{c.valuesIntro}</p>}
+              </div>
+              <Values values={c.values} />
+            </section>
+          </div>
+        </div>
+
+        <div className="wrap founding-wrap">
+          <FoundingOffer />
         </div>
 
         <Contact heading={c.closingHeading} intro={c.closingBody} />

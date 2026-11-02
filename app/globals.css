@@ -1301,9 +1301,8 @@ footer{ padding: 56px 0 28px; border-top: 1px solid var(--line); font-size: 14px
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0;
-  counter-reset: none;
 }
 .process li{
   position: relative;
@@ -1454,8 +1453,8 @@ footer{ padding: 56px 0 28px; border-top: 1px solid var(--line); font-size: 14px
   .intro-offer{ grid-template-columns: 1fr; margin-top: 56px; }
   .intro-offer-main, .intro-offer-terms{ padding: 32px 24px; }
   .intro-offer-terms{ border-left: 0; border-top: 1px solid rgba(var(--amber-rgb),0.25); }
-  .process{ grid-template-columns: 1fr 1fr; gap: 32px 0; }
-  .process li:nth-child(3){ padding-left: 0; border-left: 0; }
+  .process{ grid-template-columns: 1fr; gap: 28px; }
+  .process li, .process li + li{ padding: 0; border-left: 0; }
   .values{ grid-template-columns: 1fr 1fr; }
   .value{ padding: 22px 18px; }
   .value-letter{ font-size: 36px; }
@@ -1652,4 +1651,57 @@ footer{ padding: 56px 0 28px; border-top: 1px solid var(--line); font-size: 14px
   .okv-letter{ padding: 22px 2px 18px; gap: 8px; }
   .okv-name{ font-size: 9px; letter-spacing: 0.08em; }
   .reel-item{ flex-basis: 210px; }
+}
+
+/* ---------- Round 3 additions ---------- */
+
+.founding-wrap{ padding-top: 72px; }
+.founding{ align-items: flex-start; }
+.founding-conditions{
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 28px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--grey);
+}
+.founding-conditions li{ position: relative; padding-left: 16px; }
+.founding-conditions li::before{ content: '—'; position: absolute; left: 0; color: var(--amber); }
+.founding-actions{ display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: 0 0 auto; }
+.founding-terms{ font-size: 12px; color: var(--grey-dim); text-decoration: underline; text-underline-offset: 3px; }
+.founding-terms:hover{ color: var(--ink); }
+
+.photo-strip{ margin-top: 56px; }
+.photo-strip-head{ display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.photo-strip-head h3{
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0;
+}
+.photo-strip-head a{ font-size: 13px; font-weight: 600; color: var(--ink); }
+.photo-strip-head a:hover{ color: var(--amber); }
+.photo-strip-grid{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.photo-strip-item{ position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 4px; background: var(--ph-2); }
+.photo-strip-item img{ width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease, filter .3s ease; }
+.photo-strip-item::after{ content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(var(--bg-rgb),0.85)); }
+.photo-strip-item span{
+  position: absolute; left: 14px; bottom: 12px; z-index: 1;
+  font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 14px;
+  text-transform: uppercase; color: #faf7f1;
+}
+.photo-strip-item:hover img{ transform: scale(1.04); filter: brightness(1.06); }
+@media (prefers-reduced-motion: reduce){ .photo-strip-item:hover img{ transform: none; } }
+
+@media (max-width: 900px){
+  .founding-wrap{ padding-top: 44px; }
+  .founding-conditions{ grid-template-columns: 1fr; }
+  .founding-actions{ align-items: flex-start; }
+  .photo-strip-grid{ grid-template-columns: 1fr 1fr; }
 }

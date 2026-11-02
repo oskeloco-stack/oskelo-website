@@ -45,7 +45,7 @@ export default function Plans({ service, compare = true, ctaHref = '/contact' })
               className={`btn ${plan.featured ? 'btn-solid' : 'btn-outline'}`}
               href={`${ctaHref}?interest=${encodeURIComponent(`Monthly plan: ${plan.name}`)}#contact`}
             >
-              Start with {plan.name}
+              Get started with {plan.name}
             </a>
           </article>
         ))}
