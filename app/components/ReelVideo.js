@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Poster + title cover until clicked. On devices with a real mouse, hovering
 // plays a silent preview (skipped for reduced-motion users); clicking starts
@@ -9,6 +9,21 @@ export default function ReelVideo({ src, poster, eyebrow, title }) {
   const videoRef = useRef(null);
   const [started, setStarted] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+
+  // Only one reel plays with sound at a time: starting one pauses the others.
+  useEffect(() => {
+    function onOtherPlay(e) {
+      if (e.detail !== videoRef.current) videoRef.current?.pause();
+    }
+    window.addEventListener('oskelo:reel-play', onOtherPlay);
+    return () => window.removeEventListener('oskelo:reel-play', onOtherPlay);
+  }, []);
+
+  // When a video finishes, go back to the cover so the card looks finished too.
+  function reset() {
+    setStarted(false);
+    videoRef.current?.load();
+  }
 
   function canPreview() {
     return typeof window !== 'undefined'
@@ -38,6 +53,7 @@ export default function ReelVideo({ src, poster, eyebrow, title }) {
     if (!v) return;
     v.muted = false;
     v.currentTime = 0;
+    window.dispatchEvent(new CustomEvent('oskelo:reel-play', { detail: v }));
     v.play().catch(() => {});
   }
 
@@ -51,6 +67,7 @@ export default function ReelVideo({ src, poster, eyebrow, title }) {
         playsInline
         loop={!started}
         preload="none"
+        onEnded={started ? reset : undefined}
         aria-label={title}
       />
       {!started && (

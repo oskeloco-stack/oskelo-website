@@ -125,9 +125,9 @@ export default async function Home() {
               </div>
               <p>{c.packagesIntro}</p>
             </div>
-            <Plans service={monthly} />
+            <Plans service={monthly} compare={false} />
             <p className="more-link">
-              <a href="/services/monthly-plans">How footage, revisions and delivery work <span aria-hidden="true">→</span></a>
+              <a href="/services/monthly-plans">Compare plans in detail, plus how footage and delivery work <span aria-hidden="true">→</span></a>
             </p>
           </section>
         </div>

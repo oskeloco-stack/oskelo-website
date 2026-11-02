@@ -42,7 +42,8 @@ export async function proxy(request) {
 
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === '/admin/login';
-  const isAdminPage = pathname.startsWith('/admin') && !isLoginPage;
+  // /preview is the admin Visual editor's iframe; it gets the same sign-in gate.
+  const isAdminPage = (pathname.startsWith('/admin') || pathname.startsWith('/preview')) && !isLoginPage;
 
   if (isAdminPage && !user) {
     const redirectUrl = request.nextUrl.clone();
@@ -63,5 +64,5 @@ export async function proxy(request) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*', '/preview/:path*'],
 };

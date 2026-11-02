@@ -1,6 +1,7 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Contact from '../components/Contact';
+import WorkGroups from '../components/WorkGroups';
 import { WORK_CATEGORIES } from '../../lib/work';
 import { getContent } from '../../lib/siteContent';
 
@@ -14,6 +15,8 @@ export const metadata = {
 
 export default async function WorkPage() {
   const categories = await getContent('work', WORK_CATEGORIES);
+  // Video first: it's the core of what we sell.
+  const ordered = [...categories].sort((a, b) => (a.slug === 'video-editing' ? -1 : b.slug === 'video-editing' ? 1 : 0));
 
   return (
     <>
@@ -21,32 +24,32 @@ export default async function WorkPage() {
 
       <main id="main">
         <div className="wrap">
-          <section className="section" id="work-overview">
+          <section className="section page-intro" id="work-overview">
             <div className="section-head">
               <div>
                 <div className="eyebrow">Work</div>
                 <h1>See what we create</h1>
               </div>
-              <p>Choose photography or video &amp; editing to browse recent projects.</p>
+              <p>Video and photography we&rsquo;ve produced ourselves. New projects are added as we finish them.</p>
             </div>
-            <div className="link-cards cols-2">
-              {categories.map((category) => (
-                <a className="link-card" href={`/work/${category.slug}`} key={category.slug}>
-                  <div className={`link-card-media${category.images ? ' is-collage' : ''}`}>
-                    {category.images
-                      ? category.images.map((src) => (
-                          <img src={src} alt="" key={src} loading="lazy" />
-                        ))
-                      : category.cover && (
-                          <img src={category.cover} alt={`${category.title} work`} loading="lazy" />
-                        )}
-                  </div>
-                  <h3>{category.title}</h3>
-                  <p>{category.subtitle}</p>
-                  <span className="link-card-cta">View work →</span>
-                </a>
+            <nav className="work-jump" aria-label="Portfolio sections">
+              {ordered.map((category) => (
+                <a href={`#${category.slug}`} key={category.slug}>{category.title}</a>
               ))}
-            </div>
+            </nav>
+
+            {ordered.map((category) => (
+              <div className="work-block" id={category.slug} key={category.slug}>
+                <div className="work-block-head">
+                  <div>
+                    <h2>{category.title}</h2>
+                    <p>{category.subtitle}</p>
+                  </div>
+                  <a href={`/work/${category.slug}`}>View all {category.title.toLowerCase()} <span aria-hidden="true">→</span></a>
+                </div>
+                <WorkGroups category={category} headingLevel={3} />
+              </div>
+            ))}
           </section>
         </div>
 
