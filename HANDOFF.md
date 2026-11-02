@@ -21,7 +21,7 @@ _Previously (2026-09-11 session): finished Supabase setup (`site_content` table,
 
 ## Current state
 
-- **Round 4 (2026-11-02, "Finalizing the Redesign" brief). LOCAL ONLY — awaiting approval to publish.**
+- **Round 4 (2026-11-02, "Finalizing the Redesign" brief).** Owner said "Publish it" → committed `0befa5d`, **pushed and confirmed live**: the same crawl run against https://www.oskelo.com passed (17 pages, 68 URLs, 0 broken, all checks ok).
   - **Homepage discrepancy investigated — not reproducible on the server.** Owner described the *original* pre-redesign homepage ("Content built to stand out", ticker, old nav, basic form, footer Admin link). Checks: DNS for oskelo.com/www → Vercel IPs only (216.150.x), no AAAA; all of http/https × apex/www land on https://www.oskelo.com; homepage HTML fetched as Chrome, iPhone Safari, Googlebot and ChatGPT-User all contain the new hero and none contain "Content built"; `Cache-Control: public, max-age=0, must-revalidate`; no service worker/manifest; "Content built" exists nowhere in source (only in git history before `0a9ad45`). Conclusion: a stale copy on the viewer's side (long-open tab / browser cache, or the review tool's cached snapshot). Fix for owner: hard refresh (Ctrl+F5) or private window.
   - **Contact page:** the page intro + identical contact section are now one block (`<Contact isPage>` renders the page `h1`); intro copy merged.
   - **Headings/SEO:** every interior page now has exactly one `h1` (was h2-only); `ServiceBlock` takes `headingLevel`; project gallery pages got canonical + Lancaster description.
