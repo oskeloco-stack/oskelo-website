@@ -21,7 +21,7 @@ _Previously (2026-09-11 session): finished Supabase setup (`site_content` table,
 
 ## Current state
 
-- **Round 6 (2026-11-02, "ready for clients" polish brief). LOCAL ONLY — awaiting approval to publish.**
+- **Round 6 (2026-11-02, "ready for clients" polish brief).** Owner said "Publish it" → committed `1316a2f`, **pushed and confirmed live**: crawl of www.oskelo.com clean (17 pages / 67 URLs), all CTAs resolve, prices match, /work intro band + 3 duration badges present.
   - **Brief items 1–3 already live** (re-verified on www.oskelo.com): /contact has one h1 and no "Ready to take content" duplicate; /work shows reels + galleries, no link cards; homepage has 3 plan cards and no comparison table.
   - Homepage plans link now reads exactly "Compare all plans →" (→ `/services/monthly-plans#compare`); homepage travel note is a one-liner linking to `#details` (`<Plans travel="short">`); the full note stays on the plans pages. Monthly-plans FAQ dropped its travel question (it repeated the note directly above).
   - /work: cinematic intro band (`.work-hero`) using our own showreel loop (mobile file on phones, poster for reduced motion) behind the h1.
