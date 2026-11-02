@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import Contact from '../../components/Contact';
+import ContactCTA from '../../components/ContactCTA';
 import WorkGroups from '../../components/WorkGroups';
 import { WORK_CATEGORIES, getWorkCategory } from '../../../lib/work';
 import { getContent } from '../../../lib/siteContent';
@@ -54,7 +54,7 @@ export default async function WorkCategoryPage({ params }) {
           </section>
         </div>
 
-        <Contact />
+        <ContactCTA interest={category.slug === 'photography' ? 'Photography' : undefined} />
       </main>
 
       <Footer />

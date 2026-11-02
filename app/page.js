@@ -2,10 +2,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Contact from './components/Contact';
 import Plans from './components/Plans';
-import OneTimeGrid from './components/OneTimeGrid';
 import ReelVideo from './components/ReelVideo';
 import Values from './components/Values';
-import FoundingOffer from './components/FoundingOffer';
 import { SERVICES, getService } from '../lib/services';
 import { WORK_CATEGORIES } from '../lib/work';
 import { HOME_DEFAULT } from '../lib/pageContent';
@@ -105,7 +103,7 @@ export default async function Home() {
                   {reels.map((reel) => (
                     <figure className="reel-item" key={reel.name}>
                       <div className="reel-card has-video">
-                        <ReelVideo src={reel.video} poster={reel.image} eyebrow={reel.tag} title={reel.name} duration={reel.duration} />
+                        <ReelVideo src={reel.video} poster={reel.image} eyebrow={reel.tag} title={reel.name} duration={reel.duration} description={reel.description} />
                       </div>
                       {reel.description && <figcaption>{reel.description}</figcaption>}
                     </figure>
@@ -129,6 +127,10 @@ export default async function Home() {
             <Plans service={monthly} compare={false} travel="short" />
             <p className="more-link">
               <a href="/services/monthly-plans#compare">Compare all plans <span aria-hidden="true">→</span></a>
+            </p>
+            <p className="founding-line">
+              <span>Founding clients:</span> our first five monthly clients keep their starting rate while subscribed.{' '}
+              <a href="/services/monthly-plans#founding-offer">Details</a>
             </p>
           </section>
         </div>
@@ -164,8 +166,6 @@ export default async function Home() {
               </div>
               <p>{c.packagesOneTimeIntro}</p>
             </div>
-            <OneTimeGrid services={services} />
-
             {photoGalleries.length > 0 && (
               <div className="photo-strip">
                 <div className="photo-strip-head">
@@ -182,6 +182,9 @@ export default async function Home() {
                 </div>
               </div>
             )}
+            <p className="more-link one-time-link">
+              <a href="/services#one-time">See one-time projects &amp; pricing <span aria-hidden="true">→</span></a>
+            </p>
           </section>
         </div>
 
@@ -200,9 +203,6 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="wrap founding-wrap">
-          <FoundingOffer />
-        </div>
 
         <Contact heading={c.closingHeading} intro={c.closingBody} />
       </main>

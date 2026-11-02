@@ -1,6 +1,6 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Contact from '../components/Contact';
+import ContactCTA from '../components/ContactCTA';
 import WorkGroups from '../components/WorkGroups';
 import { WORK_CATEGORIES } from '../../lib/work';
 import { getContent } from '../../lib/siteContent';
@@ -12,6 +12,14 @@ export const metadata = {
   description: 'Short-form video, event promos and photography produced by OSKELO in Lancaster, PA.',
   alternates: { canonical: '/work' },
 };
+
+function countLabel(category) {
+  const items = category.items || [];
+  const videos = items.filter((i) => i.video).length;
+  const galleries = items.length - videos;
+  return [videos && `${videos} video${videos > 1 ? 's' : ''}`, galleries && `${galleries} galler${galleries > 1 ? 'ies' : 'y'}`]
+    .filter(Boolean).join(', ');
+}
 
 export default async function WorkPage() {
   const categories = await getContent('work', WORK_CATEGORIES);
@@ -38,7 +46,10 @@ export default async function WorkPage() {
             </div>
             <nav className="work-jump" aria-label="Portfolio sections">
               {ordered.map((category) => (
-                <a href={`#${category.slug}`} key={category.slug}>{category.title}</a>
+                <a href={`#${category.slug}`} key={category.slug}>
+                  {category.title}
+                  <span className="work-jump-count"> · {countLabel(category)}</span>
+                </a>
               ))}
             </nav>
 
@@ -57,7 +68,7 @@ export default async function WorkPage() {
           </section>
         </div>
 
-        <Contact />
+        <ContactCTA />
       </main>
 
       <Footer />

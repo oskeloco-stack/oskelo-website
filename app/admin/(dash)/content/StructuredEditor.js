@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import ImagePickerModal from './ImagePickerModal';
 
-const IMAGE_KEYS = new Set(['src', 'image', 'cover', 'poster', 'thumb', 'thumbnail']);
+const IMAGE_KEYS = new Set(['src', 'image', 'cover', 'poster', 'thumb', 'thumbnail', 'photo']);
 
 function blankLike(sample) {
   if (Array.isArray(sample)) return [];

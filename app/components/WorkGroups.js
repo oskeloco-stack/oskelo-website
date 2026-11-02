@@ -33,7 +33,7 @@ export default function WorkGroups({ category, headingLevel = 2, limit }) {
             {videos.map((item) => (
               <figure className="reel-item" key={item.name}>
                 <div className="reel-card has-video">
-                  <ReelVideo src={item.video} poster={item.image} eyebrow={item.tag} title={item.name} duration={item.duration} />
+                  <ReelVideo src={item.video} poster={item.image} eyebrow={item.tag} title={item.name} duration={item.duration} description={item.description} />
                 </div>
                 {item.description && <figcaption>{item.description}</figcaption>}
               </figure>

@@ -1,6 +1,6 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Contact from '../components/Contact';
+import ContactCTA from '../components/ContactCTA';
 import { getContent } from '../../lib/siteContent';
 import { ABOUT_DEFAULT } from '../../lib/pageContent';
 
@@ -82,7 +82,7 @@ export default async function About() {
           </div>
         )}
 
-        <Contact heading="Want to work with us?" />
+        <ContactCTA heading="Want to work with us?" body="Tell us a little about your business. You’ll hear back from the people who would actually make your content." />
       </main>
 
       <Footer />

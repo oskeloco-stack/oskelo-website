@@ -1,91 +1,96 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
-// Poster + title cover until clicked. On devices with a real mouse, hovering
-// plays a silent preview (skipped for reduced-motion users); clicking starts
-// the full video from the top with sound and controls.
-export default function ReelVideo({ src, poster, eyebrow, title, duration }) {
-  const videoRef = useRef(null);
-  const [started, setStarted] = useState(false);
+// A reel card: poster + title cover. On devices with a real mouse, hovering
+// plays a silent preview in the card (skipped for reduced-motion users).
+// Clicking opens a large viewer with sound and controls; Escape, the close
+// button or clicking outside the video closes it and returns focus.
+export default function ReelVideo({ src, poster, eyebrow, title, duration, description }) {
+  const previewRef = useRef(null);
+  const coverRef = useRef(null);
+  const closeRef = useRef(null);
   const [previewing, setPreviewing] = useState(false);
-
-  // Only one reel plays with sound at a time: starting one pauses the others.
-  useEffect(() => {
-    function onOtherPlay(e) {
-      if (e.detail !== videoRef.current) videoRef.current?.pause();
-    }
-    window.addEventListener('oskelo:reel-play', onOtherPlay);
-    return () => window.removeEventListener('oskelo:reel-play', onOtherPlay);
-  }, []);
-
-  // When a video finishes, go back to the cover so the card looks finished too.
-  function reset() {
-    setStarted(false);
-    videoRef.current?.load();
-  }
+  const [open, setOpen] = useState(false);
 
   function canPreview() {
-    return typeof window !== 'undefined'
-      && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    return window.matchMedia('(hover: hover) and (pointer: fine)').matches
       && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   function startPreview() {
-    const v = videoRef.current;
-    if (started || !v || !canPreview()) return;
+    const v = previewRef.current;
+    if (open || !v || !canPreview()) return;
     v.muted = true;
     v.play().then(() => setPreviewing(true)).catch(() => {});
   }
 
   function stopPreview() {
-    const v = videoRef.current;
-    if (started || !v) return;
+    const v = previewRef.current;
+    if (!v) return;
     v.pause();
     setPreviewing(false);
     v.load(); // back to the poster frame
   }
 
-  function play() {
-    const v = videoRef.current;
-    setStarted(true);
-    setPreviewing(false);
-    if (!v) return;
-    v.muted = false;
-    v.currentTime = 0;
-    window.dispatchEvent(new CustomEvent('oskelo:reel-play', { detail: v }));
-    v.play().catch(() => {});
+  function openViewer() {
+    stopPreview();
+    setOpen(true);
   }
+
+  function closeViewer() {
+    setOpen(false);
+    coverRef.current?.focus();
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    function onKey(e) { if (e.key === 'Escape') closeViewer(); }
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
 
   return (
     <>
-      <video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        controls={started}
-        playsInline
-        loop={!started}
-        preload="none"
-        onEnded={started ? reset : undefined}
-        aria-label={title}
-      />
-      {!started && (
-        <button
-          type="button"
-          className={`reel-cover${previewing ? ' is-previewing' : ''}`}
-          onClick={play}
-          onMouseEnter={startPreview}
-          onMouseLeave={stopPreview}
-          aria-label={`Play ${title}`}
-        >
-          <span className="reel-play">▶</span>
-          {duration && <span className="reel-duration">{duration}</span>}
-          <span className="reel-cover-text">
-            <span className="reel-cover-eyebrow">{eyebrow}</span>
-            <span className="reel-cover-title">{title}</span>
-          </span>
-        </button>
+      <video ref={previewRef} src={src} poster={poster} playsInline muted loop preload="none" aria-hidden="true" tabIndex={-1} />
+      <button
+        ref={coverRef}
+        type="button"
+        className={`reel-cover${previewing ? ' is-previewing' : ''}`}
+        onClick={openViewer}
+        onMouseEnter={startPreview}
+        onMouseLeave={stopPreview}
+        aria-label={`Play ${title}${duration ? ` (${duration})` : ''}`}
+        aria-haspopup="dialog"
+      >
+        <span className="reel-play">▶</span>
+        {duration && <span className="reel-duration">{duration}</span>}
+        <span className="reel-cover-text">
+          <span className="reel-cover-eyebrow">{eyebrow}</span>
+          <span className="reel-cover-title">{title}</span>
+        </span>
+      </button>
+
+      {open && createPortal(
+        <div className="reel-viewer" role="dialog" aria-modal="true" aria-label={title} onClick={closeViewer}>
+          <div className="reel-viewer-inner" onClick={(e) => e.stopPropagation()}>
+            <button ref={closeRef} type="button" className="reel-viewer-close" onClick={closeViewer} aria-label="Close video">✕</button>
+            <video className="reel-viewer-video" src={src} poster={poster} controls autoPlay playsInline />
+            <div className="reel-viewer-meta">
+              <span className="reel-cover-eyebrow">{eyebrow}</span>
+              <h3>{title}</h3>
+              {description && <p>{description}</p>}
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </>
   );
