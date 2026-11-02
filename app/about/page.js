@@ -1,17 +1,23 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Contact from '../components/Contact';
 import { getContent } from '../../lib/siteContent';
 import { ABOUT_DEFAULT } from '../../lib/pageContent';
 
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'About the Team — Oskelo',
-  description: 'Meet the people behind Oskelo — video and photo for businesses, individuals, and events.',
+  title: 'About the Team',
+  description: 'Meet the small Lancaster, PA team behind OSKELO. You work directly with the people who film, photograph and edit your content.',
+  alternates: { canonical: '/about' },
 };
 
+function initials(name = '') {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+}
+
 export default async function About() {
-  const c = await getContent('about', ABOUT_DEFAULT);
+  const c = { ...ABOUT_DEFAULT, ...(await getContent('about', ABOUT_DEFAULT)) };
 
   return (
     <>
@@ -19,7 +25,7 @@ export default async function About() {
 
       <main>
         <div className="wrap">
-          <section className="section" id="about">
+          <section className="section page-intro" id="about">
             <div className="section-head">
               <div>
                 <div className="eyebrow">{c.eyebrow}</div>
@@ -28,10 +34,21 @@ export default async function About() {
               <p>{c.intro}</p>
             </div>
 
+            {c.story && (
+              <div className="about-story">
+                <h3>{c.storyHeading}</h3>
+                <p>{c.story}</p>
+              </div>
+            )}
+
             <div className="team-grid">
               {(c.team || []).map((member) => (
                 <div className="team-card" key={member.name}>
-                  <div className="team-avatar"></div>
+                  <div className="team-avatar">
+                    {member.photo
+                      ? <img src={member.photo} alt={`${member.name}, ${member.role}`} loading="lazy" />
+                      : <span aria-hidden="true">{initials(member.name)}</span>}
+                  </div>
                   <h3>{member.name}</h3>
                   <div className="team-role">{member.role}</div>
                   <p>{member.bio}</p>
@@ -40,6 +57,8 @@ export default async function About() {
             </div>
           </section>
         </div>
+
+        <Contact heading="Want to work with us?" />
       </main>
 
       <Footer />

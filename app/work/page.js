@@ -7,8 +7,9 @@ import { getContent } from '../../lib/siteContent';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Our Work — Oskelo',
-  description: 'Browse Oskelo photography and video work for businesses.',
+  title: 'Portfolio: Video & Photography Work',
+  description: 'Short-form video, event promos and photography produced by OSKELO in Lancaster, PA.',
+  alternates: { canonical: '/work' },
 };
 
 export default async function WorkPage() {

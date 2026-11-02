@@ -22,7 +22,7 @@ export async function generateMetadata({ params }) {
   const result = getWorkProject(categorySlug, projectSlug, categories);
   if (!result) return {};
   return {
-    title: `${result.project.name} — Oskelo`,
+    title: `${result.project.name} | ${result.category.title}`,
     description: result.project.tag,
   };
 }

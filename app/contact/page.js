@@ -7,8 +7,9 @@ import { CONTACT_PAGE_DEFAULT } from '../../lib/pageContent';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Contact — Oskelo',
-  description: 'Get in touch with Oskelo — video and photo creation for businesses and individuals.',
+  title: 'Contact & Project Inquiries',
+  description: 'Tell OSKELO about your business or project. Video production, short-form content and photography in Lancaster, PA. We usually reply within one business day.',
+  alternates: { canonical: '/contact' },
 };
 
 export default async function ContactPage() {

@@ -6,5 +6,6 @@ import PromoBarClient from './PromoBarClient';
 // behavior needs the client for usePathname, so that part is split out.
 export default async function PromoBar() {
   const c = await getContent('promoBar', PROMO_BAR_DEFAULT);
+  if (!c.message?.trim()) return null;
   return <PromoBarClient message={c.message} />;
 }

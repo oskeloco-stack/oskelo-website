@@ -6,8 +6,9 @@ import { TERMS_DEFAULT } from '../../lib/pageContent';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Terms & Conditions — Oskelo',
+  title: 'Terms & Conditions',
   description: 'Terms and conditions for OSKELO video creation services.',
+  alternates: { canonical: '/terms' },
 };
 
 export default async function Terms() {

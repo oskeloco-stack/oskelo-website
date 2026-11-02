@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Contact from '../../components/Contact';
+import ReelVideo from '../../components/ReelVideo';
 import { WORK_CATEGORIES, getWorkCategory } from '../../../lib/work';
 import { getContent } from '../../../lib/siteContent';
 
@@ -18,8 +19,9 @@ export async function generateMetadata({ params }) {
   const category = getWorkCategory(slug, categories);
   if (!category) return {};
   return {
-    title: `${category.title} — Oskelo`,
-    description: category.subtitle,
+    title: `${category.title} Portfolio`,
+    description: `${category.subtitle} OSKELO, Lancaster, PA.`,
+    alternates: { canonical: `/work/${category.slug}` },
   };
 }
 
@@ -28,6 +30,8 @@ export default async function WorkCategoryPage({ params }) {
   const categories = await getContent('work', WORK_CATEGORIES);
   const category = getWorkCategory(slug, categories);
   if (!category) notFound();
+  const videos = category.items.filter((item) => item.video);
+  const others = category.items.filter((item) => !item.video);
 
   return (
     <>
@@ -43,8 +47,18 @@ export default async function WorkCategoryPage({ params }) {
               </div>
               <p>{category.subtitle}</p>
             </div>
+            {videos.length > 0 && (
+              <div className="reels-grid">
+                {videos.map((item) => (
+                  <div className="reel-card has-video" key={item.name}>
+                    <ReelVideo src={item.video} poster={item.image} eyebrow={item.tag} title={item.name} />
+                  </div>
+                ))}
+              </div>
+            )}
+            {others.length > 0 && (
             <div className="work-grid">
-              {category.items.map((item) => {
+              {others.map((item) => {
                 const className = `work-card${item.image ? ' work-card--photo' : ''}`;
                 const inner = (
                   <>
@@ -69,6 +83,10 @@ export default async function WorkCategoryPage({ params }) {
                 );
               })}
             </div>
+            )}
+            {category.items.length === 0 && (
+              <p className="photo-grid-empty">New projects are on the way. Check back soon.</p>
+            )}
           </section>
         </div>
 

@@ -8,10 +8,44 @@ import Analytics from './components/Analytics';
 // /admin's force-dynamic) still take precedence for that subtree.
 export const revalidate = 60;
 
+const SITE_URL = 'https://www.oskelo.com';
+
 export const metadata = {
-  title: 'Oskelo — Video & Photo for Businesses, Individuals & Events',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'OSKELO | Video Production & Content Creation in Lancaster, PA',
+    template: '%s | OSKELO',
+  },
   description:
-    'Oskelo creates video and photography for businesses, individuals, and events — editing your footage or coming on-site to shoot it.',
+    'You run your business. We run your content. Short-form video, social media videography, editing and photography for small businesses in Lancaster, PA.',
+  openGraph: {
+    type: 'website',
+    siteName: 'OSKELO',
+    locale: 'en_US',
+    url: '/',
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'OSKELO: You run your business. We run your content.' }],
+  },
+  twitter: { card: 'summary_large_image', images: ['/og.jpg'] },
+};
+
+// Structured data for local search. Only verified facts: no street address,
+// phone or reviews until they exist.
+const JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  name: 'OSKELO',
+  slogan: 'You run your business. We run your content.',
+  url: SITE_URL,
+  email: 'contact@oskelo.com',
+  image: `${SITE_URL}/og.jpg`,
+  logo: `${SITE_URL}/4.webp`,
+  priceRange: '$$',
+  areaServed: [
+    { '@type': 'City', name: 'Lancaster', containedInPlace: { '@type': 'State', name: 'Pennsylvania' } },
+    { '@type': 'AdministrativeArea', name: 'Lancaster County, PA' },
+  ],
+  address: { '@type': 'PostalAddress', addressLocality: 'Lancaster', addressRegion: 'PA', addressCountry: 'US' },
+  knowsAbout: ['Video production', 'Short-form video editing', 'Social media videography', 'Business photography', 'Event videography'],
 };
 
 export default function RootLayout({ children }) {
@@ -24,6 +58,7 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
       </head>
       <body>
         <PromoBar />

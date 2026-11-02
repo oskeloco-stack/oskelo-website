@@ -1,19 +1,21 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Contact from '../components/Contact';
-import { OFFERS } from '../../lib/offers';
+import FoundingOffer from '../components/FoundingOffer';
+import { HOME_DEFAULT } from '../../lib/pageContent';
 import { getContent } from '../../lib/siteContent';
 
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Limited Offers — Oskelo',
+  title: 'Offers for New Clients',
   description:
-    'Current limited-time offers and promotions from Oskelo — including the Monthly Rate Lock.',
+    'Ways to get started with OSKELO: a free first-video preview for businesses starting a monthly plan, and founding-client rate lock for our first five monthly clients.',
+  alternates: { canonical: '/offers' },
 };
 
 export default async function OffersPage() {
-  const offers = await getContent('offers', OFFERS);
+  const c = { ...HOME_DEFAULT, ...(await getContent('home', HOME_DEFAULT)) };
 
   return (
     <>
@@ -21,40 +23,37 @@ export default async function OffersPage() {
 
       <main>
         <div className="wrap">
-          <section className="section" id="limited-offers">
+          <section className="section page-intro" id="offers">
             <div className="section-head">
               <div>
-                <div className="eyebrow">Limited offers</div>
-                <h2>Current offers</h2>
+                <div className="eyebrow">Offers</div>
+                <h2>Getting started with OSKELO</h2>
               </div>
-              <p>Time-limited promotions. When the spots are gone, they’re gone.</p>
+              <p>Two simple ways to start working with us, both tied to our monthly plans.</p>
             </div>
 
-            {offers.length > 0 ? (
-              <div className="offer-card-list">
-                {offers.map((offer) => (
-                  <article className="offer-card" key={offer.slug}>
-                    <div className="eyebrow">{offer.eyebrow}</div>
-                    <h3>{offer.title}</h3>
-                    <p>{offer.body}</p>
-                    {offer.detail?.length > 0 && (
-                      <ul>
-                        {offer.detail.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    )}
-                    {offer.cta && (
-                      <a className="btn btn-solid" href={offer.cta.href}>
-                        {offer.cta.label}
-                      </a>
-                    )}
-                  </article>
-                ))}
+            <div className="intro-offer" style={{ marginTop: 0 }}>
+              <div className="intro-offer-main">
+                <div className="eyebrow">{c.introEyebrow}</div>
+                <h2>{c.introHeading}</h2>
+                <p>{c.introBody}</p>
+                <a className="btn btn-solid" href={`/contact?interest=${encodeURIComponent('Free first-video preview')}#contact`}>
+                  {c.introCta}
+                </a>
               </div>
-            ) : (
-              <p className="photo-grid-empty">No active offers right now — check back soon.</p>
-            )}
+              <div className="intro-offer-terms">
+                <div className="intro-offer-terms-label">How it works</div>
+                <ul>
+                  {c.introConditions.map((line, i) => <li key={i}>{line}</li>)}
+                </ul>
+              </div>
+            </div>
+
+            <FoundingOffer />
+            <p className="plan-note">
+              See <a href="/services/monthly-plans">monthly plans</a> for what each plan includes, and our{' '}
+              <a href="/terms">terms</a> for billing and cancellation details.
+            </p>
           </section>
         </div>
 

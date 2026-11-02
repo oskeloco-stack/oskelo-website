@@ -58,10 +58,10 @@ export default function Header() {
             </div>
           </div>
           <a href="/offers">Offers</a>
-          <a href="/about">Team</a>
+          <a href="/about">About</a>
           <a href="/contact">Contact</a>
         </nav>
-        <a className="btn btn-solid btn-sm nav-cta" href="/contact">Get a quote</a>
+        <a className="btn btn-solid btn-sm nav-cta" href="/contact">Start a project</a>
         <button
           type="button"
           className="nav-toggle"
@@ -98,10 +98,10 @@ export default function Header() {
           </div>
           <div className="mobile-menu-group">
             <a href="/offers" className="mobile-menu-heading" onClick={closeMobile}>Offers</a>
-            <a href="/about" className="mobile-menu-heading" onClick={closeMobile}>Team</a>
+            <a href="/about" className="mobile-menu-heading" onClick={closeMobile}>About</a>
             <a href="/contact" className="mobile-menu-heading" onClick={closeMobile}>Contact</a>
           </div>
-          <a className="btn btn-solid btn-sm" href="/contact" onClick={closeMobile}>Get a quote</a>
+          <a className="btn btn-solid btn-sm" href="/contact" onClick={closeMobile}>Start a project</a>
         </div>
       )}
     </header>
