@@ -33,7 +33,7 @@ export default async function ServicesPage() {
             <div className="section-head">
               <div>
                 <div className="eyebrow">Services &amp; pricing</div>
-                <h2>Monthly content, or one project at a time</h2>
+                <h1>Monthly content, or one project at a time</h1>
               </div>
               <p>Monthly plans are the easiest way to stay consistent. Every service is also available on its own.</p>
             </div>

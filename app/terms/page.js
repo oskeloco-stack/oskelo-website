@@ -24,7 +24,7 @@ export default async function Terms() {
             <div className="section-head">
               <div>
                 <div className="eyebrow">{c.eyebrow}</div>
-                <h2>{c.heading}</h2>
+                <h1>{c.heading}</h1>
                 <div className="legal-updated">{c.lastUpdated}</div>
               </div>
               <p>{c.intro}</p>

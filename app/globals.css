@@ -461,7 +461,7 @@ header.is-solid{
   padding-bottom: 26px;
   border-bottom: 1px solid var(--line);
 }
-.section-head h2{
+.section-head h1, .section-head h2{
   font-family:'Archivo', sans-serif;
   font-weight: 600;
   font-size: clamp(28px, 3vw, 38px);
@@ -929,7 +929,7 @@ header.is-solid{
   grid-template-columns: 1fr 1fr;
   gap: 60px;
 }
-.contact h2{
+.contact h1, .contact h2{
   font-family:'Archivo', sans-serif;
   font-weight: 800;
   font-size: clamp(32px, 4vw, 44px);
@@ -1705,3 +1705,4 @@ footer{ padding: 56px 0 28px; border-top: 1px solid var(--line); font-size: 14px
   .founding-actions{ align-items: flex-start; }
   .photo-strip-grid{ grid-template-columns: 1fr 1fr; }
 }
+.intro-offer-fine{ margin: 20px 0 0; font-size: 12px; line-height: 1.55; color: var(--grey); }

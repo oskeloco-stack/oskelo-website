@@ -20,20 +20,7 @@ export default async function ContactPage() {
       <Header />
 
       <main id="main">
-        <div className="wrap">
-          <section className="section legal" id="contact-intro">
-            <div className="section-head">
-              <div>
-                <div className="eyebrow">{c.eyebrow}</div>
-                <h2>{c.heading}</h2>
-              </div>
-              <p>{c.intro}</p>
-            </div>
-            <p>{c.body}</p>
-          </section>
-        </div>
-
-        <Contact />
+        <Contact heading={c.heading} intro={c.intro} isPage />
       </main>
 
       <Footer />

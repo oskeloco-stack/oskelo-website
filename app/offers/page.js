@@ -27,7 +27,7 @@ export default async function OffersPage() {
             <div className="section-head">
               <div>
                 <div className="eyebrow">Offers</div>
-                <h2>Getting started with OSKELO</h2>
+                <h1>Getting started with OSKELO</h1>
               </div>
               <p>Two simple ways to start working with us, both tied to our monthly plans.</p>
             </div>
@@ -46,6 +46,9 @@ export default async function OffersPage() {
                 <ul>
                   {c.introConditions.map((line, i) => <li key={i}>{line}</li>)}
                 </ul>
+                <p className="intro-offer-fine">
+                  Exactly what the preview includes is agreed with you in writing before we start, so there are no surprises.
+                </p>
               </div>
             </div>
 

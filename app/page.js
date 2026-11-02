@@ -22,7 +22,8 @@ export const metadata = {
 
 // Homepage background loop. To swap in a new showreel: drop a 1280x720,
 // silent, ~15s, <5 MB MP4 + a poster frame into /public/hero/ and point these at them.
-const HERO_VIDEO = { src: '/hero/showreel.mp4', poster: '/hero/showreel.jpg' };
+// showreel-mobile.mp4 is the same cut at 854px wide for phones (about 1.2 MB vs 2.9 MB).
+const HERO_VIDEO = { src: '/hero/showreel.mp4', mobile: '/hero/showreel-mobile.mp4', poster: '/hero/showreel.jpg' };
 
 
 export default async function Home() {
@@ -44,7 +45,10 @@ export default async function Home() {
       <main id="main">
         <section className="hero">
           <div className="hero-bg">
-            <video className="hero-video" src={HERO_VIDEO.src} poster={HERO_VIDEO.poster} autoPlay muted loop playsInline preload="auto" aria-hidden="true" />
+            <video className="hero-video" poster={HERO_VIDEO.poster} autoPlay muted loop playsInline preload="auto" aria-hidden="true">
+              <source src={HERO_VIDEO.mobile} type="video/mp4" media="(max-width: 700px)" />
+              <source src={HERO_VIDEO.src} type="video/mp4" />
+            </video>
           </div>
           <div className="hero-scrim"></div>
           <div className="hero-content">

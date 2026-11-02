@@ -10,7 +10,9 @@ const BUDGETS = ['Under $300', '$300–$600', '$600–$1,000', '$1,000+', 'Not s
 export default function Contact({
   heading = 'Ready to take content off your plate?',
   intro = 'Tell us about your business or project. We usually reply within one business day.',
+  isPage = false,
 }) {
+  const Heading = isPage ? 'h1' : 'h2';
   const [form, setForm] = useState(EMPTY);
   const [status, setStatus] = useState({ state: 'idle', message: '' });
   const startedAt = useRef(Date.now());
@@ -51,11 +53,11 @@ export default function Contact({
   }
 
   return (
-    <section className="section contact" id="contact">
+    <section className={`section contact${isPage ? ' page-intro' : ''}`} id="contact">
       <div className="wrap contact-inner">
         <div>
           <div className="eyebrow">Contact</div>
-          <h2>{heading}</h2>
+          <Heading>{heading}</Heading>
           <p>{intro}</p>
           <div className="contact-email">
             <a href="mailto:contact@oskelo.com">contact@oskelo.com</a>

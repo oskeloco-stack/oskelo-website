@@ -29,7 +29,7 @@ export default async function About() {
             <div className="section-head">
               <div>
                 <div className="eyebrow">{c.eyebrow}</div>
-                <h2>{c.headingLine1}<br />{c.headingLine2}</h2>
+                <h1>{c.headingLine1}<br />{c.headingLine2}</h1>
               </div>
               <p>{c.intro}</p>
             </div>

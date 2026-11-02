@@ -25,7 +25,7 @@ export default async function WorkPage() {
             <div className="section-head">
               <div>
                 <div className="eyebrow">Work</div>
-                <h2>See what we create</h2>
+                <h1>See what we create</h1>
               </div>
               <p>Choose photography or video &amp; editing to browse recent projects.</p>
             </div>

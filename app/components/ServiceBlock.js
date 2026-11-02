@@ -17,13 +17,14 @@ const INTEREST_BY_SERVICE = {
   photography: 'Photography',
 };
 
-export default function ServiceBlock({ service, eyebrow = 'One-time project' }) {
+export default function ServiceBlock({ service, eyebrow = 'One-time project', headingLevel = 2 }) {
+  const Heading = `h${headingLevel}`;
   return (
     <>
       <div className="section-head">
         <div>
           <div className="eyebrow">{eyebrow}</div>
-          <h2>{service.title}</h2>
+          <Heading>{service.title}</Heading>
         </div>
         <p>{service.subtitle}</p>
       </div>

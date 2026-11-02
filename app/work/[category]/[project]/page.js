@@ -23,7 +23,8 @@ export async function generateMetadata({ params }) {
   if (!result) return {};
   return {
     title: `${result.project.name} | ${result.category.title}`,
-    description: result.project.tag,
+    description: `${result.project.tag} by OSKELO, Lancaster, PA.`,
+    alternates: { canonical: `/work/${categorySlug}/${projectSlug}` },
   };
 }
 
@@ -48,7 +49,7 @@ export default async function WorkProjectPage({ params }) {
                 <div className="eyebrow">
                   <a href={`/work/${category.slug}`}>{category.title}</a>
                 </div>
-                <h2>{project.name}</h2>
+                <h1>{project.name}</h1>
               </div>
               <p>{project.tag}</p>
             </div>

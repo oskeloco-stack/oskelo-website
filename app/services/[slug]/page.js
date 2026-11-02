@@ -143,7 +143,7 @@ export default async function ServicePage({ params }) {
                 <div className="section-head">
                   <div>
                     <div className="eyebrow">Monthly plans</div>
-                    <h2>{service.title}</h2>
+                    <h1>{service.title}</h1>
                   </div>
                   <p>{service.subtitle}</p>
                 </div>
@@ -151,7 +151,7 @@ export default async function ServicePage({ params }) {
                 <FoundingOffer />
               </>
             ) : (
-              <ServiceBlock service={service} />
+              <ServiceBlock service={service} headingLevel={1} />
             )}
           </section>
         </div>
