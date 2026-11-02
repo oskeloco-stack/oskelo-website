@@ -74,7 +74,14 @@ function Bar({ label }) {
   );
 }
 
-function HomeView({ c, set: setC }) {
+function HomeView({ c: saved, set: setC }) {
+  // Copy fields added after an admin save fall back to their defaults.
+  const c = { ...HOME_DEFAULT, ...saved };
+  const field = (key) => (v) => setC(set(c, key, v));
+  const item = (arrayKey, i, key) => (v) => setC(setAt(c, arrayKey, i, key, v));
+  const monthly = SERVICES.find((s) => s.slug === 'monthly-plans');
+  const oneTimeVideo = SERVICES.find((s) => s.slug === 'one-time-video');
+
   return (
     <>
       <Bar label="Homepage" />
@@ -86,61 +93,124 @@ function HomeView({ c, set: setC }) {
           </div>
           <div className="hero-scrim" />
           <div className="hero-content">
-            <Editable as="div" className="eyebrow" value={c.heroEyebrow} onCommit={(v) => setC(set(c, 'heroEyebrow', v))} />
+            <Editable as="div" className="eyebrow" value={c.heroEyebrow} onCommit={field('heroEyebrow')} />
             <h1>
-              <Editable value={c.heroHeadingLine1} onCommit={(v) => setC(set(c, 'heroHeadingLine1', v))} placeholder="Line 1" /><br />
-              <Editable value={c.heroHeadingLine2} onCommit={(v) => setC(set(c, 'heroHeadingLine2', v))} placeholder="Line 2" />
+              <Editable value={c.heroHeadingLine1} onCommit={field('heroHeadingLine1')} placeholder="Line 1" /><br />
+              <Editable value={c.heroHeadingLine2} onCommit={field('heroHeadingLine2')} placeholder="Line 2" />
             </h1>
+            <Editable as="p" value={c.heroSub} multiline onCommit={field('heroSub')} placeholder="Short line under the heading" />
             <div className="hero-ctas">
-              <span className="btn btn-solid"><Editable value={c.heroCta1Label} onCommit={(v) => setC(set(c, 'heroCta1Label', v))} /></span>
-              <span className="btn btn-outline"><Editable value={c.heroCta2Label} onCommit={(v) => setC(set(c, 'heroCta2Label', v))} /></span>
+              <span className="btn btn-solid"><Editable value={c.heroCta1Label} onCommit={field('heroCta1Label')} /></span>
+              <span className="btn btn-outline"><Editable value={c.heroCta2Label} onCommit={field('heroCta2Label')} /></span>
             </div>
           </div>
         </section>
 
         <div className="wrap">
-          <section className="section offers" id="services">
+          <section className="section why-section" id="why">
             <div className="section-head">
               <div>
-                <Editable as="div" className="eyebrow" value={c.offersEyebrow} onCommit={(v) => setC(set(c, 'offersEyebrow', v))} />
-                <h2><Editable value={c.offersHeading} onCommit={(v) => setC(set(c, 'offersHeading', v))} /></h2>
+                <Editable as="div" className="eyebrow" value={c.whyEyebrow} onCommit={field('whyEyebrow')} />
+                <h2><Editable value={c.whyHeading} onCommit={field('whyHeading')} /></h2>
               </div>
-              <Editable as="p" value={c.offersIntro} multiline onCommit={(v) => setC(set(c, 'offersIntro', v))} />
+              <Editable as="p" value={c.whyIntro} multiline onCommit={field('whyIntro')} />
             </div>
-            <div className="offers-inner">
-              <ul className="offer-list">
-                {SERVICES.map((service, i) => (
-                  <li key={service.slug}>
-                    <span>
-                      <span className="offer-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-                      <span className="offer-text">
-                        <span className="offer-name">{service.title}</span>
-                        <span className="offer-blurb">{service.subtitle}</span>
-                      </span>
-                      <span className="offer-arrow" aria-hidden="true">→</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <div className="offers-collage" aria-hidden="true">
-                <img src="/work/wedding-engagement/garden-path.jpg" alt="" />
-              </div>
+            <div className="point-grid">
+              {c.whyPoints.map((point, i) => (
+                <div className="point" key={i}>
+                  <span className="point-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <h3><Editable value={point.title} onCommit={item('whyPoints', i, 'title')} /></h3>
+                  <Editable as="p" value={point.body} multiline onCommit={item('whyPoints', i, 'body')} />
+                </div>
+              ))}
             </div>
           </section>
         </div>
 
         <div className="section-alt">
           <div className="wrap">
-            <section className="section mission" id="mission">
+            <section className="section" id="packages">
               <div className="section-head">
                 <div>
-                  <Editable as="div" className="eyebrow" value={c.missionEyebrow} onCommit={(v) => setC(set(c, 'missionEyebrow', v))} />
-                  <h2><Editable value={c.missionHeading} onCommit={(v) => setC(set(c, 'missionHeading', v))} /></h2>
+                  <Editable as="div" className="eyebrow" value={c.packagesEyebrow} onCommit={field('packagesEyebrow')} />
+                  <h2><Editable value={c.packagesHeading} onCommit={field('packagesHeading')} /></h2>
+                </div>
+                <Editable as="p" value={c.packagesIntro} multiline onCommit={field('packagesIntro')} />
+              </div>
+              <div className="packages-label">{monthly.title}</div>
+              <div className="packages home-packages">
+                {monthly.plans.map((pkg) => (
+                  <div className={`package ${pkg.featured ? 'featured' : ''}`} key={pkg.name}>
+                    {pkg.featured && <span className="package-badge">Most popular</span>}
+                    <h3>{pkg.name}</h3>
+                    <div className="price">{pkg.price}</div>
+                    <ul>{pkg.features.map((f) => <li key={f}>{f}</li>)}</ul>
+                  </div>
+                ))}
+              </div>
+              <Editable as="div" className="packages-label" value={c.packagesOneTimeLabel} onCommit={field('packagesOneTimeLabel')} />
+              <div className="onetime-row">
+                {oneTimeVideo.plans.map((plan) => (
+                  <span className="onetime" key={plan.name}>
+                    <span className="onetime-name">{plan.name}</span>
+                    <span className="onetime-price">{plan.price}</span>
+                    <span className="onetime-detail">{plan.features[0]}</span>
+                  </span>
+                ))}
+                <span className="onetime">
+                  <span className="onetime-name">Full Shoot</span>
+                  <span className="onetime-price">Custom quote</span>
+                </span>
+              </div>
+              <Editable as="p" className="packages-note" value={c.packagesNote} multiline onCommit={field('packagesNote')} />
+              <p className="pv-hint">Package names, prices and features are edited under Services.</p>
+            </section>
+          </div>
+        </div>
+
+        <div className="wrap">
+          <section className="section" id="reels">
+            <div className="section-head">
+              <div>
+                <Editable as="div" className="eyebrow" value={c.reelsEyebrow} onCommit={field('reelsEyebrow')} />
+                <h2><Editable value={c.reelsHeading} onCommit={field('reelsHeading')} /></h2>
+              </div>
+              <Editable as="p" value={c.reelsIntro} multiline onCommit={field('reelsIntro')} />
+            </div>
+          </section>
+        </div>
+
+        <div className="section-alt">
+          <div className="wrap">
+            <section className="section" id="why-oskelo">
+              <div className="section-head">
+                <div>
+                  <Editable as="div" className="eyebrow" value={c.usEyebrow} onCommit={field('usEyebrow')} />
+                  <h2><Editable value={c.usHeading} onCommit={field('usHeading')} /></h2>
                 </div>
               </div>
-              <div className="mission-body">
-                <Editable as="p" value={c.missionBody1} multiline onCommit={(v) => setC(set(c, 'missionBody1', v))} />
-                <Editable as="p" value={c.missionBody2} multiline onCommit={(v) => setC(set(c, 'missionBody2', v))} />
+              <div className="point-grid cols-4">
+                {c.usPoints.map((point, i) => (
+                  <div className="point" key={i}>
+                    <h3><Editable value={point.title} onCommit={item('usPoints', i, 'title')} /></h3>
+                    <Editable as="p" value={point.body} multiline onCommit={item('usPoints', i, 'body')} />
+                  </div>
+                ))}
+              </div>
+              <div className="steps">
+                <Editable as="div" className="steps-heading" value={c.stepsHeading} onCommit={field('stepsHeading')} />
+                <ol className="steps-list">
+                  {c.steps.map((step, i) => (
+                    <li key={i}>
+                      <span className="step-num" aria-hidden="true">{i + 1}</span>
+                      <span className="step-text">
+                        <b><Editable value={step.title} onCommit={item('steps', i, 'title')} /></b>
+                        <Editable value={step.body} onCommit={item('steps', i, 'body')} />
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+                <span className="btn btn-solid">{c.heroCta2Label}</span>
               </div>
             </section>
           </div>
@@ -150,10 +220,10 @@ function HomeView({ c, set: setC }) {
           <section className="section" id="work">
             <div className="section-head">
               <div>
-                <Editable as="div" className="eyebrow" value={c.workEyebrow} onCommit={(v) => setC(set(c, 'workEyebrow', v))} />
-                <h2><Editable value={c.workHeading} onCommit={(v) => setC(set(c, 'workHeading', v))} /></h2>
+                <Editable as="div" className="eyebrow" value={c.workEyebrow} onCommit={field('workEyebrow')} />
+                <h2><Editable value={c.workHeading} onCommit={field('workHeading')} /></h2>
               </div>
-              <Editable as="p" value={c.workIntro} multiline onCommit={(v) => setC(set(c, 'workIntro', v))} />
+              <Editable as="p" value={c.workIntro} multiline onCommit={field('workIntro')} />
             </div>
             <div className="link-cards cols-2">
               {WORK_CATEGORIES.map((category) => (
@@ -165,18 +235,6 @@ function HomeView({ c, set: setC }) {
                   <p>{category.subtitle}</p>
                 </span>
               ))}
-            </div>
-          </section>
-        </div>
-
-        <div className="wrap">
-          <section className="section reels-section" id="reels">
-            <div className="section-head">
-              <div>
-                <Editable as="div" className="eyebrow" value={c.reelsEyebrow} onCommit={(v) => setC(set(c, 'reelsEyebrow', v))} />
-                <h2><Editable value={c.reelsHeading} onCommit={(v) => setC(set(c, 'reelsHeading', v))} /></h2>
-              </div>
-              <Editable as="p" value={c.reelsIntro} multiline onCommit={(v) => setC(set(c, 'reelsIntro', v))} />
             </div>
           </section>
         </div>
