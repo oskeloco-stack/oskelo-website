@@ -65,6 +65,7 @@ export default function Header() {
               ))}
             </div>
           </div>
+          <a href="/websites">Websites</a>
           <a href="/offers">Offers</a>
           <a href="/about">About</a>
           <a href="/contact">Contact</a>
@@ -105,6 +106,7 @@ export default function Header() {
             ))}
           </div>
           <div className="mobile-menu-group">
+            <a href="/websites" className="mobile-menu-heading" onClick={closeMobile}>Websites</a>
             <a href="/offers" className="mobile-menu-heading" onClick={closeMobile}>Offers</a>
             <a href="/about" className="mobile-menu-heading" onClick={closeMobile}>About</a>
             <a href="/contact" className="mobile-menu-heading" onClick={closeMobile}>Contact</a>

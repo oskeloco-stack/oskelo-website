@@ -4,6 +4,7 @@ import Contact from '../components/Contact';
 import Plans from '../components/Plans';
 import OneTimeGrid from '../components/OneTimeGrid';
 import ServiceBlock from '../components/ServiceBlock';
+import WebsiteTeaser from '../components/WebsiteTeaser';
 import { SERVICES, getService } from '../../lib/services';
 import { HOME_DEFAULT } from '../../lib/pageContent';
 import { getContent } from '../../lib/siteContent';
@@ -93,6 +94,12 @@ export default async function ServicesPage() {
             </div>
           </div>
         ))}
+
+        <div className="wrap">
+          <section className="section" id="websites">
+            <WebsiteTeaser />
+          </section>
+        </div>
 
         <Contact />
       </main>

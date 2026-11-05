@@ -16,6 +16,7 @@ export default async function Footer() {
         <nav className="footer-nav" aria-label="Footer">
           <a href="/services">Services</a>
           <a href="/services/monthly-plans">Monthly plans</a>
+          <a href="/websites">Websites</a>
           <a href="/work">Work</a>
           <a href="/about">About</a>
           <a href="/offers">Offers</a>

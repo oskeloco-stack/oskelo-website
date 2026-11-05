@@ -4,6 +4,7 @@ import Contact from './components/Contact';
 import Plans from './components/Plans';
 import ReelVideo from './components/ReelVideo';
 import Values from './components/Values';
+import WebsiteTeaser from './components/WebsiteTeaser';
 import { SERVICES, getService } from '../lib/services';
 import { WORK_CATEGORIES } from '../lib/work';
 import { HOME_DEFAULT } from '../lib/pageContent';
@@ -185,6 +186,9 @@ export default async function Home() {
             <p className="more-link one-time-link">
               <a href="/services#one-time">See one-time projects &amp; pricing <span aria-hidden="true">→</span></a>
             </p>
+          </section>
+          <section className="section web-teaser-section" id="websites">
+            <WebsiteTeaser />
           </section>
         </div>
 

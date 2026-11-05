@@ -4,7 +4,7 @@ import { WORK_CATEGORIES } from '../lib/work';
 const BASE = 'https://www.oskelo.com';
 
 export default function sitemap() {
-  const pages = ['', '/services', '/work', '/about', '/offers', '/contact', '/terms'];
+  const pages = ['', '/services', '/websites', '/work', '/about', '/offers', '/contact', '/terms'];
   const services = SERVICES.map((s) => `/services/${s.slug}`);
   const work = WORK_CATEGORIES.flatMap((c) => [
     `/work/${c.slug}`,
