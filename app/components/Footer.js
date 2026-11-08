@@ -14,12 +14,11 @@ export default async function Footer() {
           <p>You run your business. We run your content.</p>
         </div>
         <nav className="footer-nav" aria-label="Footer">
-          <a href="/services">Services</a>
-          <a href="/services/monthly-plans">Monthly plans</a>
+          <a href="/video">Video</a>
+          <a href="/services/monthly-plans">Monthly video plans</a>
           <a href="/websites">Websites</a>
-          <a href="/work">Work</a>
+          <a href="/work">Our work</a>
           <a href="/about">About</a>
-          <a href="/offers">Offers</a>
           <a href="/contact">Contact</a>
         </nav>
         <div className="footer-contact">

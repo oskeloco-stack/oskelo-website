@@ -2,8 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { SERVICES } from '../../lib/services';
-import { WORK_CATEGORIES } from '../../lib/work';
+
+// Kept deliberately short: the two things we do, the proof, and who we are.
+// Photography, monthly plans, offers etc. are still reachable from these
+// pages and the footer.
+const NAV = [
+  { href: '/video', label: 'Video' },
+  { href: '/websites', label: 'Websites' },
+  { href: '/work', label: 'Our work' },
+  { href: '/about', label: 'About' },
+];
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,6 +42,7 @@ export default function Header() {
   }, [mobileOpen]);
 
   const isSolid = !isHome || scrolled;
+  const isActive = (href) => pathname === href || pathname?.startsWith(`${href}/`);
 
   return (
     <header className={isSolid ? 'is-solid' : undefined}>
@@ -41,36 +50,15 @@ export default function Header() {
         <a className="logo" href="/" aria-label="OSKELO home">
           <img className="logo-img" src="/4.webp" alt="Oskelo" />
         </a>
-        <nav className="nav-links">
-          {!isHome && <a href="/">Home</a>}
-          <div className="nav-dropdown">
-            <a href="/services" className="nav-dropdown-trigger">Services</a>
-            <div className="nav-dropdown-menu">
-              {SERVICES.map((service) => (
-                <a href={`/services/${service.slug}`} key={service.slug}>
-                  <b>{service.title}</b>
-                  <span>{service.subtitle}</span>
-                </a>
-              ))}
-            </div>
-          </div>
-          <div className="nav-dropdown">
-            <a href="/work" className="nav-dropdown-trigger">Work</a>
-            <div className="nav-dropdown-menu">
-              {WORK_CATEGORIES.map((category) => (
-                <a href={`/work/${category.slug}`} key={category.slug}>
-                  <b>{category.title}</b>
-                  <span>{category.subtitle}</span>
-                </a>
-              ))}
-            </div>
-          </div>
-          <a href="/websites">Websites</a>
-          <a href="/offers">Offers</a>
-          <a href="/about">About</a>
-          <a href="/contact">Contact</a>
+        <nav className="nav-links" aria-label="Main">
+          {/* Only shown once you've left the homepage, so there's always an obvious way back. */}
+          {!isHome && <a href="/" className="nav-home">Home</a>}
+          {NAV.map((item) => (
+            <a href={item.href} key={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>
+          ))}
         </nav>
-        <a className="btn btn-solid btn-sm nav-cta" href="/contact">Start a project</a>
+        <a className="btn btn-solid btn-sm nav-cta" href="/contact">Get in touch</a>
+        {!isHome && <a href="/" className="nav-home-mobile">Home</a>}
         <button
           type="button"
           className="nav-toggle"
@@ -87,31 +75,12 @@ export default function Header() {
       {mobileOpen && (
         <div className="mobile-menu">
           <div className="mobile-menu-group">
-            <a href="/" className="mobile-menu-heading" onClick={closeMobile}>Home</a>
-          </div>
-          <div className="mobile-menu-group">
-            <a href="/services" className="mobile-menu-heading" onClick={closeMobile}>Services</a>
-            {SERVICES.map((service) => (
-              <a href={`/services/${service.slug}`} key={service.slug} className="mobile-submenu-link" onClick={closeMobile}>
-                {service.title}
-              </a>
+            {!isHome && <a href="/" className="mobile-menu-heading" onClick={closeMobile}>Home</a>}
+            {NAV.map((item) => (
+              <a href={item.href} key={item.href} className="mobile-menu-heading" onClick={closeMobile}>{item.label}</a>
             ))}
           </div>
-          <div className="mobile-menu-group">
-            <a href="/work" className="mobile-menu-heading" onClick={closeMobile}>Work</a>
-            {WORK_CATEGORIES.map((category) => (
-              <a href={`/work/${category.slug}`} key={category.slug} className="mobile-submenu-link" onClick={closeMobile}>
-                {category.title}
-              </a>
-            ))}
-          </div>
-          <div className="mobile-menu-group">
-            <a href="/websites" className="mobile-menu-heading" onClick={closeMobile}>Websites</a>
-            <a href="/offers" className="mobile-menu-heading" onClick={closeMobile}>Offers</a>
-            <a href="/about" className="mobile-menu-heading" onClick={closeMobile}>About</a>
-            <a href="/contact" className="mobile-menu-heading" onClick={closeMobile}>Contact</a>
-          </div>
-          <a className="btn btn-solid btn-sm" href="/contact" onClick={closeMobile}>Start a project</a>
+          <a className="btn btn-solid btn-sm" href="/contact" onClick={closeMobile}>Get in touch</a>
         </div>
       )}
     </header>

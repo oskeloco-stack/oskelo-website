@@ -14,44 +14,29 @@ function inquiryHref(tier) {
   return `/contact?interest=${encodeURIComponent(tier ? `Website: ${tier}` : 'Website build')}#contact`;
 }
 
-// A live, CSS-drawn browser + phone mock of our own homepage: proof that we
-// build sites like this, without a screenshot that goes stale.
+// A real site we built (gracelanc.org), shown in a browser + phone frame.
+// Screenshots live in /public/websites/.
 function SiteMock() {
   return (
-    <div className="web-mock" aria-hidden="true">
+    <div className="web-mock">
       <div className="web-mock-browser">
-        <div className="web-mock-bar">
+        <div className="web-mock-bar" aria-hidden="true">
           <span /><span /><span />
-          <div className="web-mock-url">oskelo.com</div>
+          <div className="web-mock-url">gracelanc.org</div>
         </div>
         <div className="web-mock-screen">
-          <img src="/hero/showreel.jpg" alt="" />
-          <div className="web-mock-shade" />
-          <div className="web-mock-nav">
-            <img src="/4.webp" alt="" />
-            <i /><i /><i /><b />
-          </div>
-          <div className="web-mock-copy">
-            <em>Video &amp; content · Lancaster, PA</em>
-            <strong>You run your business.</strong>
-            <strong className="accent">We run your content.</strong>
-            <div className="web-mock-btns"><b /><i /></div>
-          </div>
+          <img src="/websites/gracelanc-desktop.webp" alt="Grace Church Lancaster homepage on a laptop, built by OSKELO" />
         </div>
       </div>
       <div className="web-mock-phone">
-        <div className="web-mock-notch" />
+        <div className="web-mock-notch" aria-hidden="true" />
         <div className="web-mock-phone-screen">
-          <img src="/hero/showreel.jpg" alt="" />
-          <div className="web-mock-shade" />
-          <div className="web-mock-copy is-phone">
-            <strong>You run your business.</strong>
-            <strong className="accent">We run your content.</strong>
-            <div className="web-mock-btns"><b /></div>
-          </div>
+          <img src="/websites/gracelanc-phone.webp" alt="The same Grace Church Lancaster site on a phone" />
         </div>
       </div>
-      <div className="web-mock-tag">Built in-house by OSKELO</div>
+      <a className="web-mock-tag" href="https://www.gracelanc.org" target="_blank" rel="noopener noreferrer">
+        Recent build: Grace Church Lancaster <span aria-hidden="true">↗</span>
+      </a>
     </div>
   );
 }
