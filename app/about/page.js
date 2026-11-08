@@ -1,14 +1,16 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ContactCTA from '../components/ContactCTA';
+import Values from '../components/Values';
 import { getContent } from '../../lib/siteContent';
-import { ABOUT_DEFAULT } from '../../lib/pageContent';
+import { ABOUT_DEFAULT, HOME_DEFAULT } from '../../lib/pageContent';
 
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'About the Team',
-  description: 'Meet the small Lancaster, PA team behind OSKELO. You work directly with the people who film, photograph and edit your content.',
+  title: 'About OSKELO',
+  description:
+    'OSKELO is a Christian-owned video and website business in Lancaster, PA, run by David Becker. Built on faith, honest work and serving others.',
   alternates: { canonical: '/about' },
 };
 
@@ -18,6 +20,9 @@ function initials(name = '') {
 
 export default async function About() {
   const c = { ...ABOUT_DEFAULT, ...(await getContent('about', ABOUT_DEFAULT)) };
+  // The six OSKELO values are still edited under Homepage in the admin.
+  const home = { ...HOME_DEFAULT, ...(await getContent('home', HOME_DEFAULT)) };
+  const team = c.team || [];
 
   return (
     <>
@@ -34,30 +39,63 @@ export default async function About() {
               <p>{c.intro}</p>
             </div>
 
-            {c.story && (
-              <div className="about-story">
-                <h3>{c.storyHeading}</h3>
-                <p>{c.story}</p>
-              </div>
-            )}
-
-            <div className="team-label">The team</div>
-            <div className="team-grid">
-              {(c.team || []).map((member) => (
-                <div className="team-card" key={member.name}>
-                  <div className="team-avatar">
+            <div className={`founder${team.length > 1 ? ' founder--many' : ''}`}>
+              {team.map((member) => (
+                <div className="founder-card" key={member.name}>
+                  <div className="founder-photo">
                     {member.photo
                       ? <img src={member.photo} alt={`${member.name}, ${member.role}`} loading="lazy" />
                       : <span aria-hidden="true">{initials(member.name)}</span>}
                   </div>
-                  <h3>{member.name}</h3>
-                  <div className="team-role">{member.role}</div>
-                  <p>{member.bio}</p>
+                  <div>
+                    <h2>{member.name}</h2>
+                    <div className="team-role">{member.role}</div>
+                    <p>{member.bio}</p>
+                  </div>
                 </div>
               ))}
+              {c.story && (
+                <div className="founder-story">
+                  <h3>{c.storyHeading}</h3>
+                  <p>{c.story}</p>
+                </div>
+              )}
             </div>
           </section>
         </div>
+
+        {c.faithHeading && (
+          <section className="faith" id="faith">
+            <div className="wrap faith-inner">
+              <div>
+                <div className="eyebrow">{c.faithEyebrow}</div>
+                <h2>{c.faithHeading}</h2>
+                {(c.faithBody || []).map((para, i) => <p key={i}>{para}</p>)}
+              </div>
+              {c.faithVerse && (
+                <figure className="faith-verse">
+                  <blockquote>“{c.faithVerse}”</blockquote>
+                  {c.faithVerseRef && <figcaption>{c.faithVerseRef}</figcaption>}
+                </figure>
+              )}
+            </div>
+          </section>
+        )}
+
+        {home.values?.length > 0 && (
+          <div className="wrap">
+            <section className="section" id="meaning">
+              <div className="section-head">
+                <div>
+                  <div className="eyebrow">{c.meaningEyebrow}</div>
+                  <h2>{c.meaningHeading}</h2>
+                </div>
+                {c.meaningIntro && <p>{c.meaningIntro}</p>}
+              </div>
+              <Values values={home.values} />
+            </section>
+          </div>
+        )}
 
         {c.promises?.length > 0 && (
           <div className="section-alt">
@@ -82,7 +120,7 @@ export default async function About() {
           </div>
         )}
 
-        <ContactCTA heading="Want to work with us?" body="Tell us a little about your business. You’ll hear back from the people who would actually make your content." />
+        <ContactCTA heading="Want to work together?" body="Tell me a little about your business. You’ll hear back from the person who would actually make your video or website." />
       </main>
 
       <Footer />
