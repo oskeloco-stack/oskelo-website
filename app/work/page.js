@@ -8,8 +8,8 @@ import { getContent } from '../../lib/siteContent';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Portfolio: Video & Photography Work',
-  description: 'Short-form video, event promos and photography produced by OSKELO in Lancaster, PA.',
+  title: 'Portfolio: Video, Photography & Website Work',
+  description: 'Short-form video, event promos, photography and websites made by OSKELO in Lancaster, PA.',
   alternates: { canonical: '/work' },
 };
 
@@ -41,7 +41,7 @@ export default async function WorkPage() {
               <div className="work-hero-text">
                 <div className="eyebrow">Work</div>
                 <h1>See what we create</h1>
-                <p>Video and photography we&rsquo;ve produced ourselves. New projects are added as we finish them.</p>
+                <p>Videos, photos and websites we&rsquo;ve made for real local clients. New projects are added as they wrap.</p>
               </div>
             </div>
             <nav className="work-jump" aria-label="Portfolio sections">
@@ -51,6 +51,7 @@ export default async function WorkPage() {
                   <span className="work-jump-count"> · {countLabel(category)}</span>
                 </a>
               ))}
+              <a href="#websites">Websites<span className="work-jump-count"> · 1 build</span></a>
             </nav>
 
             {ordered.map((category) => (
@@ -65,6 +66,27 @@ export default async function WorkPage() {
                 <WorkGroups category={category} headingLevel={3} />
               </div>
             ))}
+
+            <div className="work-block" id="websites">
+              <div className="work-block-head">
+                <div>
+                  <h2>Websites</h2>
+                  <p>Custom sites for local businesses and churches, built once at a fixed price.</p>
+                </div>
+                <a href="/websites">See website pricing <span aria-hidden="true">→</span></a>
+              </div>
+              <a className="work-site" href="https://www.gracelanc.org" target="_blank" rel="noopener noreferrer">
+                <div className="work-site-shot">
+                  <img src="/websites/gracelanc-desktop.webp" alt="Grace Church Lancaster homepage, built by OSKELO" loading="lazy" />
+                </div>
+                <div className="work-site-text">
+                  <div className="eyebrow">Website build</div>
+                  <h3>Grace Church Lancaster</h3>
+                  <p>A full church website: welcome page, service times, ministries, sermons and a plan-your-visit flow that works on any phone.</p>
+                  <span className="work-site-link">Visit gracelanc.org <span aria-hidden="true">↗</span></span>
+                </div>
+              </a>
+            </div>
           </section>
         </div>
 

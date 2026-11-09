@@ -160,6 +160,14 @@ export default async function Home() {
                     {reel.description && <figcaption>{reel.description}</figcaption>}
                   </figure>
                 ))}
+                {reels.length < 4 && (
+                  <a className="reel-item reel-next" href="/contact?interest=One-time%20video#contact">
+                    <span className="reel-next-eyebrow">Your business here</span>
+                    <strong>Want a video like these?</strong>
+                    <span>Tell me what you do and I&rsquo;ll pitch a few ideas. No cost to ask.</span>
+                    <span className="reel-next-cta">Start a video <span aria-hidden="true">→</span></span>
+                  </a>
+                )}
               </div>
             </div>
           </section>

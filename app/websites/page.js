@@ -56,7 +56,7 @@ export default function WebsitesPage() {
                 <span className="hero-accent">as hard as you do.</span>
               </h1>
               <p>
-                Custom websites for small businesses, designed and built by the same team that shoots
+                Custom websites for small businesses, designed and built by the same studio that shoots
                 your video and photos. One fixed price, paid once.
               </p>
               <div className="hero-ctas">

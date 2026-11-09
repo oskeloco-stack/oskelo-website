@@ -2895,3 +2895,37 @@ main h3{ font-weight: 700 !important; }
 .faith-verse{ border-color: rgba(var(--gold-rgb),0.45); border-left: 4px solid var(--gold); }
 .faith-verse blockquote{ font-style: normal; font-weight: 700; }
 .founder-photo{ background: linear-gradient(150deg, #d6ddd7, #b9c6bc); }
+
+/* ---------- Polish pass (2026-11-09) ---------- */
+/* Homepage: fills the empty slot after the reels with an invitation. */
+.home-reels .reel-next{
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 10px;
+  padding: 26px; aspect-ratio: 9 / 16; max-height: 533px;
+  background: var(--amber); color: #fff; border-radius: 6px; text-decoration: none;
+  scroll-snap-align: start; transition: transform .2s ease, background .2s ease;
+}
+.home-reels .reel-next:hover{ transform: translateY(-3px); background: var(--amber-deep); }
+.reel-next-eyebrow{ font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.reel-next strong{ font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 26px; line-height: 1.1; }
+.reel-next span{ font-size: 14px; line-height: 1.5; color: rgba(255,255,255,.82); }
+.reel-next .reel-next-cta{ margin-top: 8px; font-weight: 700; color: #fff; }
+
+/* /work: website builds block */
+.work-site{
+  display: grid; grid-template-columns: 1.4fr 1fr; gap: 0; align-items: stretch;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; color: inherit; text-decoration: none; transition: border-color .2s ease;
+}
+.work-site:hover{ border-color: var(--amber); }
+.work-site-shot{ background: var(--bg-panel); padding: 28px 28px 0; display: flex; align-items: flex-end; }
+.work-site-shot img{ display: block; width: 100%; border-radius: 6px 6px 0 0; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+.work-site-text{ padding: 36px; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+.work-site-text h3{ margin: 0; font-size: 26px; }
+.work-site-text p{ margin: 0; color: var(--grey); line-height: 1.6; }
+.work-site-link{ margin-top: 6px; font-weight: 700; color: var(--amber); }
+@media (max-width: 760px){
+  .work-site{ grid-template-columns: 1fr; }
+  .work-site-shot{ padding: 18px 18px 0; }
+  .work-site-text{ padding: 24px; }
+  .home-reels .reel-next{ aspect-ratio: auto; min-height: 360px; }
+}
