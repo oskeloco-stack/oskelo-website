@@ -2,20 +2,32 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { INQUIRY_INTERESTS, resolveInterest } from '../../lib/services';
+import { Arrow } from './ui';
+
+// The inquiry form. Posts to /api/contact (stored in Supabase, emailed via
+// Resend). The success panel only appears after the server confirms; errors
+// from the server are shown as they come back. Spam protection: a hidden
+// honeypot field plus the time the form was open (checked server-side).
 
 const EMPTY = { name: '', business: '', email: '', interest: '', detail: '', message: '', budget: '', timeline: '', website: '' };
-
 const BUDGETS = ['Under $300', '$300–$600', '$600–$1,000', '$1,000+', 'Not sure yet'];
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function Contact({
-  heading = 'Ready to take content off your plate?',
-  intro = 'Tell us about your business or project. We usually reply within one business day.',
-  isPage = false,
-}) {
-  const Heading = isPage ? 'h1' : 'h2';
+function validate(form) {
+  const errors = {};
+  if (!form.name.trim()) errors.name = 'Please tell us your name.';
+  if (!form.email.trim()) errors.email = 'We need an email to reply to.';
+  else if (!EMAIL_RE.test(form.email.trim())) errors.email = 'That email doesn’t look quite right.';
+  if (form.message.trim().length < 10) errors.message = 'A sentence or two about the project helps us reply properly.';
+  return errors;
+}
+
+export default function Contact() {
   const [form, setForm] = useState(EMPTY);
+  const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ state: 'idle', message: '' });
   const startedAt = useRef(Date.now());
+  const formRef = useRef(null);
 
   // Buttons elsewhere link here with ?interest=… so the right option is preselected.
   useEffect(() => {
@@ -25,125 +37,126 @@ export default function Contact({
 
   function handleChange(e) {
     const { name, value } = e.target;
-    // A different choice than the one a button preselected drops its detail line.
     setForm((f) => ({ ...f, [name]: value, ...(name === 'interest' ? { detail: '' } : {}) }));
+    if (errors[name]) setErrors((er) => ({ ...er, [name]: undefined }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setStatus({ state: 'loading', message: '' });
+    const found = validate(form);
+    setErrors(found);
+    if (Object.keys(found).length) {
+      formRef.current?.querySelector(`[name="${Object.keys(found)[0]}"]`)?.focus();
+      return;
+    }
 
+    setStatus({ state: 'loading', message: '' });
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, elapsed: Date.now() - startedAt.current }),
       });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Something went wrong.');
-      }
-
-      setStatus({ state: 'success', message: form.name.split(' ')[0] });
+      let data = {};
+      try { data = await res.json(); } catch { /* non-JSON error page */ }
+      if (!res.ok || !data.success) throw new Error(data.error || 'Something went wrong sending your message.');
+      setStatus({ state: 'success', message: form.name.trim().split(' ')[0] });
       setForm(EMPTY);
     } catch (err) {
-      setStatus({ state: 'error', message: err.message });
+      const msg = err.message.includes('contact@oskelo.com')
+        ? err.message
+        : `${err.message} Please try again, or email contact@oskelo.com.`;
+      setStatus({ state: 'error', message: msg });
     }
   }
 
-  return (
-    <section className={`section contact${isPage ? ' page-intro' : ''}`} id="contact">
-      <div className="wrap contact-inner">
-        <div>
-          <div className="eyebrow">Contact</div>
-          <Heading>{heading}</Heading>
-          <p>{intro}</p>
-          <div className="contact-email">
-            <a href="mailto:contact@oskelo.com">contact@oskelo.com</a>
-            <span className="sub">Based in Lancaster, PA. Available for travel.</span>
-          </div>
-        </div>
-
-        {status.state === 'success' ? (
-          <div className="form-done" role="status" tabIndex={-1} ref={(el) => el?.focus()}>
-            <div className="form-done-mark" aria-hidden="true">✓</div>
-            <h3>Thanks{status.message ? `, ${status.message}` : ''}. Your message is in.</h3>
-            <ol className="form-done-steps">
-              <li><b>We read it</b> and look at what your business needs.</li>
-              <li><b>We reply by email</b>, usually within one business day, with questions or next steps.</li>
-              <li><b>If it’s a fit</b>, we set up a short call to plan your content.</li>
-            </ol>
-            <p>
-              Nothing back in two business days? Check your spam folder, or email{' '}
-              <a href="mailto:contact@oskelo.com">contact@oskelo.com</a>.
-            </p>
-            <button type="button" className="btn btn-outline btn-sm" onClick={() => setStatus({ state: 'idle', message: '' })}>
-              Send another message
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="form-field">
-                <label htmlFor="name">Your name</label>
-                <input id="name" name="name" type="text" autoComplete="name" required maxLength={200} value={form.name} onChange={handleChange} />
-              </div>
-              <div className="form-field">
-                <label htmlFor="email">Email</label>
-                <input id="email" name="email" type="email" autoComplete="email" required maxLength={200} value={form.email} onChange={handleChange} />
-              </div>
-            </div>
-            <div className="form-field">
-              <label htmlFor="message">Tell us about your project</label>
-              <textarea id="message" name="message" required maxLength={5000} value={form.message} onChange={handleChange}
-                placeholder="What does your business do, and what kind of content do you need?" />
-            </div>
-
-            <fieldset className="form-optional">
-              <legend>Optional, but helpful</legend>
-              <div className="form-row">
-                <div className="form-field">
-                  <label htmlFor="interest">What can we help with?</label>
-                  <select id="interest" name="interest" value={form.interest} onChange={handleChange}>
-                    <option value="">Choose one</option>
-                    {INQUIRY_INTERESTS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
-                  {form.detail && <span className="form-hint">Selected: {form.detail}</span>}
-                </div>
-                <div className="form-field">
-                  <label htmlFor="business">Business name</label>
-                  <input id="business" name="business" type="text" autoComplete="organization" maxLength={200} value={form.business} onChange={handleChange} />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-field">
-                  <label htmlFor="budget">Budget</label>
-                  <select id="budget" name="budget" value={form.budget} onChange={handleChange}>
-                    <option value="">Prefer not to say</option>
-                    {BUDGETS.map((b) => <option key={b} value={b}>{b}</option>)}
-                  </select>
-                </div>
-                <div className="form-field">
-                  <label htmlFor="timeline">Timeline</label>
-                  <input id="timeline" name="timeline" type="text" placeholder="e.g. next month" maxLength={200} value={form.timeline} onChange={handleChange} />
-                </div>
-              </div>
-            </fieldset>
-
-            {/* Honeypot: hidden from people, bots fill it in. */}
-            <div className="form-hp" aria-hidden="true">
-              <label htmlFor="website">Website</label>
-              <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={handleChange} />
-            </div>
-            <button className="btn btn-solid" type="submit" disabled={status.state === 'loading'}>
-              {status.state === 'loading' ? 'Sending…' : 'Send inquiry'}
-            </button>
-            <p className="form-fine">We only use your details to reply to you.</p>
-            {status.state === 'error' && <p className="form-status error" role="alert">{status.message}</p>}
-          </form>
-        )}
+  if (status.state === 'success') {
+    return (
+      <div className="s-done" role="status" tabIndex={-1} ref={(el) => el?.focus()}>
+        <p className="s-eyebrow">Message received</p>
+        <h2>Thanks{status.message ? `, ${status.message}` : ''}. Your message is in.</h2>
+        <ol>
+          <li>We read it and look at what your business needs.</li>
+          <li>We reply by email, usually within one business day.</li>
+          <li>If it’s a fit, we set up a short call to plan your content.</li>
+        </ol>
+        <p>Nothing back in two business days? Check your spam folder, or email <a href="mailto:contact@oskelo.com" style={{ borderBottom: '1px solid' }}>contact@oskelo.com</a>.</p>
+        <button type="button" className="s-btn s-btn--outline s-btn--sm" onClick={() => { startedAt.current = Date.now(); setStatus({ state: 'idle', message: '' }); }}>
+          Send another message
+        </button>
       </div>
-    </section>
+    );
+  }
+
+  const field = (name) => ({
+    id: `f-${name}`,
+    name,
+    value: form[name],
+    onChange: handleChange,
+    'aria-invalid': errors[name] ? true : undefined,
+    'aria-describedby': errors[name] ? `f-${name}-err` : undefined,
+  });
+  const Err = ({ name }) => (errors[name] ? <span className="s-field-error" id={`f-${name}-err`}>{errors[name]}</span> : null);
+  const loading = status.state === 'loading';
+
+  return (
+    <form className="s-form" ref={formRef} onSubmit={handleSubmit} noValidate aria-busy={loading}>
+      <div className="s-form-grid">
+        <div className={`s-field${errors.name ? ' has-error' : ''}`}>
+          <label htmlFor="f-name">Name</label>
+          <input {...field('name')} type="text" autoComplete="name" maxLength={200} required />
+          <Err name="name" />
+        </div>
+        <div className={`s-field${errors.email ? ' has-error' : ''}`}>
+          <label htmlFor="f-email">Email</label>
+          <input {...field('email')} type="email" autoComplete="email" maxLength={200} required />
+          <Err name="email" />
+        </div>
+        <div className="s-field">
+          <label htmlFor="f-business">Business or organization <span className="s-opt">Optional</span></label>
+          <input {...field('business')} type="text" autoComplete="organization" maxLength={200} />
+        </div>
+        <div className="s-field">
+          <label htmlFor="f-interest">Type of service <span className="s-opt">Optional</span></label>
+          <select {...field('interest')}>
+            <option value="">Choose one</option>
+            {INQUIRY_INTERESTS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+          {form.detail && <span className="s-field-hint">Selected: {form.detail}</span>}
+        </div>
+        <div className={`s-field s-field--full${errors.message ? ' has-error' : ''}`}>
+          <label htmlFor="f-message">Project details</label>
+          <textarea {...field('message')} maxLength={5000} required
+            placeholder="What does your business do, and what would you like made? Dates or deadlines help too." />
+          <Err name="message" />
+        </div>
+        <div className="s-field">
+          <label htmlFor="f-budget">Budget range <span className="s-opt">Optional</span></label>
+          <select {...field('budget')}>
+            <option value="">Prefer not to say</option>
+            {BUDGETS.map((b) => <option key={b} value={b}>{b}</option>)}
+          </select>
+        </div>
+        <div className="s-field">
+          <label htmlFor="f-timeline">Timeline <span className="s-opt">Optional</span></label>
+          <input {...field('timeline')} type="text" placeholder="e.g. next month" maxLength={200} />
+        </div>
+      </div>
+
+      {/* Honeypot: hidden from people, bots fill it in. */}
+      <div className="s-hp" aria-hidden="true">
+        <label htmlFor="f-website">Website</label>
+        <input id="f-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={handleChange} />
+      </div>
+
+      {status.state === 'error' && <p className="s-form-alert" role="alert">{status.message}</p>}
+
+      <div className="s-form-foot">
+        <p>We only use your details to reply to you.</p>
+        <button className="s-btn s-btn--dark" type="submit" disabled={loading}>
+          {loading ? <><span className="s-spinner" aria-hidden="true" /> Sending…</> : <>Send inquiry <Arrow /></>}
+        </button>
+      </div>
+    </form>
   );
 }

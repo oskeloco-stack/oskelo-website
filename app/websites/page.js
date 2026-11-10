@@ -1,6 +1,6 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Contact from '../components/Contact';
+import ContactSection from '../components/ContactSection';
 import { WEBSITE_TIERS, WEBSITE_INCLUDED, WEBSITE_STEPS, WEBSITE_FAQ } from '../../lib/websites';
 
 export const metadata = {
@@ -194,7 +194,7 @@ export default function WebsitesPage() {
           </section>
         </div>
 
-        <Contact
+        <ContactSection
           heading="Let’s build your website."
           intro="Tell us about your business and what you want your site to do. We usually reply within one business day."
         />

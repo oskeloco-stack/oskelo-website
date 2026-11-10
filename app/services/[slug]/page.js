@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import Contact from '../../components/Contact';
+import ContactSection from '../../components/ContactSection';
 import FoundingOffer from '../../components/FoundingOffer';
 import Plans from '../../components/Plans';
 import ServiceBlock from '../../components/ServiceBlock';
@@ -158,7 +158,7 @@ export default async function ServicePage({ params }) {
 
         {isMonthly && <MonthlyGuide guide={MONTHLY_GUIDE} />}
 
-        <Contact />
+        <ContactSection />
       </main>
 
       <Footer />

@@ -1,39 +1,28 @@
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Contact from './components/Contact';
-import ReelVideo from './components/ReelVideo';
+import ContactCTA from './components/ContactCTA';
+import HeroVideo from './components/HeroVideo';
+import FilmFrame from './components/FilmFrame';
+import { Arrow, PinIcon, ServiceIcon, Eyebrow, PriceTag, contactHref } from './components/ui';
 import { SERVICES, getService } from '../lib/services';
 import { WORK_CATEGORIES } from '../lib/work';
 import { WEBSITE_TIERS } from '../lib/websites';
 import { HOME_DEFAULT } from '../lib/pageContent';
 import { getContent } from '../lib/siteContent';
+import { flattenWork } from '../lib/portfolio';
 
 export const revalidate = 60;
 
 export const metadata = {
-  title: { absolute: 'OSKELO | Video & Website Design in Lancaster, PA' },
+  title: { absolute: 'OSKELO | Cinematic Video, Photography & Content in Lancaster, PA' },
   description:
-    'Friendly, local video and website design for small businesses in Lancaster, PA. We film and edit short-form and promo videos, and build simple, fixed-price websites.',
+    'Your story. Worth watching. OSKELO is a Pennsylvania-based creative studio making cinematic video, short-form content and photography for local businesses. Monthly plans from $299.',
   alternates: { canonical: '/' },
 };
 
-// A website we built, shown in the hero and on the Websites card. Screenshots
-// live in /public/websites/ (desktop 1440x900, phone ~375 wide). To feature a
-// different build, add its screenshots there and change this.
-const SHOWCASE_SITE = {
-  name: 'Grace Church Lancaster',
-  url: 'gracelanc.org',
-  desktop: '/websites/gracelanc-desktop.webp',
-  phone: '/websites/gracelanc-phone.webp',
-};
-
-function Check() {
-  return (
-    <svg className="home-check" viewBox="0 0 20 20" aria-hidden="true">
-      <path d="M5 10.5l3.2 3.2L15 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
+// Which real projects lead the homepage film strip, by name, in order.
+// Anything missing is skipped, and the strip fills from the rest of the work.
+const FEATURED = ['Bring Your Ride', 'Wedding & Engagement', 'Concerts'];
 
 export default async function Home() {
   const services = await getContent('services', SERVICES);
@@ -41,150 +30,171 @@ export default async function Home() {
   // Merged so copy fields added after an admin save still fall back to their defaults.
   const c = { ...HOME_DEFAULT, ...(await getContent('home', HOME_DEFAULT)) };
 
+  const projects = flattenWork(categories);
+  const featured = [
+    ...FEATURED.map((name) => projects.find((p) => p.name === name)).filter(Boolean),
+    ...projects.filter((p) => !FEATURED.includes(p.name)),
+  ].slice(0, 3);
+
   const monthly = getService('monthly-plans', services);
   const oneTime = getService('one-time-video', services);
-  const monthlyFrom = monthly?.plans?.[0]?.price?.replace(/^Starting at /, '');
-  const oneTimeFrom = oneTime?.plans?.[0]?.price?.replace(/^Starting at /, '');
-  const webFrom = WEBSITE_TIERS[0]?.price;
-  // Reels come from the Video & Editing portfolio, so adding one there shows it here too.
-  const reels = (categories.find((cat) => cat.slug === 'video-editing')?.items || []).filter((item) => item.video);
-  const heroReel = reels[0];
+  const photo = getService('photography', services);
+  const from = (p) => (p || '').replace(/^Starting at /, '').replace('/mo', '/mo');
+
+  const pillars = [
+    { icon: 'monthly', title: 'Monthly Content', body: c.studioMonthlyBody, price: monthly?.plans?.[0] && `From ${from(monthly.plans[0].price)}`, href: '/services#monthly' },
+    { icon: 'video', title: 'Video Production', body: c.studioVideoBody, price: oneTime?.plans?.[0] && `Edits from ${from(oneTime.plans[0].price)}`, href: '/services#video' },
+    { icon: 'photo', title: 'Photography', body: c.studioPhotoBody, price: photo && 'Quoted per project', href: '/services#photography' },
+  ];
 
   return (
     <>
       <Header />
 
-      <main id="main" className="home">
+      <main id="main" className="s-main">
         {/* Hero */}
-        <section className="home-hero">
-          <div className="wrap home-hero-grid">
-            <div className="home-hero-copy">
-              <div className="home-pill">{c.welcomeEyebrow}</div>
-              <h1>{c.welcomeHeading}</h1>
-              <p className="home-lede">{c.welcomeSub}</p>
-              <div className="home-ctas">
-                <a className="btn btn-solid" href="/contact">{c.welcomeCta1}</a>
-                <a className="btn btn-outline" href="/work">{c.welcomeCta2}</a>
+        <section className="s-hero" aria-labelledby="hero-heading">
+          <div className="s-hero-media">
+            <HeroVideo poster="/hero/showreel.jpg" src="/hero/showreel.mp4" mobileSrc="/hero/showreel-mobile.mp4" />
+          </div>
+          <div className="s-wrap" style={{ width: '100%' }}>
+            <div className="s-hero-copy">
+              <h1 className="s-h1" id="hero-heading">
+                {c.studioHeadline1}<br />
+                <span className="s-accent">{c.studioHeadline2}</span>
+              </h1>
+              <p className="s-lead">{c.studioSub}</p>
+              <div className="s-hero-actions">
+                <a className="s-btn s-btn--dark" href="/work">Explore Our Work <Arrow /></a>
+                <a className="s-link" href="/services">View Services</a>
               </div>
-              {c.welcomeNote && <p className="home-note">{c.welcomeNote}</p>}
+              <p className="s-hero-place"><PinIcon />{c.studioPlace}</p>
             </div>
-            {/* Both things we do, side by side: a real website we built and a real reel we shot. */}
-            <div className="home-showcase">
-              <figure className="sc-browser">
-                <div className="sc-bar" aria-hidden="true"><span /><span /><span /><i>gracelanc.org</i></div>
-                <img src={SHOWCASE_SITE.desktop} alt={`${SHOWCASE_SITE.name} homepage, a website built by OSKELO`} width="1440" height="900" />
-                <figcaption className="sc-tag">Website · {SHOWCASE_SITE.name}</figcaption>
-              </figure>
-              {heroReel && (
-                <figure className="sc-phone">
-                  <div className="sc-phone-screen">
-                    <video poster={heroReel.image} autoPlay muted loop playsInline preload="metadata" aria-hidden="true">
-                      <source src={heroReel.video} type="video/mp4" />
-                    </video>
-                  </div>
-                  <figcaption className="sc-tag">Video · {heroReel.name}</figcaption>
-                </figure>
-              )}
+          </div>
+          <span className="s-hero-tag" aria-hidden="true">Filmed by OSKELO</span>
+        </section>
+
+        {/* Featured work */}
+        {featured.length > 0 && (
+          <section className="s-section--tight" aria-label="Featured work" style={{ paddingTop: 24 }}>
+            <div className="s-wrap">
+              <div className="s-strip">
+                {featured.map((p, i) => <FilmFrame key={p.id} project={p} index={i} />)}
+              </div>
+              <div className="s-under">
+                <span>{c.studioFeaturedEyebrow}: real OSKELO projects only.</span>
+                <a className="s-link" href="/work">See all work <Arrow /></a>
+              </div>
             </div>
+          </section>
+        )}
+
+        {/* What we do */}
+        <section className="s-section" id="what-we-do" aria-labelledby="what-heading" style={{ paddingTop: 72 }}>
+          <div className="s-wrap">
+            <div className="s-head">
+              <div>
+                <Eyebrow>{c.studioWhatEyebrow}</Eyebrow>
+                <h2 className="s-h2" id="what-heading">{c.studioWhatHeading}</h2>
+              </div>
+              <p className="s-lead">{c.studioWhatIntro}</p>
+            </div>
+            <div className="s-pillars">
+              {pillars.map((p) => (
+                <a className="s-pillar" href={p.href} key={p.title}>
+                  <ServiceIcon name={p.icon} className="s-pillar-icon" />
+                  <h3 className="s-h3">{p.title}</h3>
+                  <p>{p.body}</p>
+                  {p.price && <span className="s-pillar-price">{p.price}</span>}
+                  <Arrow className="s-arrow" />
+                </a>
+              ))}
+            </div>
+            {WEBSITE_TIERS[0] && (
+              <p className="s-also">
+                Need a place to put it all? We also build one-time websites for small businesses, from {WEBSITE_TIERS[0].price}.{' '}
+                <a href="/websites">Website builds</a>
+              </p>
+            )}
           </div>
         </section>
 
-        {/* The two services */}
-        <section className="home-section" id="what-we-do">
-          <div className="wrap">
-            <div className="home-head">
-              <div className="home-eyebrow">{c.offerEyebrow}</div>
-              <h2>{c.offerHeading}</h2>
+        {/* Why OSKELO */}
+        <section className="s-section s-section--alt" aria-labelledby="why-heading">
+          <div className="s-wrap s-split">
+            <div className="s-split-media">
+              <img src="/work/wedding-engagement/field-bouquet.jpg" alt="Bride and groom in a sunlit field, photographed by OSKELO" loading="lazy" decoding="async" />
+              <span className="s-split-caption">Wedding &amp; engagement photography by OSKELO</span>
             </div>
-            <div className="home-offers">
-              <a className="home-offer" href="/video">
-                <div className="home-offer-img">
-                  <img src="/hero/showreel.jpg" alt="" loading="lazy" />
-                </div>
-                <div className="home-offer-body">
-                  <h3>{c.videoTitle}</h3>
-                  <p>{c.videoBody}</p>
-                  <ul>
-                    {c.videoPoints.map((p) => <li key={p}><Check />{p}</li>)}
-                  </ul>
-                  <div className="home-offer-foot">
-                    {(oneTimeFrom || monthlyFrom) && (
-                      <span className="home-price">
-                        {oneTimeFrom ? <>Videos from <b>{oneTimeFrom}</b></> : <>Plans from <b>{monthlyFrom}</b></>}
-                      </span>
-                    )}
-                    <span className="home-link">{c.videoCta} <span aria-hidden="true">→</span></span>
-                  </div>
-                </div>
-              </a>
-              <a className="home-offer" href="/websites">
-                <div className="home-offer-img home-offer-img--web">
-                  <div className="sc-mini-phone">
-                    <img src={SHOWCASE_SITE.phone} alt={`${SHOWCASE_SITE.name} website on a phone, built by OSKELO`} loading="lazy" />
-                  </div>
-                  <span className="sc-tag sc-tag--card">Recent build · {SHOWCASE_SITE.url}</span>
-                </div>
-                <div className="home-offer-body">
-                  <h3>{c.webTitle}</h3>
-                  <p>{c.webBody}</p>
-                  <ul>
-                    {c.webPoints.map((p) => <li key={p}><Check />{p}</li>)}
-                  </ul>
-                  <div className="home-offer-foot">
-                    {webFrom && <span className="home-price">Websites from <b>{webFrom}</b></span>}
-                    <span className="home-link">{c.webCta} <span aria-hidden="true">→</span></span>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* Recent work */}
-        {reels.length > 0 && (
-          <section className="home-section home-section--tint" id="work">
-            <div className="wrap">
-              <div className="home-head home-head--row">
-                <div>
-                  <div className="home-eyebrow">{c.showEyebrow}</div>
-                  <h2>{c.showHeading}</h2>
-                </div>
-                <a className="home-link" href="/work">{c.showCta} <span aria-hidden="true">→</span></a>
-              </div>
-              <div className="reels-row home-reels">
-                {reels.slice(0, 4).map((reel) => (
-                  <figure className="reel-item" key={reel.name}>
-                    <div className="reel-card has-video">
-                      <ReelVideo src={reel.video} poster={reel.image} eyebrow={reel.tag} title={reel.name} duration={reel.duration} description={reel.description} />
+            <div>
+              <Eyebrow>{c.studioWhyEyebrow}</Eyebrow>
+              <h2 className="s-h2" id="why-heading">{c.studioWhyHeading}</h2>
+              <p className="s-body" style={{ marginTop: 24, fontSize: 17 }}>{c.studioWhyBody}</p>
+              <ul className="s-points">
+                {(c.studioWhyPoints || []).map((pt, i) => (
+                  <li key={pt.title}>
+                    <span className="s-num">{String(i + 1).padStart(2, '0')}</span>
+                    <div>
+                      <h3>{pt.title}</h3>
+                      <p>{pt.body}</p>
                     </div>
-                    {reel.description && <figcaption>{reel.description}</figcaption>}
-                  </figure>
+                  </li>
                 ))}
-                {reels.length < 4 && (
-                  <a className="reel-item reel-next" href="/contact?interest=One-time%20video#contact">
-                    <span className="reel-next-eyebrow">Your business here</span>
-                    <strong>Want a video like these?</strong>
-                    <span>Tell me what you do and I&rsquo;ll pitch a few ideas. No cost to ask.</span>
-                    <span className="reel-next-cta">Start a video <span aria-hidden="true">→</span></span>
-                  </a>
-                )}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing preview */}
+        {monthly?.plans?.length > 0 && (
+          <section className="s-section" id="pricing" aria-labelledby="pricing-heading">
+            <div className="s-wrap">
+              <div className="s-head">
+                <div>
+                  <Eyebrow>{c.studioPricingEyebrow}</Eyebrow>
+                  <h2 className="s-h2" id="pricing-heading">{c.studioPricingHeading}</h2>
+                </div>
+                <p className="s-lead">{c.studioPricingIntro}</p>
+              </div>
+              <div className="s-plans">
+                {monthly.plans.map((plan) => (
+                  <div className={`s-plan${plan.featured ? ' is-featured' : ''}`} key={plan.name}>
+                    {plan.featured && <span className="s-plan-badge">Most popular</span>}
+                    <p className="s-plan-name">{plan.name}</p>
+                    <PriceTag price={plan.price} />
+                    <p className="s-plan-for">{plan.bestFor}</p>
+                    <ul>
+                      {plan.features.map((f) => <li key={f}>{f}</li>)}
+                    </ul>
+                    <a className={`s-btn ${plan.featured ? 's-btn--light' : 's-btn--outline'}`} href={contactHref(`Monthly plan: ${plan.name}`)}>
+                      Choose {plan.name}
+                    </a>
+                    {plan.travel && <p className="s-plan-note">Includes travel within about 15 miles. Further locations quoted up front.</p>}
+                  </div>
+                ))}
+              </div>
+              <div className="s-under">
+                <span>One-time videos from {from(oneTime?.plans?.[0]?.price) || '$99'}. Photography quoted per project.</span>
+                <a className="s-link" href="/services">Full services &amp; pricing <Arrow /></a>
               </div>
             </div>
           </section>
         )}
 
         {/* How it works */}
-        <section className="home-section" id="how-it-works">
-          <div className="wrap">
-            <div className="home-head">
-              <div className="home-eyebrow">{c.easyEyebrow}</div>
-              <h2>{c.easyHeading}</h2>
+        <section className="s-section s-section--tight" aria-labelledby="steps-heading" style={{ paddingBottom: 'clamp(80px, 9vw, 128px)' }}>
+          <div className="s-wrap">
+            <div className="s-head s-head--stack">
+              <div>
+                <Eyebrow>{c.studioStepsEyebrow}</Eyebrow>
+                <h2 className="s-h2" id="steps-heading">{c.studioStepsHeading}</h2>
+              </div>
             </div>
-            <ol className="home-steps">
-              {c.easySteps.map((step, i) => (
-                <li key={i}>
-                  <span className="home-step-num" aria-hidden="true">{i + 1}</span>
-                  <h3>{step.title}</h3>
+            <ol className="s-steps">
+              {(c.studioSteps || []).map((step, i) => (
+                <li key={step.title}>
+                  <span className="s-step-n">{String(i + 1).padStart(2, '0')}</span>
+                  <h3 className="s-h3">{step.title}</h3>
                   <p>{step.body}</p>
                 </li>
               ))}
@@ -192,9 +202,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <div className="home-contact">
-          <Contact heading={c.closingHeading} intro={c.closingBody} />
-        </div>
+        <ContactCTA heading={c.studioCtaHeading} body={c.studioCtaBody} />
       </main>
 
       <Footer />

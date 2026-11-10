@@ -1,96 +1,64 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ContactCTA from '../components/ContactCTA';
-import WorkGroups from '../components/WorkGroups';
+import WorkBrowser from '../components/WorkBrowser';
+import { Arrow, Eyebrow } from '../components/ui';
 import { WORK_CATEGORIES } from '../../lib/work';
 import { getContent } from '../../lib/siteContent';
+import { flattenWork } from '../../lib/portfolio';
 
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Portfolio: Video, Photography & Website Work',
-  description: 'Short-form video, event promos, photography and websites made by OSKELO in Lancaster, PA.',
+  title: 'Work: Video, Short-Form & Photography Portfolio',
+  description: 'Real OSKELO projects: short-form promos, event video and photography from portraits and weddings to concerts and sports. Lancaster, PA.',
   alternates: { canonical: '/work' },
 };
 
-function countLabel(category) {
-  const items = category.items || [];
-  const videos = items.filter((i) => i.video).length;
-  const galleries = items.length - videos;
-  return [videos && `${videos} video${videos > 1 ? 's' : ''}`, galleries && `${galleries} galler${galleries > 1 ? 'ies' : 'y'}`]
-    .filter(Boolean).join(', ');
-}
-
 export default async function WorkPage() {
   const categories = await getContent('work', WORK_CATEGORIES);
-  // Video first: it's the core of what we sell.
-  const ordered = [...categories].sort((a, b) => (a.slug === 'video-editing' ? -1 : b.slug === 'video-editing' ? 1 : 0));
+  // Videos lead: it's the core of what we sell.
+  const projects = flattenWork(categories).sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'video' ? -1 : 1));
 
   return (
     <>
       <Header />
 
-      <main id="main">
-        <div className="wrap">
-          <section className="section page-intro" id="work-overview">
-            <div className="work-hero">
-              <video className="work-hero-video" poster="/hero/showreel.jpg" autoPlay muted loop playsInline preload="metadata" aria-hidden="true">
-                <source src="/hero/showreel-mobile.mp4" type="video/mp4" media="(max-width: 700px)" />
-                <source src="/hero/showreel.mp4" type="video/mp4" />
-              </video>
-              <div className="work-hero-text">
-                <div className="eyebrow">Work</div>
-                <h1>See what we create</h1>
-                <p>Videos, photos and websites we&rsquo;ve made for real local clients. New projects are added as they wrap.</p>
+      <main id="main" className="s-main">
+        <section className="s-page-hero" aria-labelledby="work-heading">
+          <div className="s-wrap">
+            <Eyebrow>Work</Eyebrow>
+            <h1 className="s-h1" id="work-heading">Real projects. <span className="s-accent">Real businesses and people.</span></h1>
+            <p className="s-lead">Everything here was filmed, edited or photographed by OSKELO. Tap a video to watch it with sound, or open a collection to see the full gallery.</p>
+          </div>
+        </section>
+
+        <section className="s-section" style={{ paddingTop: 0 }} aria-label="Portfolio">
+          <div className="s-wrap">
+            <WorkBrowser projects={projects} />
+          </div>
+        </section>
+
+        <section className="s-section s-section--alt" aria-labelledby="web-heading">
+          <div className="s-wrap s-web">
+            <div>
+              <Eyebrow>Also from the studio</Eyebrow>
+              <h2 className="s-h2" id="web-heading" style={{ fontSize: 'clamp(30px, 3.4vw, 44px)' }}>Website builds</h2>
+              <p className="s-body" style={{ marginTop: 18 }}>
+                We built the Grace Church Lancaster website: welcome page, service times, ministries, sermons and a plan-your-visit flow that works on any phone.
+              </p>
+              <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', marginTop: 28 }}>
+                <a className="s-link" href="https://www.gracelanc.org" target="_blank" rel="noopener noreferrer">Visit gracelanc.org <span aria-hidden="true">↗</span></a>
+                <a className="s-link" href="/websites">Website pricing <Arrow /></a>
               </div>
             </div>
-            <nav className="work-jump" aria-label="Portfolio sections">
-              {ordered.map((category) => (
-                <a href={`#${category.slug}`} key={category.slug}>
-                  {category.title}
-                  <span className="work-jump-count"> · {countLabel(category)}</span>
-                </a>
-              ))}
-              <a href="#websites">Websites<span className="work-jump-count"> · 1 build</span></a>
-            </nav>
+            <a className="s-web-shot" href="https://www.gracelanc.org" target="_blank" rel="noopener noreferrer" aria-label="Grace Church Lancaster website (opens in a new tab)">
+              <img src="/websites/gracelanc-desktop.webp" alt="Grace Church Lancaster homepage, built by OSKELO" loading="lazy" decoding="async" />
+            </a>
+          </div>
+        </section>
 
-            {ordered.map((category) => (
-              <div className="work-block" id={category.slug} key={category.slug}>
-                <div className="work-block-head">
-                  <div>
-                    <h2>{category.title}</h2>
-                    <p>{category.subtitle}</p>
-                  </div>
-                  <a href={`/work/${category.slug}`}>View all {category.title.toLowerCase()} <span aria-hidden="true">→</span></a>
-                </div>
-                <WorkGroups category={category} headingLevel={3} />
-              </div>
-            ))}
-
-            <div className="work-block" id="websites">
-              <div className="work-block-head">
-                <div>
-                  <h2>Websites</h2>
-                  <p>Custom sites for local businesses and churches, built once at a fixed price.</p>
-                </div>
-                <a href="/websites">See website pricing <span aria-hidden="true">→</span></a>
-              </div>
-              <a className="work-site" href="https://www.gracelanc.org" target="_blank" rel="noopener noreferrer">
-                <div className="work-site-shot">
-                  <img src="/websites/gracelanc-desktop.webp" alt="Grace Church Lancaster homepage, built by OSKELO" loading="lazy" />
-                </div>
-                <div className="work-site-text">
-                  <div className="eyebrow">Website build</div>
-                  <h3>Grace Church Lancaster</h3>
-                  <p>A full church website: welcome page, service times, ministries, sermons and a plan-your-visit flow that works on any phone.</p>
-                  <span className="work-site-link">Visit gracelanc.org <span aria-hidden="true">↗</span></span>
-                </div>
-              </a>
-            </div>
-          </section>
-        </div>
-
-        <ContactCTA />
+        <ContactCTA heading="Your project could be next." body="Tell us what you do and what you need. We’ll suggest the simplest way to get it made." />
       </main>
 
       <Footer />

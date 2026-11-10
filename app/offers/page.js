@@ -1,6 +1,6 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Contact from '../components/Contact';
+import ContactSection from '../components/ContactSection';
 import FoundingOffer from '../components/FoundingOffer';
 import { HOME_DEFAULT } from '../../lib/pageContent';
 import { getContent } from '../../lib/siteContent';
@@ -60,7 +60,7 @@ export default async function OffersPage() {
           </section>
         </div>
 
-        <Contact />
+        <ContactSection />
       </main>
 
       <Footer />

@@ -1,88 +1,97 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
-// Kept deliberately short: the two things we do, the proof, and who we are.
-// Photography, monthly plans, offers etc. are still reachable from these
-// pages and the footer.
 const NAV = [
-  { href: '/video', label: 'Video' },
-  { href: '/websites', label: 'Websites' },
-  { href: '/work', label: 'Our work' },
+  { href: '/work', label: 'Work' },
+  { href: '/services', label: 'Services' },
   { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
 ];
 
 export default function Header() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const closeMobile = () => setMobileOpen(false);
   const pathname = usePathname();
-  const isHome = pathname === '/';
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const burgerRef = useRef(null);
+  const menuRef = useRef(null);
 
-  // The header's translucent fade only looks right over the homepage hero
-  // photo — anywhere else (or once scrolled past it) it lets page text show
-  // through and overlap the nav, so it goes solid as soon as you scroll.
   useEffect(() => {
-    if (!isHome) return;
-    function onScroll() {
-      setScrolled(window.scrollY > 10);
-    }
+    const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [isHome]);
+  }, []);
 
-  // Escape closes the mobile menu.
+  // Close the menu whenever the route changes.
+  useEffect(() => { setOpen(false); }, [pathname]);
+
+  // While the mobile menu is open: lock page scroll, Escape closes it and
+  // returns focus to the button, Tab stays inside the menu.
   useEffect(() => {
-    if (!mobileOpen) return;
-    function onKey(e) { if (e.key === 'Escape') setMobileOpen(false); }
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    menuRef.current?.querySelector('a')?.focus();
+    function onKey(e) {
+      if (e.key === 'Escape') { setOpen(false); burgerRef.current?.focus(); }
+      if (e.key === 'Tab' && menuRef.current) {
+        const items = [...menuRef.current.querySelectorAll('a'), burgerRef.current];
+        const i = items.indexOf(document.activeElement);
+        if (e.shiftKey && i <= 0) { e.preventDefault(); items[items.length - 1].focus(); }
+        else if (!e.shiftKey && i === items.length - 1) { e.preventDefault(); items[0].focus(); }
+      }
+    }
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [mobileOpen]);
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [open]);
 
-  const isSolid = !isHome || scrolled;
   const isActive = (href) => pathname === href || pathname?.startsWith(`${href}/`);
 
+  // The menu panel sits outside <header>: the header's backdrop blur would
+  // otherwise become the containing block for the fixed-position panel.
   return (
-    <header className={isSolid ? 'is-solid' : undefined}>
-      <div className="nav">
-        <a className="logo" href="/" aria-label="OSKELO home">
-          <img className="logo-img" src="/4.webp" alt="Oskelo" />
+    <>
+    <header className={`s-header${scrolled || open ? ' is-scrolled' : ''}`}>
+      <div className="s-header-inner">
+        <a className="s-logo" href="/" aria-label="OSKELO home">
+          <img src="/brand/oskelo-wordmark.webp" alt="OSKELO" width="640" height="97" />
         </a>
-        <nav className="nav-links" aria-label="Main">
-          {/* Only shown once you've left the homepage, so there's always an obvious way back. */}
-          {!isHome && <a href="/" className="nav-home">Home</a>}
+        <nav className="s-nav" aria-label="Main">
           {NAV.map((item) => (
-            <a href={item.href} key={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>
+            <a key={item.href} href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>
           ))}
         </nav>
-        <a className="btn btn-solid btn-sm nav-cta" href="/contact">Get in touch</a>
-        {!isHome && <a href="/" className="nav-home-mobile">Home</a>}
-        <button
-          type="button"
-          className="nav-toggle"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-          aria-expanded={mobileOpen}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+        <div className="s-header-cta">
+          <a className="s-btn s-btn--outline s-btn--sm" href="/contact">Start a Project</a>
+          <button
+            ref={burgerRef}
+            type="button"
+            className="s-burger"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            aria-controls="s-mobile-menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span /><span /><span />
+          </button>
+        </div>
       </div>
+    </header>
 
-      {mobileOpen && (
-        <div className="mobile-menu">
-          <div className="mobile-menu-group">
-            {!isHome && <a href="/" className="mobile-menu-heading" onClick={closeMobile}>Home</a>}
+      {open && (
+        <div className="s-mobile-menu" id="s-mobile-menu" ref={menuRef}>
+          <nav aria-label="Mobile">
+            <a className="s-mobile-link" href="/">Home</a>
             {NAV.map((item) => (
-              <a href={item.href} key={item.href} className="mobile-menu-heading" onClick={closeMobile}>{item.label}</a>
+              <a key={item.href} className="s-mobile-link" href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>
             ))}
-          </div>
-          <a className="btn btn-solid btn-sm" href="/contact" onClick={closeMobile}>Get in touch</a>
+          </nav>
+          <a className="s-btn s-btn--dark" href="/contact">Start a Project</a>
+          <p className="s-mobile-meta">contact@oskelo.com · Lancaster, PA</p>
         </div>
       )}
-    </header>
+    </>
   );
 }

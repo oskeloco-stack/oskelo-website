@@ -1,4 +1,5 @@
 import './globals.css';
+import './studio.css';
 import PromoBar from './components/PromoBar';
 import Analytics from './components/Analytics';
 
@@ -13,11 +14,11 @@ const SITE_URL = 'https://www.oskelo.com';
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'OSKELO | Video Production & Content Creation in Lancaster, PA',
+    default: 'OSKELO | Cinematic Video, Photography & Content in Lancaster, PA',
     template: '%s | OSKELO',
   },
   description:
-    'You run your business. We run your content. Short-form video, social media videography, editing and photography for small businesses in Lancaster, PA.',
+    'OSKELO is a Pennsylvania-based creative studio. Cinematic video, short-form content, editing and photography for businesses doing great things. You run your business. We run your content.',
   openGraph: {
     type: 'website',
     siteName: 'OSKELO',
@@ -57,7 +58,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
           rel="stylesheet"
         />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
