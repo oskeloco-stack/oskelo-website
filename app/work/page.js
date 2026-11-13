@@ -10,8 +10,8 @@ import { flattenWork } from '../../lib/portfolio';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Work: Video, Short-Form & Photography Portfolio',
-  description: 'Real OSKELO projects: short-form promos, event video and photography from portraits and weddings to concerts and sports. Lancaster, PA.',
+  title: 'Work: Video & Short-Form Portfolio',
+  description: 'Real OSKELO projects: brand stories, event promos and short-form video for local businesses and organizations. Lancaster, PA.',
   alternates: { canonical: '/work' },
 };
 
@@ -29,7 +29,7 @@ export default async function WorkPage() {
           <div className="s-wrap">
             <Eyebrow>Work</Eyebrow>
             <h1 className="s-h1" id="work-heading">Real projects. <span className="s-accent">Real businesses and people.</span></h1>
-            <p className="s-lead">Everything here was filmed, edited or photographed by OSKELO. Tap a video to watch it with sound, or open a collection to see the full gallery.</p>
+            <p className="s-lead">Everything here was filmed and edited by OSKELO. Tap a video to watch it with sound.</p>
           </div>
         </section>
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { StatTile, Panel, BarList, Skeleton, fmt } from './ui';
 import TrafficChart from './TrafficChart';
+import { DueTag, daysFrom, money } from './organizer';
 
 const KEY_LABEL = { work: 'Work galleries', services: 'Services', offers: 'Offers' };
 
@@ -32,6 +33,27 @@ export default function Dashboard() {
         if (!m.error) setMessages(m);
       })
       .catch(() => setError('Could not load the dashboard.'));
+  }, []);
+
+  // Organizer: follow-ups due, project deadlines, open to-dos. Never fatal —
+  // before the tables exist these just come back empty.
+  const [todo, setTodo] = useState(null);
+  useEffect(() => {
+    const get = (type) =>
+      fetch(`/api/admin/records?type=${type}`).then((r) => r.json()).then((d) => d.items || []).catch(() => []);
+    Promise.all([get('outreach'), get('projects'), get('tasks')]).then(([o, p, t]) => {
+      const rows = [];
+      o.filter((r) => ['emailed', 'followed_up'].includes(r.status) && r.follow_up_on && daysFrom(r.follow_up_on) <= 0)
+        .forEach((r) => rows.push({ id: `o${r.id}`, day: r.follow_up_on, text: `Follow up with ${r.company}`, href: '/admin/outreach' }));
+      p.filter((r) => ['booked', 'in_progress'].includes(r.status) && r.due_on && daysFrom(r.due_on) <= 7)
+        .forEach((r) => rows.push({ id: `p${r.id}`, day: r.due_on, text: `Deliver ${r.title || 'project'} for ${r.client}`, href: '/admin/projects' }));
+      p.filter((r) => r.status === 'delivered' && !r.paid)
+        .forEach((r) => rows.push({ id: `u${r.id}`, day: null, unpaid: true, text: `Collect payment from ${r.client}${r.price ? ` (${money(r.price)})` : ''}`, href: '/admin/projects' }));
+      t.filter((r) => !r.done && (!r.due_on || daysFrom(r.due_on) <= 3))
+        .forEach((r) => rows.push({ id: `t${r.id}`, day: r.due_on, text: r.title, href: '/admin/tasks' }));
+      rows.sort((a, b) => (a.day || '9999').localeCompare(b.day || '9999'));
+      setTodo(rows);
+    });
   }, []);
 
   const t = stats?.traffic;
@@ -85,6 +107,28 @@ export default function Dashboard() {
         )}
       </div>
 
+      <Panel
+        title="Needs attention"
+        meta="Follow-ups, deadlines, payments and to-dos"
+        actions={<a className="admin-mini" href="/admin/tasks">To-dos</a>}
+      >
+        {!todo ? (
+          <Skeleton h={60} />
+        ) : todo.length === 0 ? (
+          <p className="admin-empty">Nothing due. You're caught up.</p>
+        ) : (
+          <div className="org-attn">
+            {todo.slice(0, 8).map((r) => (
+              <a key={r.id} href={r.href} className="org-attn-row">
+                <span>{r.text}</span>
+                {r.day ? <DueTag day={r.day} /> : r.unpaid ? <span className="org-due is-soon">Unpaid</span> : null}
+              </a>
+            ))}
+            {todo.length > 8 && <span className="panel-meta">+{todo.length - 8} more</span>}
+          </div>
+        )}
+      </Panel>
+
       <Panel title="Traffic" meta="Last 14 days">
         {!stats ? <Skeleton h={240} /> : <TrafficChart series={t?.series || []} />}
       </Panel>
@@ -134,6 +178,14 @@ export default function Dashboard() {
       </Panel>
 
       <div className="admin-cards">
+        <a className="admin-card" href="/admin/outreach">
+          <h2>Outreach →</h2>
+          <p>Log every company you email, see when you reached out, and never miss a follow-up.</p>
+        </a>
+        <a className="admin-card" href="/admin/projects">
+          <h2>Projects →</h2>
+          <p>Booked jobs, delivery dates, and who has (or hasn't) paid.</p>
+        </a>
         <a className="admin-card" href="/admin/analytics">
           <h2>Analytics →</h2>
           <p>Traffic trends, top pages, referrers, devices and countries over 7–90 days.</p>

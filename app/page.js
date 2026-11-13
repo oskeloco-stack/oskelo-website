@@ -14,15 +14,15 @@ import { flattenWork } from '../lib/portfolio';
 export const revalidate = 60;
 
 export const metadata = {
-  title: { absolute: 'OSKELO | Cinematic Video, Photography & Content in Lancaster, PA' },
+  title: { absolute: 'OSKELO | Cinematic Video & Short-Form Content in Lancaster, PA' },
   description:
-    'Your story. Worth watching. OSKELO is a Pennsylvania-based creative studio making cinematic video, short-form content and photography for local businesses. Monthly plans from $299.',
+    'Your story. Worth watching. OSKELO is a Pennsylvania-based creative studio making cinematic video and short-form content for local businesses. Monthly plans from $299.',
   alternates: { canonical: '/' },
 };
 
 // Which real projects lead the homepage film strip, by name, in order.
 // Anything missing is skipped, and the strip fills from the rest of the work.
-const FEATURED = ['Bring Your Ride', 'Wedding & Engagement', 'Concerts'];
+const FEATURED = ['Grace Youth', 'Car Show 2027', 'Bring Your Ride'];
 
 export default async function Home() {
   const services = await getContent('services', SERVICES);
@@ -30,7 +30,8 @@ export default async function Home() {
   // Merged so copy fields added after an admin save still fall back to their defaults.
   const c = { ...HOME_DEFAULT, ...(await getContent('home', HOME_DEFAULT)) };
 
-  const projects = flattenWork(categories);
+  // Video leads the homepage; photography stays on /work for now.
+  const projects = flattenWork(categories).filter((p) => p.kind === 'video');
   const featured = [
     ...FEATURED.map((name) => projects.find((p) => p.name === name)).filter(Boolean),
     ...projects.filter((p) => !FEATURED.includes(p.name)),
@@ -38,13 +39,12 @@ export default async function Home() {
 
   const monthly = getService('monthly-plans', services);
   const oneTime = getService('one-time-video', services);
-  const photo = getService('photography', services);
   const from = (p) => (p || '').replace(/^Starting at /, '').replace('/mo', '/mo');
 
   const pillars = [
     { icon: 'monthly', title: 'Monthly Content', body: c.studioMonthlyBody, price: monthly?.plans?.[0] && `From ${from(monthly.plans[0].price)}`, href: '/services#monthly' },
     { icon: 'video', title: 'Video Production', body: c.studioVideoBody, price: oneTime?.plans?.[0] && `Edits from ${from(oneTime.plans[0].price)}`, href: '/services#video' },
-    { icon: 'photo', title: 'Photography', body: c.studioPhotoBody, price: photo && 'Quoted per project', href: '/services#photography' },
+    { icon: 'event', title: 'Event Video', body: c.studioEventBody, price: 'Quoted per event', href: '/services#video' },
   ];
 
   return (
@@ -123,8 +123,8 @@ export default async function Home() {
         <section className="s-section s-section--alt" aria-labelledby="why-heading">
           <div className="s-wrap s-split">
             <div className="s-split-media">
-              <img src="/work/wedding-engagement/field-bouquet.jpg" alt="Bride and groom in a sunlit field, photographed by OSKELO" loading="lazy" decoding="async" />
-              <span className="s-split-caption">Wedding &amp; engagement photography by OSKELO</span>
+              <video src="/work/reels/car-show-loop.mp4" poster="/work/reels/car-show-loop.jpg" autoPlay muted loop playsInline preload="metadata" aria-label="Car show promo filmed and edited by OSKELO" />
+              <span className="s-split-caption">Event promo filmed &amp; edited by OSKELO</span>
             </div>
             <div>
               <Eyebrow>{c.studioWhyEyebrow}</Eyebrow>
@@ -174,7 +174,7 @@ export default async function Home() {
                 ))}
               </div>
               <div className="s-under">
-                <span>One-time videos from {from(oneTime?.plans?.[0]?.price) || '$99'}. Photography quoted per project.</span>
+                <span>One-time videos from {from(oneTime?.plans?.[0]?.price) || '$99'}. Events quoted per project.</span>
                 <a className="s-link" href="/services">Full services &amp; pricing <Arrow /></a>
               </div>
             </div>

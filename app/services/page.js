@@ -84,11 +84,10 @@ export default async function ServicesPage() {
           <div className="s-wrap">
             <Eyebrow>Services &amp; pricing</Eyebrow>
             <h1 className="s-h1" id="svc-heading">Clear services. <span className="s-accent">Straightforward pricing.</span></h1>
-            <p className="s-lead">Ongoing monthly content, a single video, or a photo shoot. Pick what fits, and you’ll know exactly what you’re getting before anything starts.</p>
+            <p className="s-lead">Ongoing monthly content, a single video, or full event coverage. Pick what fits, and you’ll know exactly what you’re getting before anything starts.</p>
             <nav className="s-chips" aria-label="Jump to a service">
               <a className="s-chip" href="#monthly">Monthly content</a>
               <a className="s-chip" href="#video">Video production</a>
-              <a className="s-chip" href="#photography">Photography</a>
               <a className="s-chip" href="#websites">Websites</a>
             </nav>
           </div>

@@ -21,6 +21,21 @@ const I = {
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   ),
+  outreach: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4z" />
+    </svg>
+  ),
+  projects: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+    </svg>
+  ),
+  tasks: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 11l3 3 8-8" /><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" />
+    </svg>
+  ),
   images: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" />
@@ -42,8 +57,11 @@ const I = {
 
 const LINKS = [
   { href: '/admin', label: 'Dashboard', icon: I.dashboard },
-  { href: '/admin/analytics', label: 'Analytics', icon: I.analytics },
   { href: '/admin/messages', label: 'Messages', icon: I.messages },
+  { href: '/admin/outreach', label: 'Outreach', icon: I.outreach },
+  { href: '/admin/projects', label: 'Projects', icon: I.projects },
+  { href: '/admin/tasks', label: 'To-dos', icon: I.tasks },
+  { href: '/admin/analytics', label: 'Analytics', icon: I.analytics },
   { href: '/admin/images', label: 'Images', icon: I.images },
   { href: '/admin/enhance', label: 'Enhance', icon: I.enhance },
   { href: '/admin/content', label: 'Content', icon: I.content },

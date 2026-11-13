@@ -1,8 +1,8 @@
 import { getContent } from '../../lib/siteContent';
 import { FOOTER_DEFAULT } from '../../lib/pageContent';
 
-// The admin area lives at /admin (sign-in required) and is deliberately not
-// linked here, so customers aren't pointed at it.
+// Small "Admin" link in the bottom bar at the owner's request (2026-11-13).
+// /admin is sign-in only and disallowed in robots.js.
 export default async function Footer() {
   const c = { ...FOOTER_DEFAULT, ...(await getContent('footer', FOOTER_DEFAULT)) };
 
@@ -27,7 +27,6 @@ export default async function Footer() {
             <ul>
               <li><a href="/services#monthly">Monthly content</a></li>
               <li><a href="/services#video">Video production</a></li>
-              <li><a href="/services#photography">Photography</a></li>
               <li><a href="/websites">Website builds</a></li>
             </ul>
           </div>
@@ -42,7 +41,10 @@ export default async function Footer() {
         </div>
         <div className="s-footer-base">
           <span>{c.copyright}</span>
-          <a href="/terms">{c.termsLabel}</a>
+          <span style={{ display: 'flex', gap: 20 }}>
+            <a href="/terms">{c.termsLabel}</a>
+            <a href="/admin" rel="nofollow">Admin</a>
+          </span>
         </div>
       </div>
     </footer>

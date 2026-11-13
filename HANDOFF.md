@@ -2,7 +2,7 @@
 
 Living status doc for the Oskelo website. Updated at the end of every task.
 
-_Last updated: 2026-11-09 (later) — full "cinematic studio" redesign built from the owner's concept image + brief. LIVE on www.oskelo.com (d5f129f, pushed at owner's "Publish it"). See Current state first bullet and the task log._
+_Last updated: 2026-11-13: added Outreach / Projects / To-dos to the admin panel (uncommitted; needs `supabase/admin_organizer.sql` run once in Supabase). Previously 2026-11-12 (latest): the site is now video-first (photography on the back burner), and the two sample videos were added. Uncommitted and not live. See task log._
 
 _Earlier the same session: user reported the admin area "isn't working" and asked for it to function flawlessly, plus a visual drag-and-drop photo editor: click on visuals, drag photos in, move/crop them manually, and have them land in the Images gallery instantly with an auto-generated name. Investigation found the actual problem: a prior session had built a whole Visual click-to-edit preview (iframe + postMessage sync) and a global drag-drop-to-upload zone, but left all of it **uncommitted and never pushed** — so none of it ever existed on the live admin the user was testing, which is consistent with "isn't working." Verified that work end-to-end locally against real Supabase data (every `/admin/*` screen; all three Content tabs), found and fixed one real bug in it (see below), then built the actual missing feature on top: any image field in the Content form now accepts a dropped photo as an instant, auto-named replacement, gallery arrays (Portraits/Concerts/Sports/Wedding & Engagement) accept a multi-file drop to append new photos, and gallery entries get a drag-to-reposition crop control (a focal point, applied on the real gallery pages via `object-position`, additive so untouched photos render exactly as before). Committed as `2209ac9`, **pushed to `origin/main`** at the user's request (now `2519551`) — Vercel deploying.)_
 
@@ -207,6 +207,12 @@ _Previously (2026-09-11 session): finished Supabase setup (`site_content` table,
 
 ## Outstanding / next steps
 
+- [ ] **Sample videos (2026-11-12): owner review.** `C:\Business\OSKELO\Sample Videos\` — "Grace Youth - Brand Story.mp4" (41 s) and "Car Show 2027 - Event Promo.mp4" (38 s). Car show facts card says **WHEN: OCTOBER 2027** (assumed, no real date known); confirm or change in `Car Show\_Pro Edit\work\event_promo.py`.
+- [x] **Sample cuts built in Resolve** (2026-11-12): projects "Grace Church Youth - Promo" (timeline "Grace Youth - Brand Story") and "Grace Church Car Show 2027 - Pro" (timeline "Car Show 2027 - Event Promo"), rendered from Resolve. The hung Resolve (PID 5300) was ended with the owner's OK and relaunched.
+- [x] **Two samples added to the site** (2026-11-12, uncommitted): Grace Youth (Brand Story) and Car Show 2027 (Event Promo) in `lib/work.js` and on the homepage film strip. Not pushed yet.
+- [ ] **Photography is on the back burner (2026-11-12).** To bring it back, revert the video-first entry in the task log (homepage pillar, footer link, services chip).
+- [ ] **Car Show Teaser:** the old 22 s car show reel (renamed from "Car Show 2027") is still on /work. Remove it if the new promo replaces it.
+
 - [x] **Enhance — background/subject masking: built, the manual-brush option.** User chose the free manual paint-mask approach over a paid AI background-removal API. Live in `/admin/enhance`'s "Edit manually" → "Paint a mask". See the task log for how it works. (The paid-AI-API alternative is still on the table if ever wanted later — nothing about this rules it out, it would just be an additional option, not a replacement.)
 - [x] **Push the Enhance format/paste/width fix** (`58237a4`) — this and everything else through `a72e937` was already part of `origin/main` before the 2026-09-12 session started (confirmed via `git log origin/main -1`). This checkbox was stale.
 - [x] **Push `2209ac9` to `origin/main`** — done 2026-09-12, user confirmed. `origin/main` is now at `2519551`; Vercel deploying.
@@ -239,6 +245,45 @@ _Previously (2026-09-11 session): finished Supabase setup (`site_content` table,
 - Note: the middle-image color correction is a CSS filter in `app/globals.css`, not baked into the file — kept as CSS so it stays adjustable.
 
 ## Task log
+
+### 2026-11-13 — Admin organizer: Outreach, Projects, To-dos
+
+- Owner asked for an admin section for contact-form messages (already existed at `/admin/messages`), a simple log of which companies they emailed and when, plus anything else to stay organized.
+- **Added to `/admin`** (sidebar order: Dashboard, Messages, Outreach, Projects, To-dos, Analytics, Images, Enhance, Content):
+  - **Outreach** (`/admin/outreach`): company, contact, email/phone/site, what was pitched, date emailed, follow-up date (defaults +5 days), status (Emailed / Followed up / Replied / Meeting set / Won / Not interested / No reply), notes. Stat tiles, filters (Follow up / Waiting / Talking / Closed / All), search, inline status change, "Followed up" button (stamps a note, sets status, next follow-up +7 days).
+  - **Projects** (`/admin/projects`): booked jobs with price, shoot/due dates, status, paid toggle; tiles for active / total booked / paid / still owed.
+  - **To-dos** (`/admin/tasks`): quick add with optional due date, check off, clear finished.
+  - **Dashboard** "Needs attention" panel (follow-ups due, deliveries due within 7 days, delivered-but-unpaid, to-dos due within 3 days or undated). **Messages** gained a "Make a project" button that pre-fills Projects.
+- Code: `lib/adminRecords.js` (field config), `app/api/admin/records/route.js` (one CRUD route, whitelisted fields, admin-only), `_components/organizer.js` + `OutreachView`/`ProjectsView`/`TasksView`, CSS under "Organizer" in `app/admin/admin.css`.
+- **Database setup NOT done — owner must run it once:** the Supabase connector in this session is signed into the *BeckYards* account (no access to Oskelo's project), so tables weren't created. Run `supabase/admin_organizer.sql` in the Oskelo project's SQL Editor. Until then those pages show a setup notice instead of breaking. RLS on, no policies (server-only).
+- **Footer "Admin" link is back** (owner asked, reversing the Round 2 removal): small link next to Terms in the footer bottom bar (`app/components/Footer.js`), `rel="nofollow"`; /admin is still sign-in only and robots-disallowed. Checked on localhost.
+- Verified: `next build` passes; screens checked in the browser with a temporary fake-data page (deleted after), including add, followed-up, check-off, dashboard panel, phone width; fixed one bug found there. New routes 307/401 when signed out. **Not checked against the real database** (tables don't exist yet). Uncommitted, not pushed.
+
+### 2026-11-12 (latest) — Video-first: photography on the back burner
+
+Owner: "Lets keep the photography on the backburner and focus on the videography on the website mostly." Nothing was deleted. Photography galleries, `/work/[category]` and the Services photography section all still exist.
+- **Homepage (`app/page.js`):** the film strip is now videos only (Grace Youth, Car Show 2027, Bring Your Ride). The third pillar, Photography, is replaced by **Event Video** (new `studioEventBody` copy plus a new `event` icon in `ui.js`, linking to `/services#video`). The Why OSKELO image (wedding photo) is replaced by a silent looping clip, `public/work/reels/car-show-loop.mp4` (7.5 s, 1.2 MB, no text, cut from the new car show promo at 4–7.8 s and 14–17.7 s). The pricing footnote now says "Events quoted per project". Title, meta description, `studioSub` and `studioWhatIntro` no longer mention photography.
+- **/work:** title, meta and intro are video-only. The filter order is now All / Video / Short-Form / Photography, and videos were already sorted first.
+- **/services:** the Photography jump chip is removed and the intro says "full event coverage" instead of "a photo shoot". The photography section itself is kept, lower on the page.
+- **Footer:** the Photography link is removed.
+- **Left as is:** the We Capture plan feature "footage & photography" and the concert-photo background in the closing CTA.
+- **Checked locally at 1440:** the homepage strip, pillars and loop are in place, /work chips and copy are right, and /services chips are monthly/video/websites. `next build` was not run. Not committed or pushed.
+
+### 2026-11-12 (latest) — Two sample videos added to the website
+
+Owner: "Add these two videos to the oskelo website." Re-encoded both from `C:\Business\OSKELO\Sample Videos\` to 540x960 H.264 + faststart: `public/work/reels/grace-youth-brand-story.mp4` (4.8 MB, CRF 27) and `car-show-2027-promo.mp4` (5.2 MB, CRF 30 to stay near 5 MB). Posters are text-free frames: the spaghetti-tower table shot (frame 937) and the yellow SS Camaro engine bay. Added both at the top of Video & Editing in `lib/work.js` (Grace Youth, Creative Production, 0:41; Car Show 2027, Events, 0:38). The old 22 s reel is renamed "Car Show Teaser". There is no saved `work` row in Supabase, so `lib/work.js` is live. Homepage `FEATURED` is now Grace Youth / Wedding & Engagement / Car Show 2027 (was Bring Your Ride / Wedding / Concerts). Checked locally at 1440: the homepage strip shows both, the Grace Youth viewer plays, /work?type=video lists 5 videos, and there are no console errors. Not committed or pushed.
+
+### 2026-11-12 (later) — Sample videos: built in Resolve, cut + color fixes
+
+Owner: "Build in DaVinci Resolve", plus "weird cuts that were way too fast on some of the people talking" and "add color correction". Measured every visible shot: the brand story flashed the speaker for 0.2–0.8 s between two cutaways in 4 spots. Fixed with a `cut_rest()` helper, so each speaker holds about 2.5 s, then one cutaway runs to the end of the line; the montage is now 2×2.4 s instead of 4×1.2 s. Shortest shot is now 1.4 s (car show was already 2 s holds). Color: the old per-shot LUT was nearly invisible, so `grade.set_pro()` was added (85% white-balance neutralize, contrast 1.34, saturation 1.24; new LUT cache tag `pro`, so V1–V4 are untouched). Both edits call it. Built both into Resolve (LUT on every clip, 15/15 and 16/16), rendered from Resolve, and replaced the copies in `C:\Business\OSKELO\Sample Videos\`. -17.2 / -15.5 LUFS.
+
+### 2026-11-12 — Sample videos to pitch coffee shops (remakes)
+
+Owner wants 1–3 edited videos to show coffee shops what OSKELO can do; no coffee footage exists, so remade two Grace Church pieces: the youth promo as a **brand story** (formats chosen: "Brand story 30-45s" + "Event promo"), and the Car Show 2027 promo **less "cool", more focused and professional**.
+- **Grace Youth - Brand Story** (41.1 s, 1080x1920): `Youth Group\Pro-Mo\_Edit\work5_brand_story.py` on the existing engine. Voice-led: welcome → "favorite thing… fun time" → spaghetti tower → leader's "unify… one structure" → music lifts to a montage ("A PLACE TO BELONG.") → info card → end card. Music: Epidemic "Loving What Is (Instrumental)" – Ludlow, 98 BPM (downloaded to `_Edit\music`). No heartbeat/boom SFX. -17.2 LUFS.
+- **Car Show 2027 - Event Promo** (38.4 s): new folder `Car Show\_Pro Edit\` with copies of the youth `engine.py`/`gfx2.py`/`grade.py`/`resolve_import.py` adapted to the car show catalog (keys `1099`, `D0117`; 59.94p drone assets). Steady 4-beat holds, same editorial type as the youth promo (Bahnschrift condensed, gold rule), facts card + end card; no countdowns, flashes, stacks or hit SFX. Music: Epidemic "If You're Still Around (Instrumental)" – Conditional, 122 BPM. -15.6 LUFS.
+- `gfx2.py` (youth): `info_card(rows=)` and `end_card(eyebrow, heads, gold, when, addr)` now configurable, defaults unchanged; engine passes them through. Backups `gfx2.bak_2026-11-12.py`, `engine.bak_2026-11-12.py`.
+- Finals rendered with the engine's ffmpeg path at full res (CRF 17, same grade LUTs/overlays/mix) because Resolve's API was unreachable; FCPXMLs are built and ready for Resolve. Copies in `C:\Business\OSKELO\Sample Videos\`. Nothing committed; website untouched.
 
 ### 2026-11-09 — Cinematic studio redesign (concept image + brief)
 

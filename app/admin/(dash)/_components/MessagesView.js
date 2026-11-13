@@ -135,6 +135,17 @@ export default function MessagesView() {
                 >
                   Reply
                 </a>
+                <a
+                  className="admin-mini"
+                  href={`/admin/projects?${new URLSearchParams({
+                    client: m.name || '',
+                    email: m.email || '',
+                    notes: (m.message || '').slice(0, 500),
+                  })}`}
+                  title="Start a project for this person, pre-filled from the message"
+                >
+                  Make a project
+                </a>
                 {m.read_at ? (
                   <button className="admin-mini" disabled={busyId === m.id} onClick={() => act(m.id, 'unread')}>
                     Mark unread

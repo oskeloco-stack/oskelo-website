@@ -45,6 +45,15 @@ export function ServiceIcon({ name, className }) {
       </svg>
     );
   }
+  if (name === 'event') {
+    return (
+      <svg {...common}>
+        <circle cx="16" cy="16" r="11" />
+        <circle cx="16" cy="16" r="3" />
+        <path d="M16 5v5M16 22v5M5 16h5M22 16h5" />
+      </svg>
+    );
+  }
   return (
     <svg {...common}>
       <path d="M4 10.5A1.5 1.5 0 0 1 5.5 9H10l2-3h8l2 3h4.5A1.5 1.5 0 0 1 28 10.5v14A1.5 1.5 0 0 1 26.5 26h-21A1.5 1.5 0 0 1 4 24.5z" />
